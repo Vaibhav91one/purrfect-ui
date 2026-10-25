@@ -10,6 +10,7 @@ const SPRING = { type: "spring", stiffness: 260, damping: 22 } as const;
 const LOOK_X = 3.5;
 const LOOK_Y = 2.5;
 const LOOK_RANGE = 220;
+const NEAR = 140; // px from the notch's edge: farther than this the bot ignores the pointer and looks straight ahead
 const clamp = (n: number) => Math.max(-1, Math.min(1, n));
 
 /**
@@ -53,11 +54,21 @@ export function BotFace({ className }: { className?: string }) {
     };
   }, [reduce]);
 
-  // eyes follow a mouse pointer (not touch), and settle back when it leaves the window
+  // eyes follow a mouse pointer (not touch) while it is near the notch, and settle back when it moves away or leaves the window
   useEffect(() => {
     if (reduce) return;
     const onMove = (e: PointerEvent) => {
       if (e.pointerType === "touch" || !svg.current) return;
+      const notch = svg.current.closest("nav")?.getBoundingClientRect();
+      if (notch) {
+        const gapX = Math.max(notch.left - e.clientX, 0, e.clientX - notch.right);
+        const gapY = Math.max(notch.top - e.clientY, 0, e.clientY - notch.bottom);
+        if (Math.hypot(gapX, gapY) > NEAR) {
+          lookX.set(0);
+          lookY.set(0);
+          return;
+        }
+      }
       const r = svg.current.getBoundingClientRect();
       lookX.set(clamp((e.clientX - (r.left + r.width / 2)) / LOOK_RANGE) * LOOK_X);
       lookY.set(clamp((e.clientY - (r.top + r.height / 2)) / LOOK_RANGE) * LOOK_Y);
