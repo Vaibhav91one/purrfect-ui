@@ -55,8 +55,12 @@ export function Loader({ stickers = [], once, ready, handoff = false, contained 
 
   useEffect(() => {
     if ((once && seen(once)) || matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      reveal.current?.();
-      return setPhase("done");
+      // skipped: finish on the next tick (setState must not run synchronously in the effect body)
+      const skip = setTimeout(() => {
+        reveal.current?.();
+        setPhase("done");
+      }, 0);
+      return () => clearTimeout(skip);
     }
     roll.current?.animate([{ transform: "translateY(0)" }, { transform: "translateY(-3.6em)" }], { duration: 1400, easing: EASE_SOFT, fill: "forwards" });
     let dead = false;
