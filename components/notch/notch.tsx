@@ -1,6 +1,6 @@
 "use client";
 
-import { Search, X } from "lucide-react";
+import { Boxes, CircleQuestionMark, Coins, Heart, Search, X, type LucideIcon } from "lucide-react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { useSound } from "@/components/providers/sound-provider";
@@ -16,6 +16,8 @@ const HOVER_IN_MS = 80;
 const HOVER_OUT_MS = 260;
 const ROW_H = 48;
 const NOTCH_W = 340; // collapsed width from `sm` up
+
+const NAV_ICONS: Record<string, LucideIcon> = { "#components": Boxes, "#loved": Heart, "#sponsors": Coins, "#faq": CircleQuestionMark };
 
 const subscribeResize = (cb: () => void) => {
   addEventListener("resize", cb);
@@ -184,18 +186,22 @@ export function Notch() {
               </div>
               <ul className="px-2 pb-2">
                 {matches.length === 0 && <li className="px-3 py-3 text-sm text-white/50">Nothing found</li>}
-                {matches.map((l) => (
-                  <li key={l.href}>
-                    <button
-                      type="button"
-                      onClick={() => go(l.href)}
-                      data-cuelume-navigate
-                      className="w-full rounded-xl px-3 py-2 text-left text-sm text-white/80 hover:bg-white/10 hover:text-white focus-visible:bg-white/10 focus-visible:outline-none"
-                    >
-                      {l.label}
-                    </button>
-                  </li>
-                ))}
+                {matches.map((l) => {
+                  const Icon = NAV_ICONS[l.href];
+                  return (
+                    <li key={l.href}>
+                      <button
+                        type="button"
+                        onClick={() => go(l.href)}
+                        data-cuelume-navigate
+                        className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-sm text-white/80 hover:bg-white/10 hover:text-white focus-visible:bg-white/10 focus-visible:outline-none"
+                      >
+                        <Icon className="size-4" />
+                        {l.label}
+                      </button>
+                    </li>
+                  );
+                })}
               </ul>
             </motion.form>
           ) : (
@@ -237,11 +243,15 @@ export function Notch() {
                 style={{ transformOrigin: "top center" }}
                 className="flex flex-col rounded-3xl bg-black p-2 text-white shadow-[0_8px_30px_rgb(0_0_0/0.35)] ring-1 ring-white/10"
               >
-                {NAV_LINKS.map((l) => (
-                  <a key={l.href} href={l.href} data-cuelume-navigate className={notchRow} onClick={closeAll}>
-                    {l.label}
-                  </a>
-                ))}
+                {NAV_LINKS.map((l) => {
+                  const Icon = NAV_ICONS[l.href];
+                  return (
+                    <a key={l.href} href={l.href} data-cuelume-navigate className={notchRow} onClick={closeAll}>
+                      <Icon className="size-4" />
+                      {l.label}
+                    </a>
+                  );
+                })}
                 <div className="mx-3 my-1 h-px bg-white/10" />
                 <div className="flex items-center gap-2">
                   <div className="min-w-0 flex-1">
