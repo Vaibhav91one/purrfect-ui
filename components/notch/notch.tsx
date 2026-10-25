@@ -117,10 +117,9 @@ export function Notch() {
   const t = reduce ? { duration: 0 } : SPRING;
 
   return (
-    <div className="pointer-events-auto relative flex items-start gap-2">
-      <div
+    <div
         ref={root}
-        className="relative"
+        className="pointer-events-auto relative"
         onPointerEnter={(e) => {
           if (e.pointerType !== "mouse" || searching) return;
           hovered.current = true;
@@ -244,18 +243,36 @@ export function Notch() {
                   </a>
                 ))}
                 <div className="mx-3 my-1 h-px bg-white/10" />
-                <GithubStars />
+                <div className="flex items-center gap-2">
+                  <div className="min-w-0 flex-1">
+                    <GithubStars />
+                  </div>
+                  {/* phones have no room beside the notch, so the buttons ride in the menu's last row */}
+                  <div className="flex gap-2 sm:hidden">
+                    <SoundToggle />
+                    <ThemeToggle />
+                  </div>
+                </div>
               </motion.div>
             </div>
           )}
         </AnimatePresence>
-      </div>
 
-      {/* sound and theme sit outside the notch: off its right edge on desktop (so the notch stays centred), after it on phones */}
-      <div className={`flex gap-2 sm:absolute sm:top-0 sm:left-full sm:ml-2 ${searching ? "max-sm:hidden" : ""}`}>
-        <SoundToggle />
-        <ThemeToggle />
-      </div>
+        {/* sound and theme: round buttons that pop out beside the notch, only while the menu is open. pl-2 (not a gap)
+            keeps them inside the hover area. */}
+        <AnimatePresence>
+          {open && !searching && (
+            <motion.div
+              className="absolute top-0 left-full hidden gap-2 pl-2 sm:flex"
+              initial={{ opacity: 0, x: -12, scale: 0.9 }}
+              animate={{ opacity: 1, x: 0, scale: 1, transition: t }}
+              exit={{ opacity: 0, x: -8, transition: { duration: reduce ? 0 : 0.1 } }}
+            >
+              <SoundToggle />
+              <ThemeToggle />
+            </motion.div>
+          )}
+        </AnimatePresence>
     </div>
   );
 }
