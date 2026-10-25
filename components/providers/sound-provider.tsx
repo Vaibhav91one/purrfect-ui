@@ -35,6 +35,7 @@ export function SoundProvider({ children }: { children: ReactNode }) {
   }, [enabled]);
 
   useEffect(() => {
+    sound.setTheme("bubble");
     const unbind = sound.bind();
     const unlock = () => void sound.unlock();
     addEventListener("pointerdown", unlock, { once: true });
