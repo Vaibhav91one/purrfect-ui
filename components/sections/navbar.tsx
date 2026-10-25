@@ -1,11 +1,12 @@
-// Floating pill, fixed to the top. It overlays the hero instead of pushing it down, so the hero is exactly one screen.
+import { Notch } from "@/components/notch/notch";
+
+// Fixed to the top, floating over the hero (no layout push). The wrapper ignores the pointer so only the notch itself
+// catches clicks; its width is capped like every section.
 export function Navbar() {
   return (
-    <header className="pointer-events-none fixed inset-x-0 top-4 z-50 px-6 md:px-8 lg:px-12">
+    <header className="pointer-events-none fixed inset-x-0 top-4 z-50 px-4 md:px-8 lg:px-12">
       <div className="mx-auto flex w-full max-w-[1800px] justify-center">
-        <nav className="pointer-events-auto rounded-full border border-border bg-card px-6 py-3 text-sm uppercase tracking-wider text-muted-foreground">
-          Navbar
-        </nav>
+        <Notch />
       </div>
     </header>
   );

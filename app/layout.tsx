@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { SoundProvider } from "@/components/providers/sound-provider";
+import { SITE_URL } from "@/lib/site";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -11,8 +13,6 @@ const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
 });
-
-const SITE_URL = "https://webof.vaibhav.quest";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -31,7 +31,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       </head>
       {/* suppressHydrationWarning: extensions (e.g. ColorZilla) add attributes to <body> before React hydrates */}
       <body className="min-h-full flex flex-col" suppressHydrationWarning>
-        {children}
+        <SoundProvider>{children}</SoundProvider>
       </body>
     </html>
   );
