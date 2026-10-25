@@ -1,10 +1,10 @@
 # webof-ui
 
 Animated React components with sound, extracted from my own projects (Poinu, Mapinly, Bountydesk, portfolio).
-Live at https://components.webof.quest. Install any component with the shadcn CLI, or copy the source.
+Live at https://webof.vaibhav.quest. Install any component with the shadcn CLI, or copy the source.
 
 ```bash
-npx shadcn@latest add https://components.webof.quest/r/<component>.json
+npx shadcn@latest add https://webof.vaibhav.quest/r/<component>.json
 ```
 
 ## Layout

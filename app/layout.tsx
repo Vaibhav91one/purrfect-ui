@@ -12,7 +12,7 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-const SITE_URL = "https://components.webof.quest";
+const SITE_URL = "https://webof.vaibhav.quest";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
