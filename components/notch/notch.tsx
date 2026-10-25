@@ -2,9 +2,10 @@
 
 import { Search, X } from "lucide-react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
-import { useCallback, useEffect, useRef, useState, useSyncExternalStore, type CSSProperties } from "react";
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { useSound } from "@/components/providers/sound-provider";
 import { NAV_LINKS } from "@/lib/site";
+import { ArcChips } from "./arc-chips";
 import { BotFace } from "./bot-face";
 import { GithubStars } from "./github-stars";
 import { SoundToggle } from "./sound-toggle";
@@ -15,10 +16,7 @@ const SPRING = { type: "spring", stiffness: 420, damping: 34 } as const;
 const HOVER_IN_MS = 80;
 const HOVER_OUT_MS = 260;
 const ROW_H = 48;
-// The chips cup the notch in a smile: the middle chip hangs lowest, each step outward rises, and the outermost sit beside it.
-const ARC_STEP = 12; // px of rise per squared step from the centre
-const ARC_SPREAD = 14; // px of extra side margin per step beyond the first
-const ARC_LIFT = 56; // px the outer chips are raised so they flank the notch instead of sitting under it
+const NOTCH_W = 340; // collapsed width from `sm` up; the chip arc is sized around it
 
 const subscribeResize = (cb: () => void) => {
   addEventListener("resize", cb);
@@ -116,7 +114,7 @@ export function Notch() {
     document.querySelector(href)?.scrollIntoView({ behavior: "smooth" });
   };
 
-  const width = searching ? Math.min(560, vw - 32) : vw >= 640 ? 340 : 250;
+  const width = searching ? Math.min(560, vw - 32) : vw >= 640 ? NOTCH_W : 250;
   const t = reduce ? { duration: 0 } : SPRING;
 
   // the arc: links, stars, sound, theme. Each gets an index so it can drop by its distance from the centre.
@@ -130,7 +128,6 @@ export function Notch() {
     <SoundToggle key="sound" />,
     <ThemeToggle key="theme" />,
   ];
-  const mid = (items.length - 1) / 2;
 
   return (
     <div
@@ -248,32 +245,7 @@ export function Notch() {
         )}
       </motion.nav>
 
-      <AnimatePresence>
-        {open && !searching && (
-          <div
-            id="notch-arc"
-            className="pointer-events-none absolute top-full left-1/2 flex w-[min(760px,calc(100vw-32px))] -translate-x-1/2 flex-wrap justify-center gap-2 pt-3"
-          >
-            {items.map((item, i) => {
-              const away = Math.abs(i - mid);
-              const dy = (mid * mid - away * away) * ARC_STEP - ARC_LIFT;
-              const dx = Math.max(0, away - 1) * ARC_SPREAD; // outer chips also stand off sideways so they clear the notch
-              return (
-                // outer div carries the arc offset (CSS translate), the motion div the pop (transform), so they don't fight
-                <div key={i} className="pointer-events-auto sm:mx-(--dx) sm:translate-y-(--dy)" style={{ "--dy": `${dy}px`, "--dx": `${dx}px` } as CSSProperties}>
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0.4, y: -28 }}
-                    animate={{ opacity: 1, scale: 1, y: 0, transition: { ...t, delay: reduce ? 0 : away * 0.04 } }}
-                    exit={{ opacity: 0, scale: 0.6, y: -16, transition: { duration: reduce ? 0 : 0.12 } }}
-                  >
-                    {item}
-                  </motion.div>
-                </div>
-              );
-            })}
-          </div>
-        )}
-      </AnimatePresence>
+      <AnimatePresence>{open && !searching && <ArcChips items={items} notchWidth={NOTCH_W} rowHeight={ROW_H} pop={t} reduce={reduce} />}</AnimatePresence>
     </div>
   );
 }
