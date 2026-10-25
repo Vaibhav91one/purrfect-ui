@@ -2,26 +2,26 @@
 
 import { useEffect, useState } from "react";
 import { motion, useReducedMotion } from "motion/react";
-import { FACES, SEQUENCE, type FaceName } from "./faces";
+import { FACES, SEQUENCE } from "./faces";
 
 const STEP_MS = 2600;
 const SPRING = { type: "spring", stiffness: 260, damping: 22 } as const;
 
 /**
  * The notch's bot: two eyes and a mouth that morph through FACES one after another, with a quick blink every few seconds.
- * `override` pins an expression (e.g. happy while the notch is open). Under reduced motion it stays on the idle face.
+ * Under reduced motion it stays on the idle face.
  */
-export function BotFace({ override, className }: { override?: FaceName; className?: string }) {
+export function BotFace({ className }: { className?: string }) {
   const reduce = useReducedMotion();
   const [step, setStep] = useState(0);
   const [blink, setBlink] = useState(false);
 
   // walk the sequence
   useEffect(() => {
-    if (reduce || override) return;
+    if (reduce) return;
     const id = setInterval(() => setStep((n) => (n + 1) % SEQUENCE.length), STEP_MS);
     return () => clearInterval(id);
-  }, [reduce, override]);
+  }, [reduce]);
 
   // random blink, every 3 to 5.5 s
   useEffect(() => {
@@ -42,7 +42,7 @@ export function BotFace({ override, className }: { override?: FaceName; classNam
     };
   }, [reduce]);
 
-  const name = override ?? (reduce ? "idle" : SEQUENCE[step]);
+  const name = reduce ? "idle" : SEQUENCE[step];
   const face = FACES[name];
   const fill = face.tint ?? "#fff";
   const t = reduce ? { duration: 0 } : SPRING;

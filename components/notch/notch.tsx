@@ -6,7 +6,6 @@ import { useCallback, useEffect, useRef, useState, useSyncExternalStore, type CS
 import { useSound } from "@/components/providers/sound-provider";
 import { NAV_LINKS } from "@/lib/site";
 import { BotFace } from "./bot-face";
-import type { FaceName } from "./faces";
 import { GithubStars } from "./github-stars";
 import { SoundToggle } from "./sound-toggle";
 import { chip } from "./styles";
@@ -16,7 +15,10 @@ const SPRING = { type: "spring", stiffness: 420, damping: 34 } as const;
 const HOVER_IN_MS = 80;
 const HOVER_OUT_MS = 260;
 const ROW_H = 48;
-const ARC_DROP = 7; // px of extra drop per step away from the centre: the chips hang in an arch under the notch
+// The chips cup the notch in a smile: the middle chip hangs lowest, each step outward rises, and the outermost sit beside it.
+const ARC_STEP = 12; // px of rise per squared step from the centre
+const ARC_SPREAD = 14; // px of extra side margin per step beyond the first
+const ARC_LIFT = 56; // px the outer chips are raised so they flank the notch instead of sitting under it
 
 const subscribeResize = (cb: () => void) => {
   addEventListener("resize", cb);
@@ -32,7 +34,7 @@ const useViewportWidth = () => useSyncExternalStore(subscribeResize, () => inner
 export function Notch() {
   const reduce = useReducedMotion();
   const vw = useViewportWidth();
-  const { enabled, play } = useSound();
+  const { play } = useSound();
   const [open, setOpen] = useState(false);
   const [searching, setSearching] = useState(false);
   const [query, setQuery] = useState("");
@@ -114,8 +116,7 @@ export function Notch() {
     document.querySelector(href)?.scrollIntoView({ behavior: "smooth" });
   };
 
-  const mood: FaceName | undefined = open ? "happy" : !enabled ? "sleepy" : undefined;
-  const width = searching ? Math.min(560, vw - 32) : 250;
+  const width = searching ? Math.min(560, vw - 32) : vw >= 640 ? 340 : 250;
   const t = reduce ? { duration: 0 } : SPRING;
 
   // the arc: links, stars, sound, theme. Each gets an index so it can drop by its distance from the centre.
@@ -229,7 +230,7 @@ export function Notch() {
               }}
               className="flex h-10 items-center gap-2 rounded-full pr-3 pl-2 hover:bg-white/5 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-white"
             >
-              <BotFace override={mood} />
+              <BotFace />
               <span className="text-sm font-medium tracking-tight">webof-ui</span>
             </button>
             <button
@@ -237,9 +238,11 @@ export function Notch() {
               onClick={openSearch}
               aria-label="Search"
               data-cuelume-open
-              className="grid size-9 shrink-0 place-items-center rounded-full bg-white/10 text-white/70 transition-colors hover:bg-white/15 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-white"
+              className="flex h-9 shrink-0 items-center gap-2 rounded-full bg-white/10 px-2.5 text-sm text-white/70 transition-colors hover:bg-white/15 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-white sm:pr-3 sm:pl-3.5"
             >
               <Search className="size-4" />
+              <span className="hidden sm:inline">Search</span>
+              <kbd className="hidden rounded bg-white/10 px-1.5 text-[11px] text-white/60 sm:inline">⌘K</kbd>
             </button>
           </div>
         )}
@@ -253,9 +256,11 @@ export function Notch() {
           >
             {items.map((item, i) => {
               const away = Math.abs(i - mid);
+              const dy = (mid * mid - away * away) * ARC_STEP - ARC_LIFT;
+              const dx = Math.max(0, away - 1) * ARC_SPREAD; // outer chips also stand off sideways so they clear the notch
               return (
                 // outer div carries the arc offset (CSS translate), the motion div the pop (transform), so they don't fight
-                <div key={i} className="pointer-events-auto sm:translate-y-(--dy)" style={{ "--dy": `${away * away * ARC_DROP}px` } as CSSProperties}>
+                <div key={i} className="pointer-events-auto sm:mx-(--dx) sm:translate-y-(--dy)" style={{ "--dy": `${dy}px`, "--dx": `${dx}px` } as CSSProperties}>
                   <motion.div
                     initial={{ opacity: 0, scale: 0.4, y: -28 }}
                     animate={{ opacity: 1, scale: 1, y: 0, transition: { ...t, delay: reduce ? 0 : away * 0.04 } }}
