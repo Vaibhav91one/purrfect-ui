@@ -6,9 +6,13 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "registry:build": "shadcn build",
+    "prebuild": "pnpm registry:build",
+    "typecheck": "next typegen && tsc --noEmit"
   },
   "dependencies": {
+    "motion": "^14.6.0",
     "next": "16.4.3",
     "react": "19.3.0",
     "react-dom": "19.3.0"
@@ -20,6 +24,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.4.3",
+    "shadcn": "^4.22.1",
     "tailwindcss": "^4",
     "typescript": "^5"
   },
