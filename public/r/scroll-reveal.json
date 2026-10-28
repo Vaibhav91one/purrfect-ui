@@ -1,0 +1,17 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "scroll-reveal",
+  "title": "Scroll reveal",
+  "description": "Text that fills in word by word as you scroll it into view.",
+  "dependencies": [
+    "motion"
+  ],
+  "files": [
+    {
+      "path": "registry/scroll-reveal/scroll-reveal.tsx",
+      "content": "\"use client\";\n\nimport { motion, useReducedMotion, useScroll, useTransform, type MotionValue } from \"motion/react\";\nimport { useRef, type RefObject } from \"react\";\n\ntype Offset = NonNullable<Parameters<typeof useScroll>[0]>[\"offset\"];\n\nfunction Word({ children, progress, range, reduce }: { children: string; progress: MotionValue<number>; range: [number, number]; reduce: boolean }) {\n  const opacity = useTransform(progress, range, [0, 1]);\n  return (\n    <span className=\"relative mr-[0.25em] mt-1 inline-block\">\n      <span className=\"opacity-20\">{children}</span>\n      <motion.span style={{ opacity: reduce ? 1 : opacity }} className=\"absolute inset-0\">\n        {children}\n      </motion.span>\n    </span>\n  );\n}\n\n/**\n * Text that fills in word by word as you scroll it into view: every word starts faint and turns solid in reading\n * order, finishing when its top reaches the upper sixth of the screen (`offset` changes that). Pass `container` to follow a scrolling box instead of the page. Size and weight come from `className`. Reduced motion shows the whole text solid.\n */\nexport function ScrollReveal({ text, className = \"text-4xl font-light tracking-tight md:text-6xl lg:text-7xl\", offset = [\"start 0.8\", \"start 0.15\"], container }: { text: string; className?: string; offset?: Offset; container?: RefObject<HTMLElement | null> }) {\n  const reduce = useReducedMotion() ?? false;\n  const ref = useRef<HTMLParagraphElement>(null);\n  const { scrollYProgress } = useScroll({ target: ref, offset, container });\n  const words = text.split(\" \");\n  return (\n    <p ref={ref} className={`leading-[1.1] ${className}`}>\n      <span className=\"sr-only\">{text}</span>\n      <span aria-hidden>\n        {words.map((w, i) => (\n          <Word key={i} progress={scrollYProgress} range={[i / words.length, (i + 1) / words.length]} reduce={reduce}>\n            {w}\n          </Word>\n        ))}\n      </span>\n    </p>\n  );\n}\n",
+      "type": "registry:ui"
+    }
+  ],
+  "type": "registry:ui"
+}

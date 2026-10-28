@@ -1,23 +1,31 @@
 "use client";
 
-import { Boxes, CircleQuestionMark, Coins, Heart, Search, X, type LucideIcon } from "lucide-react";
+import { Boxes, House, Search, X, type LucideIcon } from "lucide-react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { FAST, SPRING } from "@/lib/motion";
 import { useSound } from "@/components/providers/sound-provider";
+import { COMPONENTS } from "@/lib/components-data";
 import { NAV_LINKS } from "@/lib/site";
-import { BotFace } from "./bot-face";
+import { NotchCat } from "./notch-cat";
 import { GithubStars } from "./github-stars";
 import { SoundToggle } from "./sound-toggle";
 import { notchPill, notchRow } from "./styles";
 import { ThemeToggle } from "./theme-toggle";
 
-const SPRING = { type: "spring", stiffness: 420, damping: 34 } as const;
 const HOVER_IN_MS = 80;
 const HOVER_OUT_MS = 260;
 const ROW_H = 48;
 const NOTCH_W = 340; // collapsed width from `sm` up
 
-const NAV_ICONS: Record<string, LucideIcon> = { "#components": Boxes, "#loved": Heart, "#sponsors": Coins, "#faq": CircleQuestionMark };
+const NAV_ICONS: Record<string, LucideIcon> = { Home: House, Components: Boxes };
+const CATEGORIES = [...new Set(COMPONENTS.map((c) => c.category))];
+
+const heading = "px-3 pt-2 pb-1 text-[11px] font-medium tracking-wide text-white/40 uppercase";
+const chip =
+  "rounded-full bg-white/10 px-3 py-1 text-xs text-white/70 transition-colors hover:bg-white/15 hover:text-white aria-pressed:bg-white aria-pressed:text-black focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-white";
 
 const subscribeResize = (cb: () => void) => {
   addEventListener("resize", cb);
@@ -26,7 +34,7 @@ const subscribeResize = (cb: () => void) => {
 const useViewportWidth = () => useSyncExternalStore(subscribeResize, () => innerWidth, () => 1280);
 
 /**
- * The navbar: a small black notch with the bot, the name and a search icon. Hover (mouse), focus (keyboard) or a tap
+ * The navbar: a small black notch with the cat, the name and a search icon. Hover (mouse), focus (keyboard) or a tap
  * (touch) pops the links, stars, sound and theme out in an arc under it. The search icon turns the whole notch into a
  * search bar. Esc or a click outside puts everything back.
  */
@@ -34,9 +42,12 @@ export function Notch() {
   const reduce = useReducedMotion();
   const vw = useViewportWidth();
   const { play } = useSound();
+  const router = useRouter();
+  const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [searching, setSearching] = useState(false);
   const [query, setQuery] = useState("");
+  const [filter, setFilter] = useState("All"); // category filter in the search bar
 
   const root = useRef<HTMLDivElement>(null);
   const trigger = useRef<HTMLButtonElement>(null);
@@ -62,6 +73,7 @@ export function Notch() {
     setOpen(false);
     setSearching(false);
     setQuery("");
+    setFilter("All");
   }, []);
 
   const openSearch = useCallback(() => {
@@ -108,11 +120,21 @@ export function Notch() {
     return () => removeEventListener("keydown", onKey);
   }, [openSearch]);
 
-  const matches = NAV_LINKS.filter((l) => l.label.toLowerCase().includes(query.trim().toLowerCase()));
+  // search lists the pages and every component (name or category); the filter narrows components to one category
+  const needle = query.trim().toLowerCase();
+  type Row = { label: string; href: string; Icon: LucideIcon; tag?: string };
+  const pages: Row[] = filter === "All" ? NAV_LINKS.filter((l) => l.label.toLowerCase().includes(needle)).map((l) => ({ label: l.label, href: l.href, Icon: NAV_ICONS[l.label] })) : [];
+  const comps: Row[] = COMPONENTS.filter((c) => (filter === "All" || c.category === filter) && (!needle || `${c.name} ${c.category}`.toLowerCase().includes(needle))).map((c) => ({
+    label: c.name,
+    href: `/components?c=${c.slug}`,
+    Icon: Boxes,
+    tag: c.category,
+  }));
+  const matches = [...pages, ...comps];
   const go = (href: string) => {
     quiet();
     closeAll();
-    document.querySelector(href)?.scrollIntoView({ behavior: "smooth" });
+    router.push(href);
   };
 
   const width = searching ? Math.min(560, vw - 32) : vw >= 640 ? NOTCH_W : 250;
@@ -121,6 +143,7 @@ export function Notch() {
   return (
     <div
         ref={root}
+        data-notch
         className="pointer-events-auto relative"
         onPointerEnter={(e) => {
           if (e.pointerType !== "mouse" || searching) return;
@@ -146,24 +169,25 @@ export function Notch() {
           animate={{ width, height: searching ? "auto" : ROW_H }}
           transition={t}
           style={{ borderRadius: 26 }}
-          className="overflow-hidden bg-black text-white shadow-[0_8px_30px_rgb(0_0_0/0.35)] ring-1 ring-white/10"
+          className="relative overflow-hidden bg-black text-white shadow-[0_8px_30px_rgb(0_0_0/0.35)] ring-1 ring-white/10"
         >
           {searching ? (
             <motion.form
               key="search"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ duration: reduce ? 0 : 0.15 }}
+              transition={{ duration: reduce ? 0 : FAST }}
               role="search"
               onSubmit={(e) => {
                 e.preventDefault();
                 if (matches[0]) go(matches[0].href);
               }}
             >
-              <div className="flex items-center gap-2 px-4" style={{ height: ROW_H }}>
+              <div className="flex items-center gap-2 rounded-full px-4 focus-within:outline-2 focus-within:-outline-offset-2 focus-within:outline-white/50" style={{ height: ROW_H }}>
                 <Search className="size-4 shrink-0 text-white/60" />
                 <input
                   autoFocus
+                  data-cuelume-type
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
                   placeholder="Search…"
@@ -184,20 +208,41 @@ export function Notch() {
                   <X className="size-4" />
                 </button>
               </div>
-              <ul className="px-2 pb-2">
+              <div role="group" aria-label="Filter by category" className="flex gap-1.5 overflow-x-auto px-4 py-3 [scrollbar-width:none]">
+                {["All", ...CATEGORIES].map((c) => (
+                  <button
+                    key={c}
+                    type="button"
+                    aria-pressed={filter === c}
+                    onClick={(e) => {
+                      setFilter(c);
+                      e.currentTarget.scrollIntoView({ inline: "center", block: "nearest" });
+                    }}
+                    data-cuelume-tap
+                    className={`${chip} shrink-0 whitespace-nowrap`}
+                  >
+                    {c}
+                    {c !== "All" && <span className="ml-1.5 opacity-50">{COMPONENTS.filter((x) => x.category === c).length}</span>}
+                  </button>
+                ))}
+              </div>
+              <ul className="max-h-[min(20rem,50svh)] overflow-y-auto overscroll-contain px-2 pb-2">
                 {matches.length === 0 && <li className="px-3 py-3 text-sm text-white/50">Nothing found</li>}
-                {matches.map((l) => {
-                  const Icon = NAV_ICONS[l.href];
+                {matches.map((l, i) => {
+                  const Icon = l.Icon;
+                  const startsGroup = pages.length > 0 && (i === 0 || !!matches[i - 1].tag !== !!l.tag);
                   return (
                     <li key={l.href}>
+                      {startsGroup && <p className={heading}>{l.tag ? "Components" : "Pages"}</p>}
                       <button
                         type="button"
                         onClick={() => go(l.href)}
                         data-cuelume-navigate
-                        className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-sm text-white/80 hover:bg-white/10 hover:text-white focus-visible:bg-white/10 focus-visible:outline-none"
+                        className="flex w-full items-center gap-2 rounded-2xl px-3 py-2 text-left text-sm text-white/80 hover:bg-white/10 hover:text-white focus-visible:bg-white/10 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-white"
                       >
-                        <Icon className="size-4" />
-                        {l.label}
+                        <Icon className="size-4 shrink-0" />
+                        <span className="min-w-0 flex-1 truncate">{l.label}</span>
+                        {l.tag && <span className="shrink-0 text-xs text-white/40">{l.tag}</span>}
                       </button>
                     </li>
                   );
@@ -206,22 +251,28 @@ export function Notch() {
             </motion.form>
           ) : (
             <div className="flex items-center justify-between gap-1 px-2" style={{ height: ROW_H }}>
+              <NotchCat />
               <button
                 ref={trigger}
                 type="button"
                 aria-expanded={open}
                 aria-controls="notch-menu"
-                aria-label="webof-ui menu"
+                aria-label="purrfect ui menu"
                 onPointerDown={(e) => (lastPointer.current = e.pointerType)}
                 onClick={() => {
-                  // a mouse is handled by hover; touch and keyboard toggle
-                  if (lastPointer.current === "mouse" && hovered.current) return;
+                  // a mouse goes home (hover already opens the menu); touch has no hover, so a tap toggles the menu
+                  if (lastPointer.current === "mouse") {
+                    play("navigate");
+                    closeAll();
+                    if (pathname === "/") scrollTo({ top: 0, behavior: reduce ? "auto" : "smooth" });
+                    else router.push("/");
+                    return;
+                  }
                   schedule(!open, 0);
                 }}
-                className="flex h-10 items-center gap-2 rounded-full pr-3 pl-2 hover:bg-white/5 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-white"
+                className="group flex h-10 items-center gap-2 rounded-full pr-3 pl-[62px] hover:bg-white/5 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-white"
               >
-                <BotFace />
-                <span className="text-sm font-medium tracking-tight">webof-ui</span>
+                <span className="text-sm font-medium tracking-tight">purrfect ui</span>
               </button>
               <button type="button" onClick={openSearch} aria-label="Search" data-cuelume-open className={`${notchPill} px-2.5 sm:pr-3 sm:pl-3.5`}>
                 <Search className="size-4" />
@@ -243,13 +294,13 @@ export function Notch() {
                 style={{ transformOrigin: "top center" }}
                 className="flex flex-col rounded-3xl bg-black p-2 text-white shadow-[0_8px_30px_rgb(0_0_0/0.35)] ring-1 ring-white/10"
               >
-                {NAV_LINKS.map((l) => {
-                  const Icon = NAV_ICONS[l.href];
+                {NAV_LINKS.filter((l) => l.href !== pathname).map((l) => {
+                  const Icon = NAV_ICONS[l.label];
                   return (
-                    <a key={l.href} href={l.href} data-cuelume-navigate className={notchRow} onClick={closeAll}>
+                    <Link key={l.href} href={l.href} data-cuelume-navigate className={notchRow} onClick={closeAll}>
                       <Icon className="size-4" />
                       {l.label}
-                    </a>
+                    </Link>
                   );
                 })}
                 <div className="mx-3 my-1 h-px bg-white/10" />

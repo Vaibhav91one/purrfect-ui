@@ -1,0 +1,17 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "tabs",
+  "title": "Tabs",
+  "description": "Tabs with a pill that glides under the active label.",
+  "dependencies": [
+    "motion"
+  ],
+  "files": [
+    {
+      "path": "registry/tabs/tabs.tsx",
+      "content": "\"use client\";\n\nimport { motion, useReducedMotion } from \"motion/react\";\nimport { useId, useRef, useState, type KeyboardEvent } from \"react\";\n\nexport interface TabsProps {\n  /** The tab labels, in order. Each label is also its value, so keep them unique. */\n  tabs: string[];\n  /** Controlled value. Leave it out and the tabs keep their own state. */\n  value?: string;\n  /** Starting tab when uncontrolled. Defaults to the first. */\n  defaultValue?: string;\n  onValueChange?: (value: string) => void;\n  /** Accessible name for the tab list. */\n  label?: string;\n  /** Size comes from here, e.g. `text-lg`. */\n  className?: string;\n}\n\nconst SPRING = { type: \"spring\", stiffness: 420, damping: 34 } as const;\n\n/**\n * Tabs with a pill that glides under the active label. One spring moves the pill, so picking another tab mid-glide carries\n * on from where it is. Arrow keys, Home and End move between tabs (roving tabindex); the pill is instant under\n * `prefers-reduced-motion`. It renders the tab bar only: show your own panel for the selected value.\n */\nexport function Tabs({ tabs, value, defaultValue, onValueChange, label = \"Tabs\", className = \"\" }: TabsProps) {\n  const reduce = useReducedMotion() ?? false;\n  const id = useId();\n  const [inner, setInner] = useState(defaultValue ?? tabs[0]);\n  const active = value ?? inner;\n  const refs = useRef<(HTMLButtonElement | null)[]>([]);\n\n  const pick = (tab: string) => {\n    if (value === undefined) setInner(tab);\n    onValueChange?.(tab);\n  };\n\n  const onKeyDown = (e: KeyboardEvent) => {\n    const at = Math.max(0, tabs.indexOf(active));\n    const to = e.key === \"ArrowRight\" ? (at + 1) % tabs.length : e.key === \"ArrowLeft\" ? (at - 1 + tabs.length) % tabs.length : e.key === \"Home\" ? 0 : e.key === \"End\" ? tabs.length - 1 : -1;\n    if (to < 0) return;\n    e.preventDefault();\n    pick(tabs[to]);\n    refs.current[to]?.focus();\n  };\n\n  return (\n    <div role=\"tablist\" aria-label={label} onKeyDown={onKeyDown} className={`[scrollbar-width:none] inline-flex [&::-webkit-scrollbar]:hidden max-w-full overflow-x-auto rounded-full bg-muted p-1.5 ${className}`}>\n      {tabs.map((t, i) => (\n        <button\n          key={t}\n          ref={(el) => void (refs.current[i] = el)}\n          type=\"button\"\n          role=\"tab\"\n          aria-selected={active === t}\n          tabIndex={active === t ? 0 : -1}\n          onClick={() => pick(t)}\n          className={`relative shrink-0 rounded-full px-5 py-2 whitespace-nowrap transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foreground ${active === t ? \"text-background\" : \"text-muted-foreground hover:text-foreground\"}`}\n        >\n          {active === t && <motion.span layoutId={id} transition={reduce ? { duration: 0 } : SPRING} className=\"absolute inset-0 rounded-full bg-foreground\" />}\n          <span className=\"relative\">{t}</span>\n        </button>\n      ))}\n    </div>\n  );\n}\n",
+      "type": "registry:ui"
+    }
+  ],
+  "type": "registry:ui"
+}

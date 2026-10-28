@@ -6,7 +6,7 @@ export const notchPill =
 
 /** Full-width row in the dropdown. */
 export const notchRow =
-  "flex h-10 w-full items-center gap-2 rounded-2xl px-3 text-sm text-white/80 transition-colors hover:bg-white/10 hover:text-white focus-visible:bg-white/10 focus-visible:outline-none";
+  "flex h-10 w-full items-center gap-2 rounded-2xl px-3 text-sm text-white/80 transition-colors hover:bg-white/10 hover:text-white focus-visible:bg-white/10 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-white";
 
 /** Round button that sits beside the notch (sound, theme): a small notch of its own. */
 export const soloButton =

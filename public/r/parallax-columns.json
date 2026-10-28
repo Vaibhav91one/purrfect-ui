@@ -1,0 +1,17 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "parallax-columns",
+  "title": "Parallax columns",
+  "description": "Three columns that scroll at different speeds.",
+  "dependencies": [
+    "motion"
+  ],
+  "files": [
+    {
+      "path": "registry/parallax-columns/parallax-columns.tsx",
+      "content": "\"use client\";\n\nimport { motion, useReducedMotion, useScroll, useSpring, useTransform } from \"motion/react\";\nimport { useEffect, useRef, useState, type ReactNode, type RefObject } from \"react\";\n\n// ponytail: kept in step with SCROLL_SPRING in lib/motion.ts; duplicated so this file installs on its own\nconst SPRING = { stiffness: 200, damping: 30, mass: 0.4 };\n\n/**\n * Three columns that scroll at different speeds (after Olivier Larose's smooth parallax scroll, without Lenis, so\n * native scrolling is untouched). `speeds` are viewport heights each column starts below its place; they rise into line as the section scrolls in. Reduced motion\n * makes it a plain static grid.\n */\nexport function ParallaxColumns({ columns, speeds = [0.12, 0.22, 0.05], className = \"\", container }: { columns: [ReactNode[], ReactNode[], ReactNode[]]; speeds?: [number, number, number]; className?: string; container?: RefObject<HTMLElement | null> }) {\n  const reduce = useReducedMotion() ?? false;\n  const ref = useRef<HTMLDivElement>(null);\n  const [vh, setVh] = useState(0);\n  useEffect(() => {\n    const read = () => setVh(innerHeight);\n    read();\n    addEventListener(\"resize\", read);\n    return () => removeEventListener(\"resize\", read);\n  }, []);\n  const { scrollYProgress } = useScroll({ target: ref, offset: [\"start end\", \"end end\"], container });\n  // one hook call per column, written out: hooks can't live in a loop\n  const k = reduce ? 0 : vh;\n  const raw0 = useTransform(scrollYProgress, [0, 1], [k * speeds[0], 0]);\n  const raw1 = useTransform(scrollYProgress, [0, 1], [k * speeds[1], 0]);\n  const raw2 = useTransform(scrollYProgress, [0, 1], [k * speeds[2], 0]);\n  // ease toward the scroll position (the tutorial gets this feel from Lenis; a spring keeps native scrolling)\n  const y0 = useSpring(raw0, SPRING);\n  const y1 = useSpring(raw1, SPRING);\n  const y2 = useSpring(raw2, SPRING);\n  const ys = [y0, y1, y2];\n  return (\n    <div ref={ref} className={`relative overflow-hidden ${className}`}>\n      <div className=\"flex gap-3 sm:gap-4\">\n        {columns.map((items, c) => (\n          <motion.ul key={c} style={{ y: ys[c] }} className=\"flex min-w-0 flex-1 flex-col gap-3 sm:gap-4\">\n            {items.map((item, i) => (\n              <li key={i}>{item}</li>\n            ))}\n          </motion.ul>\n        ))}\n      </div>\n    </div>\n  );\n}\n",
+      "type": "registry:ui"
+    }
+  ],
+  "type": "registry:ui"
+}
