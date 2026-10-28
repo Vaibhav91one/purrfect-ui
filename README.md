@@ -4,12 +4,15 @@
   </a>
   <h1>purrfect ui</h1>
 
+<p><b>UI that purrs.</b></p>
+
 **Animated React components with sound. Install with the shadcn CLI or copy the source.**
 
 <img src="https://img.shields.io/badge/Next.js-0a0a0a?logo=nextdotjs&logoColor=ec4899" alt="Next.js" />
 <img src="https://img.shields.io/badge/Tailwind_CSS-0a0a0a?logo=tailwindcss&logoColor=ec4899" alt="Tailwind CSS" />
 <img src="https://img.shields.io/badge/TypeScript-0a0a0a?logo=typescript&logoColor=ec4899" alt="TypeScript" />
 <img src="https://img.shields.io/badge/shadcn-registry-ec4899?labelColor=0a0a0a" alt="shadcn registry" />
+<a href="https://github.com/Vaibhav91one/purrfect-ui/actions/workflows/ci.yml"><img src="https://github.com/Vaibhav91one/purrfect-ui/actions/workflows/ci.yml/badge.svg" alt="CI" /></a>
 <img src="https://img.shields.io/badge/license-MIT-0a0a0a?labelColor=0a0a0a&color=ec4899" alt="MIT" />
 
 [**purrfectui.com**](https://purrfectui.com) &nbsp;&middot;&nbsp; [Components](https://purrfectui.com/components) &nbsp;&middot;&nbsp; [Follow on X](https://x.com/VrsatileVaibhav)
@@ -67,10 +70,10 @@ Not `add button` on its own. That looks in the default shadcn registry.
 git clone https://github.com/Vaibhav91one/purrfect-ui.git
 cd purrfect-ui
 pnpm install
-pnpm dev
+pnpm dev          # http://localhost:3000
+pnpm registry:build   # after changing a component or registry.json
+pnpm build
 ```
-
-After changing a component or `registry.json`, rebuild the registry output with `pnpm registry:build`.
 
 ## How it's built
 
@@ -81,15 +84,6 @@ After changing a component or `registry.json`, rebuild the registry output with 
 - `lib/components-data.ts` the gallery list (name, category, description); a component counts as installable once it is in `registry.json`
 - `lib/component-docs.ts` usage snippet, props and behaviours shown in the dialog
 - `registry.json` lists every installable item; `pnpm registry:build` writes `public/r/*.json` (also runs before `pnpm build`)
-
-### Develop
-
-```bash
-pnpm install
-pnpm dev          # http://localhost:3000
-pnpm registry:build
-pnpm build
-```
 
 Next 16: read `node_modules/next/dist/docs/` before relying on older Next APIs (see `AGENTS.md`).
 
@@ -147,7 +141,7 @@ Port checklist, in order:
 
 ## Contributing
 
-Issues and pull requests are welcome at [github.com/Vaibhav91one/purrfect-ui](https://github.com/Vaibhav91one/purrfect-ui). To add a component, create `registry/<slug>/` with `<slug>.tsx` and `demo.tsx`, list it in `registry.json`, add it to `lib/components-data.ts` and `lib/component-docs.ts`, then run `pnpm registry:build`.
+Issues and pull requests are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md) for how to add a component and the quality gate it has to pass.
 
 ## License
 

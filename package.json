@@ -2,6 +2,27 @@
   "name": "purrfectui",
   "version": "0.1.0",
   "private": true,
+  "description": "Animated React components with sound. Install with the shadcn CLI or copy the source.",
+  "homepage": "https://purrfectui.com",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Vaibhav91one/purrfect-ui.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Vaibhav91one/purrfect-ui/issues"
+  },
+  "license": "MIT",
+  "author": "Vaibhav Tomar <https://vaibhavtomar.com>",
+  "keywords": [
+    "react",
+    "shadcn",
+    "registry",
+    "animation",
+    "motion",
+    "tailwindcss",
+    "components",
+    "sound"
+  ],
   "scripts": {
     "dev": "next dev",
     "build": "next build",
