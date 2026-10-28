@@ -1,6 +1,166 @@
 {
   "$schema": "https://ui.shadcn.com/schema/registry.json",
-  "name": "webof",
-  "homepage": "https://webof.vaibhav.quest",
-  "items": []
+  "name": "purrfectui",
+  "homepage": "https://purrfectui.com",
+  "items": [
+    {
+      "name": "button",
+      "type": "registry:ui",
+      "title": "Button",
+      "description": "A pill button whose letters roll up from the middle on hover, with a lift and a springy press.",
+      "files": [
+        {
+          "path": "registry/button/button.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "magnetic",
+      "type": "registry:ui",
+      "title": "Magnetic",
+      "description": "Pulls what it wraps toward the mouse, then springs back with an elastic overshoot.",
+      "dependencies": [
+        "gsap"
+      ],
+      "files": [
+        {
+          "path": "registry/magnetic/magnetic.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "scroll-reveal",
+      "type": "registry:ui",
+      "title": "Scroll reveal",
+      "description": "Text that fills in word by word as you scroll it into view.",
+      "dependencies": [
+        "motion"
+      ],
+      "files": [
+        {
+          "path": "registry/scroll-reveal/scroll-reveal.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "parallax-columns",
+      "type": "registry:ui",
+      "title": "Parallax columns",
+      "description": "Three columns that scroll at different speeds.",
+      "dependencies": [
+        "motion"
+      ],
+      "files": [
+        {
+          "path": "registry/parallax-columns/parallax-columns.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "path-carousel",
+      "type": "registry:ui",
+      "title": "Path carousel",
+      "description": "Items ride a curved path, the centre one biggest; scroll, swipe or use the arrows to rotate.",
+      "files": [
+        {
+          "path": "registry/path-carousel/path-carousel.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "notch",
+      "type": "registry:ui",
+      "title": "Notch",
+      "description": "A tab that hangs from the top edge with inverse-rounded shoulders, dropping in once on mount.",
+      "dependencies": [
+        "motion"
+      ],
+      "files": [
+        {
+          "path": "registry/notch/notch.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "hero-reveal",
+      "type": "registry:ui",
+      "title": "Hero reveal",
+      "description": "A hero whose photo frame opens along the y-axis, then the headline blurs up and the action springs in.",
+      "dependencies": [
+        "motion"
+      ],
+      "files": [
+        {
+          "path": "registry/hero-reveal/hero-reveal.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "layered-menu",
+      "type": "registry:ui",
+      "title": "Layered menu",
+      "description": "A burger that opens a full-frame menu of four coloured panels dropping in turn.",
+      "dependencies": [
+        "motion"
+      ],
+      "files": [
+        {
+          "path": "registry/layered-menu/layered-menu.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "toggle",
+      "type": "registry:ui",
+      "title": "Toggle",
+      "description": "An on/off switch whose knob stretches as it travels, driven by one spring.",
+      "dependencies": [
+        "motion"
+      ],
+      "files": [
+        {
+          "path": "registry/toggle/toggle.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "counter",
+      "type": "registry:ui",
+      "title": "Counter",
+      "description": "A number that rolls digit by digit to its value.",
+      "dependencies": [
+        "motion"
+      ],
+      "files": [
+        {
+          "path": "registry/counter/counter.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "tabs",
+      "type": "registry:ui",
+      "title": "Tabs",
+      "description": "Tabs with a pill that glides under the active label.",
+      "dependencies": [
+        "motion"
+      ],
+      "files": [
+        {
+          "path": "registry/tabs/tabs.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    }
+  ]
 }

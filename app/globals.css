@@ -12,9 +12,35 @@
   --border: #e4e4e7;
   --accent: #0a0a0a;
   --accent-foreground: #ffffff;
+  --glow: 0.22; /* hero Milky Way strength */
+  --compass: #1346e7; /* runeicons.com brand blue; same in both themes */
+}
+
+/* code highlighting (sugar-high): light values here, dark under .dark */
+:root {
+  --sh-class: #1d4ed8;
+  --sh-identifier: #1f2937;
+  --sh-sign: #6b7280;
+  --sh-property: #0550ae;
+  --sh-entity: #0f766e;
+  --sh-jsxliterals: #6d28d9;
+  --sh-string: #047857;
+  --sh-keyword: #c2255c;
+  --sh-comment: #9ca3af;
 }
 
 .dark {
+  --sh-class: #7dd3fc;
+  --sh-identifier: #e5e7eb;
+  --sh-sign: #9ca3af;
+  --sh-property: #93c5fd;
+  --sh-entity: #5eead4;
+  --sh-jsxliterals: #c4b5fd;
+  --sh-string: #86efac;
+  --sh-keyword: #f9a8d4;
+  --sh-comment: #6b7280;
+
+  --glow: 0.4;
   --background: #000000;
   --foreground: #ededed;
   --muted: #141414;
@@ -34,13 +60,608 @@
   --color-border: var(--border);
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
+  --color-compass: var(--compass);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
   --ease-snappy: cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+svg[data-play] {
+  --pd: 2.4s;
+}
+
+svg[data-play="fast"] {
+  --pd: 1.5s;
+}
+
+@keyframes play-ball {
+  0%, 100% {
+    translate: 0;
+    rotate: 0deg;
+    scale: 1;
+  }
+
+  18% {
+    translate: 0 -28px;
+  }
+
+  36% {
+    translate: 0;
+    scale: 1.15 .85;
+  }
+
+  42% {
+    scale: 1;
+  }
+
+  50% {
+    translate: 0 -14px;
+  }
+
+  62%, 70% {
+    translate: 0;
+    rotate: 0deg;
+    scale: 1;
+  }
+
+  82% {
+    translate: 14px -8px;
+    rotate: 110deg;
+  }
+
+  92% {
+    translate: 14px;
+    rotate: 200deg;
+  }
+}
+
+@keyframes play-shadow {
+  18% {
+    scale: .6 1;
+  }
+
+  50% {
+    scale: .8 1;
+  }
+
+  82% {
+    scale: .75 1;
+  }
+}
+
+@keyframes play-paw {
+  0%, 58%, 100% {
+    rotate: 0deg;
+  }
+
+  64% {
+    rotate: -34deg;
+  }
+
+  70% {
+    rotate: 10deg;
+  }
+
+  82% {
+    rotate: 0deg;
+  }
+}
+
+@keyframes play-head {
+  0%, 36%, 62%, 100% {
+    rotate: 0deg;
+  }
+
+  18% {
+    rotate: -5deg;
+  }
+
+  50% {
+    rotate: -3deg;
+  }
+
+  70% {
+    rotate: 5deg;
+  }
+}
+
+@keyframes play-tail {
+  from {
+    rotate: -9deg;
+  }
+
+  to {
+    rotate: 11deg;
+  }
+}
+
+.play-ball {
+  animation: play-ball var(--pd, 2.4s) ease-in-out infinite;
+}
+
+.play-shadow {
+  animation: play-shadow var(--pd, 2.4s) ease-in-out infinite;
+}
+
+.play-paw {
+  animation: play-paw var(--pd, 2.4s) ease-in-out infinite;
+}
+
+.play-head {
+  animation: play-head var(--pd, 2.4s) ease-in-out infinite;
+}
+
+.play-tail {
+  animation: .8s ease-in-out infinite alternate play-tail;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .play-ball, .play-shadow, .play-paw, .play-head, .play-tail {
+    animation: none;
+  }
+}
+
+@keyframes compass-sway {
+  50% {
+    rotate: 16deg;
+  }
+}
+
+.compass-sway {
+  transform-origin: 50px 50px;
+  animation: 4s ease-in-out infinite alternate compass-sway;
+}
+
+[data-live] .compass-sway {
+  animation: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .compass-sway {
+    animation: none;
+  }
+}
+
+html[data-sheet] {
+  overflow: hidden;
+}
+
+dialog[data-sheet]::backdrop {
+  -webkit-backdrop-filter: blur(24px);
+  backdrop-filter: blur(24px);
+  background: #0000008c;
+  transition: opacity .25s cubic-bezier(.23, 1, .32, 1);
+  animation: .3s cubic-bezier(.23, 1, .32, 1) sheet-fade;
+}
+
+dialog[data-sheet][data-closing]::backdrop {
+  opacity: 0;
+}
+
+/* intro: items wait invisible until the loader reveals the page (or the tab already saw it), then enter in order */
+.intro-item {
+  opacity: 0;
+  translate: 0 28px;
+}
+
+html[data-intro="ready"] .intro-item {
+  opacity: 1;
+  translate: 0 0;
+  transition: opacity 1s cubic-bezier(0.33, 1, 0.68, 1) var(--d, 0ms), translate 1.1s cubic-bezier(0.33, 1, 0.68, 1) var(--d, 0ms);
+}
+
+/* the preloader layer: gone for tabs that saw it and for reduced motion; the notch and its cat wait for the cat to land */
+html[data-seen] [data-intro-layer] {
+  display: none;
+}
+
+html:not([data-landed]) [data-notch-cat] {
+  visibility: hidden;
+}
+
+html:not([data-intro="ready"]) [data-notch] {
+  opacity: 0;
+}
+
+[data-notch] {
+  transition: opacity 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+@keyframes intro-pulse {
+  50% {
+    opacity: 0.6;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-intro-layer] {
+    display: none;
+  }
+
+  [data-notch] {
+    transition: none;
+  }
+
+  .intro-item {
+    opacity: 1;
+    translate: 0 0;
+    transition: none !important;
+  }
+}
+
+@keyframes sheet-fade {
+  from {
+    opacity: 0;
+  }
+}
+
+html {
+  scrollbar-gutter: stable; /* locking scroll during the intro must not change the page width */
+  overscroll-behavior: none;
+  background: var(--background);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans), system-ui, sans-serif;
+}
+
+@keyframes cat-spin {
+  to {
+    rotate: 360deg;
+  }
+}
+
+@keyframes cat-tail {
+  from {
+    rotate: -6deg;
+  }
+
+  to {
+    rotate: 6deg;
+  }
+}
+
+@keyframes cat-blink {
+  0%, 92%, 100% {
+    scale: 1;
+  }
+
+  96% {
+    scale: 1 .1;
+  }
+}
+
+.cat-spin {
+  animation: 14s linear infinite cat-spin;
+}
+
+.cat-tail {
+  animation: 3.2s ease-in-out infinite alternate cat-tail;
+}
+
+.cat-blink {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: 5s infinite cat-blink;
+}
+
+@property --amp {
+  syntax: "<angle>";
+  inherits: true;
+  initial-value: 9deg;
+}
+
+@keyframes cat-tail-sleep {
+  from {
+    rotate: calc(var(--amp) * -1);
+  }
+
+  to {
+    rotate: var(--amp);
+  }
+}
+
+@keyframes cat-look {
+  0%, 100% {
+    translate: 0;
+  }
+
+  30% {
+    translate: -2.5px;
+  }
+
+  65% {
+    translate: 2.5px -.5px;
+  }
+}
+
+@keyframes cat-eye-blink {
+  0%, 88%, 100% {
+    scale: 1;
+  }
+
+  94% {
+    scale: 1 .1;
+  }
+}
+
+svg[data-awake] {
+  transition: --amp .6s cubic-bezier(.23, 1, .32, 1);
+}
+
+svg[data-awake="true"] {
+  --amp: 20deg;
+}
+
+.cat-tail-sleep {
+  animation: 1.3s ease-in-out infinite alternate cat-tail-sleep;
+}
+
+.cat-head {
+  transition: translate .6s cubic-bezier(.23, 1, .32, 1), rotate .6s cubic-bezier(.23, 1, .32, 1);
+}
+
+svg[data-awake="true"] .cat-head {
+  translate: 0 -5px;
+  rotate: -9deg;
+}
+
+.cat-eye-open {
+  opacity: 0;
+  transition: opacity .2s;
+}
+
+.cat-eye-closed {
+  transition: opacity .2s;
+}
+
+svg[data-awake="true"] .cat-eye-open {
+  opacity: 1;
+  animation: 2.6s ease-in-out .5s cat-look;
+}
+
+svg[data-awake="true"] .cat-eye-closed {
+  opacity: 0;
+}
+
+.cat-eye-ball {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+svg[data-awake="true"] .cat-eye-ball {
+  animation: 2.6s .5s cat-eye-blink;
+}
+
+@keyframes cat-breathe {
+  from {
+    scale: 1;
+  }
+
+  to {
+    scale: 1.012 1.035;
+  }
+}
+
+.cat-breathe {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  animation: 4.5s ease-in-out infinite alternate cat-breathe;
+}
+
+/* hero Milky Way: slow drift and twinkling stars around the cat */
+@keyframes star-twinkle {
+  50% {
+    opacity: 0.25;
+  }
+}
+
+.galaxy {
+  transform: translate(-50%, -50%) rotate(-14deg);
+}
+
+.galaxy .star {
+  position: absolute;
+  border-radius: 9999px;
+  background: #eef2ff;
+}
+
+.galaxy .star-tw {
+  animation: star-twinkle 3.4s ease-in-out infinite;
+}
+
+:root:not(.dark) .galaxy .star {
+  background: #6d28d9;
+}
+
+/* footer wordmark cats (components/gallery/wordmark-cats.tsx): hidden until the wordmark scrolls into view, then settle in one by one */
+.wm-eyes-on [fill="black"] {
+  fill: white;
+}
+
+.wm-cat {
+  opacity: 0;
+  translate: 0 0.06em;
+}
+
+[data-in] .wm-cat {
+  opacity: 1;
+  translate: 0 0;
+  transition: opacity 0.7s cubic-bezier(0.23, 1, 0.32, 1) var(--i, 0ms), translate 0.8s cubic-bezier(0.23, 1, 0.32, 1) var(--i, 0ms);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wm-cat {
+    opacity: 1;
+    translate: 0 0;
+    transition: none !important;
+  }
+}
+
+@keyframes wm-look {
+  0%, 20% {
+    transform: rotate(-7deg);
+  }
+
+  45%, 70% {
+    transform: rotate(7deg);
+  }
+
+  100% {
+    transform: rotate(-7deg);
+  }
+}
+
+@keyframes wm-tail {
+  to {
+    transform: rotate(14deg);
+  }
+}
+
+@keyframes wm-breathe {
+  to {
+    transform: scaleY(1.04) translateY(-1px);
+  }
+}
+
+@keyframes wm-stretch {
+  0%, 70%, 100% {
+    transform: scale(1);
+  }
+
+  80%, 90% {
+    transform: scale(1.1, .94);
+  }
+}
+
+@keyframes wm-z {
+  0% { opacity: 0; transform: translate(0, 4px); }
+  30% { opacity: 0.9; }
+  100% { opacity: 0; transform: translate(6px, -16px); }
+}
+
+@keyframes wm-blink {
+  0%, 94%, 100% {
+    transform: scaleY(1);
+  }
+
+  97% {
+    transform: scaleY(.1);
+  }
+}
+
+.wm-look, .wm-head-rest {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  animation: 7s ease-in-out infinite wm-look;
+}
+
+.wm-head-rest {
+  animation: none;
+}
+
+.wm-tail, .wm-tail-curl {
+  transform-box: fill-box;
+  transform-origin: 0 100%;
+  animation: 2.6s ease-in-out infinite alternate wm-tail;
+}
+
+.wm-breathe {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  animation: 3.6s ease-in-out infinite alternate wm-breathe;
+}
+
+.wm-stretch {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  animation: 6s ease-in-out infinite wm-stretch;
+}
+
+.wm-z {
+  animation: wm-z 4s ease-out infinite;
+}
+
+.wm-blink {
+  animation: 5s ease-in-out infinite wm-blink;
+  animation-delay: inherit;
+  transform-box: fill-box;
+  transform-origin: 50%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wm-z, .wm-look, .wm-tail, .wm-tail-curl, .wm-breathe, .wm-stretch, .wm-blink, .galaxy .star-tw, .cat-spin, .cat-tail, .cat-blink, .cat-breathe, .cat-tail-sleep {
+    animation: none;
+  }
+}
+
+@keyframes cat-line {
+  0% {
+    opacity: 0;
+    scale: 1 .4;
+  }
+
+  35% {
+    opacity: .85;
+    scale: 1;
+  }
+
+  100% {
+    opacity: 0;
+    scale: 1;
+  }
+}
+
+.cat-line {
+  opacity: 0;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: .9s ease-out infinite cat-line;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cat-line {
+    animation-name: cat-line-fade;
+  }
+}
+
+@keyframes cat-line-fade {
+  0%, 100% {
+    opacity: 0;
+  }
+
+  35% {
+    opacity: .85;
+  }
+}
+
+@keyframes cat-sit {
+  from {
+    opacity: 0;
+    scale: 1.04 .9;
+  }
+
+  to {
+    opacity: 1;
+    scale: 1;
+  }
+}
+
+.cat-sit {
+  transform-origin: bottom;
+  animation: .3s cubic-bezier(.23, 1, .32, 1) cat-sit;
+}
+
+/* keyboard focus: one ring everywhere. Elements with their own focus-visible utilities keep them; the notch is black in both themes, so its ring is white. */
+@layer base {
+  :focus-visible {
+    outline: 2px solid var(--foreground);
+    outline-offset: 2px;
+  }
+
+  [data-notch] :focus-visible {
+    outline-color: #fff;
+  }
 }

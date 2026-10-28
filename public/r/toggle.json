@@ -1,0 +1,17 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "toggle",
+  "title": "Toggle",
+  "description": "An on/off switch whose knob stretches as it travels, driven by one spring.",
+  "dependencies": [
+    "motion"
+  ],
+  "files": [
+    {
+      "path": "registry/toggle/toggle.tsx",
+      "content": "\"use client\";\n\nimport { motion, useReducedMotion, useSpring, useTransform, useVelocity } from \"motion/react\";\nimport { useEffect, useState } from \"react\";\n\nexport interface ToggleProps {\n  /** Controlled value. Leave it out and the switch keeps its own state. */\n  checked?: boolean;\n  /** Starting value when uncontrolled. */\n  defaultChecked?: boolean;\n  onCheckedChange?: (checked: boolean) => void;\n  /** The switch's accessible name. There is no visible text inside it, so say what it turns on. */\n  label: string;\n  disabled?: boolean;\n  className?: string;\n}\n\nconst TRAVEL = 48; // px the knob moves: track 112 - padding 16 - knob 48\nconst SPRING = { stiffness: 420, damping: 34 };\n\n/**\n * An on/off switch whose knob stretches as it travels. One spring moves the knob and its own speed drives the stretch, so\n * flipping it again mid-way carries on from where the knob is. Space and Enter flip it. Under `prefers-reduced-motion` the\n * knob jumps and only the colour fades.\n */\nexport function Toggle({ checked, defaultChecked = false, onCheckedChange, label, disabled, className = \"\" }: ToggleProps) {\n  const reduce = useReducedMotion() ?? false;\n  const [inner, setInner] = useState(defaultChecked);\n  const on = checked ?? inner;\n  const x = useSpring(on ? TRAVEL : 0, SPRING);\n  const stretch = useTransform(useVelocity(x), [-1400, 0, 1400], [1.3, 1, 1.3]);\n\n  useEffect(() => {\n    if (reduce) x.jump(on ? TRAVEL : 0);\n    else x.set(on ? TRAVEL : 0);\n  }, [on, reduce, x]);\n\n  const flip = () => {\n    const next = !on;\n    if (checked === undefined) setInner(next);\n    onCheckedChange?.(next);\n  };\n\n  return (\n    <button\n      type=\"button\"\n      role=\"switch\"\n      aria-checked={on}\n      aria-label={label}\n      disabled={disabled}\n      onClick={flip}\n      className={`flex h-16 w-28 shrink-0 items-center rounded-full p-2 transition-colors duration-300 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foreground disabled:cursor-not-allowed disabled:opacity-50 ${on ? \"bg-emerald-500\" : \"bg-border\"} ${className}`}\n    >\n      <motion.span aria-hidden style={{ x, scaleX: stretch }} className=\"size-12 rounded-full bg-white shadow\" />\n    </button>\n  );\n}\n",
+      "type": "registry:ui"
+    }
+  ],
+  "type": "registry:ui"
+}
