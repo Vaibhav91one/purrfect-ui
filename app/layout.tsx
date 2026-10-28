@@ -5,7 +5,7 @@ import { Intro } from "@/components/providers/intro";
 import { PageFade } from "@/components/providers/page-fade";
 import { SoundProvider } from "@/components/providers/sound-provider";
 import { Toaster } from "@/components/ui/sonner";
-import { SITE_URL } from "@/lib/site";
+import { DEFAULT_OG, SITE_URL } from "@/lib/site";
 
 const DESCRIPTION = "Animated React components with sound, built from real projects. Install with the shadcn CLI or copy the source.";
 
@@ -28,8 +28,8 @@ export const metadata: Metadata = {
   creator: "Vaibhav Tomar",
   keywords: ["react components", "animated components", "shadcn registry", "tailwind css", "motion", "gsap", "ui library", "copy and paste components"],
   alternates: { canonical: "/" },
-  openGraph: { type: "website", siteName: "purrfect ui", title: "purrfect ui", description: DESCRIPTION, url: "/", locale: "en_US" },
-  twitter: { card: "summary_large_image", title: "purrfect ui", description: DESCRIPTION },
+  openGraph: { type: "website", siteName: "purrfect ui", title: "purrfect ui", description: DESCRIPTION, url: "/", locale: "en_US", images: [DEFAULT_OG] },
+  twitter: { card: "summary_large_image", title: "purrfect ui", description: DESCRIPTION, images: [DEFAULT_OG.url] },
   robots: { index: true, follow: true },
 };
 
