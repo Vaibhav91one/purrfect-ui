@@ -29,11 +29,11 @@ export function FooterSection() {
                 Vaibhav
               </a>
               {" · "}
-              <a href="https://x.com/VrsatileVaibhav" className="text-foreground hover:underline">
+              <a href="https://x.com/VrsatileVaibhav" rel="me" className="text-foreground hover:underline">
                 X
               </a>
               {" · "}
-              <a href="https://github.com/Vaibhav91one" className="text-foreground hover:underline">
+              <a href="https://github.com/Vaibhav91one" rel="me" className="text-foreground hover:underline">
                 GitHub
               </a>
             </p>
