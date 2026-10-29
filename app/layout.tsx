@@ -7,7 +7,8 @@ import { SoundProvider } from "@/components/providers/sound-provider";
 import { Toaster } from "@/components/ui/sonner";
 import { DEFAULT_OG, SITE_URL } from "@/lib/site";
 
-const DESCRIPTION = "Animated React components with sound, built from real projects. Install with the shadcn CLI or copy the source.";
+const DESCRIPTION = "React components that wiggle, stretch and snap back, with sound. One file each: install with the shadcn CLI or copy the source.";
+const TITLE = "purrfect ui · React components that wiggle and snap back";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -21,15 +22,15 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
-  title: { default: "purrfect ui", template: "%s · purrfect ui" },
+  title: { default: TITLE, template: "%s · purrfect ui" },
   description: DESCRIPTION,
   applicationName: "purrfect ui",
   authors: [{ name: "Vaibhav Tomar", url: "https://vaibhavtomar.com" }],
   creator: "Vaibhav Tomar",
   keywords: ["react components", "animated components", "shadcn registry", "tailwind css", "motion", "gsap", "ui library", "copy and paste components"],
   alternates: { canonical: "/" },
-  openGraph: { type: "website", siteName: "purrfect ui", title: "purrfect ui", description: DESCRIPTION, url: "/", locale: "en_US", images: [DEFAULT_OG] },
-  twitter: { card: "summary_large_image", title: "purrfect ui", description: DESCRIPTION, images: [DEFAULT_OG.url] },
+  openGraph: { type: "website", siteName: "purrfect ui", title: TITLE, description: DESCRIPTION, url: "/", locale: "en_US", images: [DEFAULT_OG] },
+  twitter: { card: "summary_large_image", title: TITLE, description: DESCRIPTION, images: [DEFAULT_OG.url] },
   robots: { index: true, follow: true },
 };
 

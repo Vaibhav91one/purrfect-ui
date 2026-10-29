@@ -64,9 +64,11 @@ export function HeroReveal({ src, alt = "", title, description, action, classNam
         </motion.div>
       </div>
       <div className="z-10 flex max-w-5xl flex-col items-center justify-center gap-6 px-4 pb-19 text-center sm:px-6 md:pb-0">
-        <BlurReveal>
-          <h1 className="max-w-4xl text-4xl leading-[1.1] font-medium tracking-tight text-balance text-white sm:text-5xl lg:text-6xl xl:text-7xl">{title}</h1>
-        </BlurReveal>
+        {title && (
+          <BlurReveal>
+            <h1 className="max-w-4xl text-4xl leading-[1.1] font-medium tracking-tight text-balance text-white sm:text-5xl lg:text-6xl xl:text-7xl">{title}</h1>
+          </BlurReveal>
+        )}
         {description && (
           <BlurReveal delay={0.12}>
             <p className="max-w-2xl text-sm leading-tight font-medium tracking-tight text-white sm:text-base">{description}</p>

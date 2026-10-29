@@ -2,7 +2,7 @@ import { ComponentsSection, FooterSection, HeroSection, Navbar } from "@/compone
 import { containerClasses } from "@/lib/layout-classes";
 import { SITE_URL } from "@/lib/site";
 
-const ld = { "@context": "https://schema.org", "@type": "WebSite", name: "purrfect ui", url: SITE_URL };
+const ld = { "@context": "https://schema.org", "@type": "WebSite", name: "purrfect ui", url: SITE_URL, description: "React components that wiggle, stretch and snap back, with sound. Install with the shadcn CLI.", author: { "@type": "Person", name: "Vaibhav Tomar", url: "https://vaibhavtomar.com" } };
 
 export default function Home() {
   return (

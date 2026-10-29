@@ -1,13 +1,14 @@
 import Link from "next/link";
-import { COMPONENTS } from "@/lib/components-data";
+import { CATEGORIES, categorySlug, COMPONENTS } from "@/lib/components-data";
 import { sectionBaseClasses } from "@/lib/layout-classes";
 import { GITHUB_URL } from "@/lib/site";
 import { Wordmark } from "@/components/gallery/wordmark";
 import { CurledCat, LoafCat, StretchCat } from "@/components/gallery/wordmark-cats";
 
 const columns = [
-  { title: "Components", links: COMPONENTS.slice(0, 6).map((c) => ({ label: c.name, href: `/components?c=${c.slug}` })) },
-  { title: "Product", links: [{ label: "Components", href: "/components" }] },
+  { title: "Components", links: COMPONENTS.slice(0, 6).map((c) => ({ label: c.name, href: `/components/${c.slug}` })) },
+  { title: "Categories", links: CATEGORIES.map((c) => ({ label: c, href: `/components/category/${categorySlug(c)}` })) },
+  { title: "Product", links: [{ label: "Components", href: "/components" }, { label: "Docs", href: "/docs" }, { label: "Changelog", href: "/changelog" }, { label: "About", href: "/about" }] },
   { title: "Resources", links: [{ label: "GitHub", href: GITHUB_URL }, { label: "Issues", href: `${GITHUB_URL}/issues` }] },
 ];
 
@@ -43,7 +44,7 @@ export function FooterSection() {
             </a>
             <p className="mt-4 text-sm text-muted-foreground">© 2026 purrfect ui</p>
           </div>
-          <nav aria-label="Footer" className="grid grid-cols-2 gap-x-12 gap-y-10 sm:grid-cols-3">
+          <nav aria-label="Footer" className="grid grid-cols-2 gap-x-12 gap-y-10 sm:grid-cols-4">
             {columns.map((col) => (
               <div key={col.title}>
                 <h2 className="text-sm font-medium">{col.title}</h2>
