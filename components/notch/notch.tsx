@@ -1,13 +1,13 @@
 "use client";
 
-import { Boxes, House, Search, X, type LucideIcon } from "lucide-react";
+import { BookOpen, Boxes, Cat, History, House, Search, X, type LucideIcon } from "lucide-react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { FAST, SPRING } from "@/lib/motion";
 import { useSound } from "@/components/providers/sound-provider";
-import { COMPONENTS } from "@/lib/components-data";
+import { CATEGORIES, COMPONENTS } from "@/lib/components-data";
 import { NAV_LINKS } from "@/lib/site";
 import { NotchCat } from "./notch-cat";
 import { GithubStars } from "./github-stars";
@@ -20,8 +20,7 @@ const HOVER_OUT_MS = 260;
 const ROW_H = 48;
 const NOTCH_W = 340; // collapsed width from `sm` up
 
-const NAV_ICONS: Record<string, LucideIcon> = { Home: House, Components: Boxes };
-const CATEGORIES = [...new Set(COMPONENTS.map((c) => c.category))];
+const NAV_ICONS: Record<string, LucideIcon> = { Home: House, Components: Boxes, Docs: BookOpen, Changelog: History, About: Cat };
 
 const heading = "px-3 pt-2 pb-1 text-[11px] font-medium tracking-wide text-white/40 uppercase";
 const chip =

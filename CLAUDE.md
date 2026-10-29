@@ -19,7 +19,7 @@ Dev server serves stale CSS after editing `app/globals.css` or running `pnpm bui
 
 ## Layout
 
-- `app/` pages (`/`, `/components`); `app/globals.css` holds tokens and the cat keyframes.
+- `app/` pages (`/`, `/components`, `/components/category/<name>`, `/docs`, `/changelog`, `/about`; text pages use `sections/prose-page.tsx`); `app/globals.css` holds tokens and the cat keyframes.
 - `registry/<slug>/` one folder per installable component (`<slug>.tsx`, `demo.tsx`, `meta.ts`); `registry.json` lists them; `public/r/*.json` is generated.
 - `components/sections/` home sections; `components/gallery/` gallery, previews, cat; `components/notch/` the floating notch; `components/providers/` sound provider.
 - `lib/` data and helpers: `components-data.ts`, `layout-classes.ts` (section sizing; dev-only blue/red/green outlines show section bounds), `sound.ts`, `site.ts`.

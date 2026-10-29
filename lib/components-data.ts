@@ -59,4 +59,7 @@ export const COMPONENTS: ComponentItem[] = [
   item("path-carousel", "Path carousel", "Layout", "Items ride a curved path, the centre one biggest; scroll, swipe or use the arrows to rotate.", [560, 300]),
 ];
 
+export const CATEGORIES = [...new Set(COMPONENTS.map((c) => c.category))];
+export const categorySlug = (category: string) => category.toLowerCase();
+
 export const bySlug = (slug: string | null | undefined) => COMPONENTS.find((c) => c.slug === slug);
