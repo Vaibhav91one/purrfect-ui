@@ -2,7 +2,7 @@
 
 import { Rocket } from "lucide-react";
 import { useEffect, useRef, useState, type ReactNode, type RefObject } from "react";
-import { Button } from "@/registry/button/button";
+import { RollButton as Button } from "@/registry/roll-button/roll-button";
 import { Counter } from "@/registry/counter/counter";
 import { HeroReveal } from "@/registry/hero-reveal/hero-reveal";
 import { LayeredMenu } from "@/registry/layered-menu/layered-menu";
@@ -11,8 +11,15 @@ import { Notch } from "@/registry/notch/notch";
 import { PathCarousel } from "@/registry/path-carousel/path-carousel";
 import { ParallaxColumns } from "@/registry/parallax-columns/parallax-columns";
 import { ScrollReveal } from "@/registry/scroll-reveal/scroll-reveal";
-import { Tabs } from "@/registry/tabs/tabs";
-import { Toggle } from "@/registry/toggle/toggle";
+import { GlideTabs as Tabs } from "@/registry/glide-tabs/glide-tabs";
+import { StretchSwitch as Toggle } from "@/registry/stretch-switch/stretch-switch";
+import CurtainRevealDemo from "@/registry/curtain-reveal/demo";
+import DisplacementDemo from "@/registry/displacement/demo";
+import FillButtonDemo from "@/registry/fill-button/demo";
+import HoverPreviewDemo from "@/registry/hover-preview/demo";
+import PreloaderDemo from "@/registry/preloader/demo";
+import RollLinkDemo from "@/registry/roll-link/demo";
+import ScrollMarqueeDemo from "@/registry/scroll-marquee/demo";
 import { useTick } from "./use-tick";
 
 /** What the dialog hands every demo: the Loop switch, the Speed slider and the component's own extras. `playing` undefined = a still card. */
@@ -54,7 +61,7 @@ function TabsDemo({ playing, speed }: DemoProps) {
 function ButtonLoop({ playing, speed, opts }: DemoProps) {
   const n = useTick(playing, speed, 1500) % 2;
   return (
-    <Button variant={opts.variant === "Ghost" ? "ghost" : "solid"} size={opts.size === "Large" ? "lg" : "md"} forceHover={n === 1} icon={<Rocket className="size-4" />}>
+    <Button variant={opts.variant === "Ghost" ? "ghost" : "solid"} size={opts.size === "Large" ? "lg" : "md"} data-hover={n === 1 ? "true" : undefined} data-cuelume-tap="" icon={<Rocket className="size-4" />}>
       Ship it
     </Button>
   );
@@ -69,7 +76,7 @@ function NotchLoop({ playing, speed }: DemoProps) {
   const n = useTick(playing, speed, 3200);
   return (
     <div className={frame}>
-      <Notch key={n} delay={0.15}>
+      <Notch key={n} delay={0.15} color="#fff">
         <span className="text-2xl font-medium text-[#1B1B1B]">ARMOUR</span>
       </Notch>
     </div>
@@ -215,16 +222,35 @@ function PathLoop({ playing, speed }: DemoProps) {
   );
 }
 
+/** The follower is page-level (position: fixed), so a scaled card shows what it does instead of running it. */
+function CursorStill() {
+  return (
+    <div className="relative grid h-64 w-96 grid-cols-2 overflow-hidden rounded-2xl text-lg">
+      <div className="grid place-items-center bg-muted">Page</div>
+      <div className="grid place-items-center bg-foreground text-background">Inverted</div>
+      <span className="absolute top-1/2 left-1/2 size-10 -translate-1/2 rounded-full bg-white mix-blend-difference" />
+    </div>
+  );
+}
+
 export const DEMOS: Record<string, (p: DemoProps) => ReactNode> = {
-  button: ButtonLoop,
+  "roll-button": ButtonLoop,
   magnetic: MagneticLoop,
   notch: NotchLoop,
   "hero-reveal": HeroLoop,
   "layered-menu": MenuLoop,
-  toggle: ToggleDemo,
+  "stretch-switch": ToggleDemo,
   counter: CounterDemo,
-  tabs: TabsDemo,
+  "glide-tabs": TabsDemo,
   "scroll-reveal": RevealLoop,
   "parallax-columns": ParallaxLoop,
   "path-carousel": PathLoop,
+  displacement: DisplacementDemo,
+  "hover-preview": HoverPreviewDemo,
+  "scroll-marquee": ScrollMarqueeDemo,
+  "roll-link": RollLinkDemo,
+  "curtain-reveal": CurtainRevealDemo,
+  preloader: PreloaderDemo,
+  "cursor-follower": CursorStill,
+  "fill-button": FillButtonDemo,
 };

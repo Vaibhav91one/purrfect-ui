@@ -1,0 +1,22 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "fill-button",
+  "title": "Fill button",
+  "description": "An outlined pill whose fill sweeps in from the left and out to the right.",
+  "registryDependencies": [
+    "utils"
+  ],
+  "files": [
+    {
+      "path": "registry/fill-button/fill-button.tsx",
+      "content": "\"use client\";\n\nimport { useRef, type AnchorHTMLAttributes, type ButtonHTMLAttributes, type FocusEvent, type HTMLAttributes, type PointerEvent, type ReactNode } from \"react\";\nimport { cn } from \"@/lib/utils\";\n\ntype Base = { children: ReactNode; className?: string };\nexport type FillButtonProps =\n  | (Base & { href: string } & Omit<AnchorHTMLAttributes<HTMLAnchorElement>, \"children\">)\n  | (Base & { href?: undefined } & Omit<ButtonHTMLAttributes<HTMLButtonElement>, \"children\">);\n\n/**\n * An outlined pill whose fill sweeps in from the left on hover or keyboard focus and sweeps out to the right on leave, the\n * label switching colour with it. One CSS transition does the sweep; a data attribute says which way, so React never\n * re-renders. Touch and pen get the press colour only. Reduced motion: the fill fades in and out instead of sweeping.\n */\nexport function FillButton({ className, children, ...rest }: FillButtonProps) {\n  const fill = useRef<HTMLSpanElement>(null);\n  // in: slide to 0 from wherever it is. out: slide off to the right, then jump back to the left with no transition\n  const go = (state: \"in\" | \"out\") => {\n    const el = fill.current;\n    if (!el || (state === \"out\" && el.dataset.state === \"idle\")) return; // nothing showing, nothing to sweep out\n    el.dataset.state = state;\n    if (state === \"out\") el.addEventListener(\"transitionend\", () => el.dataset.state === \"out\" && (el.dataset.state = \"idle\"), { once: true });\n  };\n  // yours run first, then the sweep\n  const own = rest as HTMLAttributes<HTMLElement>;\n  const on = {\n    onPointerEnter: (e: PointerEvent<HTMLElement>) => (own.onPointerEnter?.(e), e.pointerType === \"mouse\" && go(\"in\")),\n    onPointerLeave: (e: PointerEvent<HTMLElement>) => (own.onPointerLeave?.(e), e.pointerType === \"mouse\" && go(\"out\")),\n    onFocus: (e: FocusEvent<HTMLElement>) => (own.onFocus?.(e), e.currentTarget.matches(\":focus-visible\") && go(\"in\")),\n    onBlur: (e: FocusEvent<HTMLElement>) => (own.onBlur?.(e), go(\"out\")),\n  };\n  const cls = cn(\n    \"group/fill relative isolate inline-flex items-center justify-center gap-2 overflow-hidden rounded-full border border-foreground px-6 py-3 text-sm font-semibold whitespace-nowrap text-foreground transition-colors duration-300 ease-out active:text-background has-[[data-state=in]]:text-background focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-foreground disabled:pointer-events-none disabled:opacity-50\",\n    className,\n  );\n  const inner = (\n    <>\n      <span\n        ref={fill}\n        aria-hidden\n        data-state=\"idle\"\n        className=\"absolute inset-0 -z-10 bg-foreground transition-[translate,opacity] duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] data-[state=idle]:-translate-x-full data-[state=idle]:transition-none data-[state=in]:translate-x-0 data-[state=out]:translate-x-full group-active/fill:translate-x-0 motion-reduce:!translate-x-0 motion-reduce:data-[state=idle]:opacity-0 motion-reduce:data-[state=out]:opacity-0\"\n      />\n      {children}\n    </>\n  );\n  if (\"href\" in rest && rest.href !== undefined)\n    return (\n      <a className={cls} {...(rest as AnchorHTMLAttributes<HTMLAnchorElement>)} {...on}>\n        {inner}\n      </a>\n    );\n  return (\n    <button type=\"button\" className={cls} {...(rest as ButtonHTMLAttributes<HTMLButtonElement>)} {...on}>\n      {inner}\n    </button>\n  );\n}\n",
+      "type": "registry:ui"
+    }
+  ],
+  "meta": {
+    "react": ">=19",
+    "tailwindcss": ">=4",
+    "tokens": "shadcn (background, foreground, muted, border, ...): run shadcn init first"
+  },
+  "type": "registry:ui"
+}

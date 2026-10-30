@@ -1,12 +1,23 @@
 import type { ReactNode } from "react";
-import { states as button } from "@/registry/button/worst-case";
+import { states as button } from "@/registry/roll-button/worst-case";
 import { states as magnetic } from "@/registry/magnetic/worst-case";
 import { states as notch } from "@/registry/notch/worst-case";
 import { states as heroReveal } from "@/registry/hero-reveal/worst-case";
 import { states as layeredMenu } from "@/registry/layered-menu/worst-case";
-import { states as toggle } from "@/registry/toggle/worst-case";
+import { states as toggle } from "@/registry/stretch-switch/worst-case";
 import { states as counter } from "@/registry/counter/worst-case";
-import { states as tabs } from "@/registry/tabs/worst-case";
+import { states as tabs } from "@/registry/glide-tabs/worst-case";
+import { states as scrollReveal } from "@/registry/scroll-reveal/worst-case";
+import { states as parallaxColumns } from "@/registry/parallax-columns/worst-case";
+import { states as pathCarousel } from "@/registry/path-carousel/worst-case";
+import { states as displacement } from "@/registry/displacement/worst-case";
+import { states as hoverPreview } from "@/registry/hover-preview/worst-case";
+import { states as scrollMarquee } from "@/registry/scroll-marquee/worst-case";
+import { states as rollLink } from "@/registry/roll-link/worst-case";
+import { states as curtainReveal } from "@/registry/curtain-reveal/worst-case";
+import { states as preloader } from "@/registry/preloader/worst-case";
+import { states as cursorFollower } from "@/registry/cursor-follower/worst-case";
+import { states as fillButton } from "@/registry/fill-button/worst-case";
 
 /** Dev-only worst-case states per component (see /dev). Add a component's `registry/<slug>/worst-case.tsx` here when you port it. */
-export const FIXTURES: Record<string, Record<string, ReactNode>> = { button, magnetic, notch, "hero-reveal": heroReveal, "layered-menu": layeredMenu, toggle, counter, tabs };
+export const FIXTURES: Record<string, Record<string, ReactNode>> = { "roll-button": button, magnetic, notch, "hero-reveal": heroReveal, "layered-menu": layeredMenu, "stretch-switch": toggle, counter, "glide-tabs": tabs, "scroll-reveal": scrollReveal, "parallax-columns": parallaxColumns, "path-carousel": pathCarousel, displacement, "hover-preview": hoverPreview, "scroll-marquee": scrollMarquee, "roll-link": rollLink, "curtain-reveal": curtainReveal, preloader, "cursor-follower": cursorFollower, "fill-button": fillButton };

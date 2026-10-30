@@ -4,14 +4,22 @@
   "title": "Counter",
   "description": "A number that rolls digit by digit to its value.",
   "dependencies": [
-    "motion"
+    "motion@^14.6.0"
+  ],
+  "registryDependencies": [
+    "utils"
   ],
   "files": [
     {
       "path": "registry/counter/counter.tsx",
-      "content": "\"use client\";\n\nimport { motion, useReducedMotion } from \"motion/react\";\n\nexport interface CounterProps {\n  /** The number to show. Change it and each digit column rolls to its new digit. */\n  value: number;\n  /** BCP 47 tag for the digit grouping (1,234 or 1.234). */\n  locale?: string;\n  /** Size and weight come from here, e.g. `text-8xl font-semibold`. */\n  className?: string;\n}\n\nconst OUT = [0.23, 1, 0.32, 1] as const;\n\nfunction Digit({ d, reduce }: { d: number; reduce: boolean }) {\n  return (\n    <span aria-hidden className=\"relative inline-block h-[1em] w-[1ch] overflow-hidden leading-none\">\n      <motion.span\n        animate={{ transform: `translateY(${-d * 10}%)` }}\n        // check-ignore: duration a count-up is read, not waited on; it is a display moment, not a control\n        transition={{ duration: reduce ? 0 : 0.9, ease: OUT }}\n        className=\"flex flex-col\"\n      >\n        {Array.from({ length: 10 }, (_, i) => (\n          <span key={i} className=\"h-[1em]\">\n            {i}\n          </span>\n        ))}\n      </motion.span>\n    </span>\n  );\n}\n\n/**\n * A number that rolls digit by digit to its value. Each column slides up or down to its digit; columns are keyed from the\n * right, so 99 -> 100 grows a column instead of reshuffling. Screen readers get the formatted number once, not the 0-9 stack.\n * Under `prefers-reduced-motion` the digits switch with no roll.\n */\nexport function Counter({ value, locale = \"en-US\", className = \"\" }: CounterProps) {\n  const reduce = useReducedMotion() ?? false;\n  const text = new Intl.NumberFormat(locale).format(value);\n  return (\n    <span role=\"img\" aria-label={text} className={`inline-flex leading-none tabular-nums ${className}`}>\n      {[...text].map((ch, i) =>\n        /\\d/.test(ch) ? (\n          <Digit key={text.length - i} d={+ch} reduce={reduce} />\n        ) : (\n          <span key={text.length - i} aria-hidden>\n            {ch}\n          </span>\n        ),\n      )}\n    </span>\n  );\n}\n",
+      "content": "\"use client\";\n\nimport { motion, useReducedMotion } from \"motion/react\";\nimport { useMemo, type ComponentProps } from \"react\";\nimport { cn } from \"@/lib/utils\";\n\nexport interface CounterProps extends Omit<ComponentProps<\"span\">, \"children\"> {\n  /** The number to show. Change it and each digit column rolls to its new digit. */\n  value: number;\n  /** BCP 47 tag for the digit grouping (1,234 or 1.234). */\n  locale?: string;\n  /** Size and weight come from here, e.g. `text-8xl font-semibold`. */\n  className?: string;\n}\n\nconst OUT = [0.23, 1, 0.32, 1] as const;\n\nfunction Digit({ d, reduce }: { d: number; reduce: boolean }) {\n  return (\n    <span aria-hidden className=\"relative inline-block h-[1em] w-[1ch] overflow-hidden leading-none\">\n      <motion.span\n        animate={{ transform: `translateY(${-d * 10}%)` }}\n        // check-ignore: duration a count-up is read, not waited on; it is a display moment, not a control\n        transition={{ duration: reduce ? 0 : 0.9, ease: OUT }}\n        className=\"flex flex-col\"\n      >\n        {Array.from({ length: 10 }, (_, i) => (\n          <span key={i} className=\"h-[1em]\">\n            {i}\n          </span>\n        ))}\n      </motion.span>\n    </span>\n  );\n}\n\n/**\n * A number that rolls digit by digit to its value. Each column slides up or down to its digit; columns are keyed from the\n * right, so 99 -> 100 grows a column instead of reshuffling. Screen readers read the formatted number as text, not the 0-9 stack.\n * Under `prefers-reduced-motion` the digits switch with no roll.\n */\nexport function Counter({ value, locale = \"en-US\", className, ...rest }: CounterProps) {\n  const reduce = useReducedMotion() ?? false;\n  const format = useMemo(() => new Intl.NumberFormat(locale), [locale]);\n  const text = format.format(value);\n  return (\n    <span className={cn(\"inline-flex leading-none tabular-nums\", className)} {...rest}>\n      <span className=\"sr-only\">{text}</span>\n      {[...text].map((ch, i) =>\n        /\\d/.test(ch) ? (\n          <Digit key={text.length - i} d={+ch} reduce={reduce} />\n        ) : (\n          <span key={text.length - i} aria-hidden>\n            {ch}\n          </span>\n        ),\n      )}\n    </span>\n  );\n}\n",
       "type": "registry:ui"
     }
   ],
+  "meta": {
+    "react": ">=19",
+    "tailwindcss": ">=4",
+    "tokens": "shadcn (background, foreground, muted, border, ...): run shadcn init first"
+  },
   "type": "registry:ui"
 }

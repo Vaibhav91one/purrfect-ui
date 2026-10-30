@@ -6,7 +6,7 @@
 
 <p><b>UI that purrs.</b></p>
 
-**Animated React components with sound. Install with the shadcn CLI or copy the source.**
+**Animated React components for shadcn projects. Install with the shadcn CLI or copy the source.**
 
 <img src="https://img.shields.io/badge/Next.js-0a0a0a?logo=nextdotjs&logoColor=ec4899" alt="Next.js" />
 <img src="https://img.shields.io/badge/Tailwind_CSS-0a0a0a?logo=tailwindcss&logoColor=ec4899" alt="Tailwind CSS" />
@@ -21,7 +21,15 @@
 
 <br />
 
-purrfect ui is a shadcn registry built with Next.js, Tailwind CSS and TypeScript. Every component is animated with Motion, plays a synthesized sound cue, honors `prefers-reduced-motion` and installs straight into your codebase. You own the code: no package to depend on, restyle anything. The components are extracted from my own projects (Poinu, Mapinly, Bountydesk, portfolio).
+purrfect ui is a shadcn registry built with Next.js, Tailwind CSS and TypeScript. Every component is animated (Motion, or GSAP for Magnetic, or plain CSS and rAF), honors `prefers-reduced-motion` and installs straight into your codebase. You own the code: no package to depend on, restyle anything. The site itself plays synthesized sound cues; the installed components stay silent. The components are extracted from my own projects (Poinu, Mapinly, Bountydesk, portfolio).
+
+### Requirements
+
+- React 19 and Tailwind CSS 4.
+- A shadcn theme: run `npx shadcn@latest init` first. The components use its tokens (`background`, `foreground`, `primary`, `muted`, `border`, `input`, ...) and its `cn()` from `@/lib/utils`, so they follow your theme in light and dark.
+- Every component takes `className` (merged with `cn()`, so your classes win) and passes the rest of its props (`id`, `style`, `aria-*`, `data-*`, handlers) to its root element.
+
+Renamed so they no longer overwrite shadcn's own files: `button` is now `roll-button`, `tabs` is `glide-tabs`, `toggle` is `stretch-switch` (old URLs redirect).
 
 ## Quick start
 
@@ -34,7 +42,7 @@ npx shadcn@latest add https://purrfectui.com/r/<component>.json
 For example:
 
 ```bash
-npx shadcn@latest add https://purrfectui.com/r/button.json
+npx shadcn@latest add https://purrfectui.com/r/roll-button.json
 ```
 
 Browse every component with a live preview (installable ones also show their source and props) at [purrfectui.com/components](https://purrfectui.com/components).
@@ -60,9 +68,9 @@ npx shadcn@latest mcp init --client claude
 # or: --client cursor | vscode
 ```
 
-Ask: `add @purrfectui/button`
+Ask: `add @purrfectui/roll-button`
 
-Not `add button` on its own. That looks in the default shadcn registry.
+Not `add roll-button` on its own. That looks in the default shadcn registry.
 
 ## Running locally
 
@@ -124,7 +132,10 @@ pnpm check <slug>            # static rules + eslint + tsc; exit 1 on any FAIL (
 pnpm check --rules           # every rule and why it exists
 pnpm check:selftest          # proves each rule fires on bad code
 pnpm check <slug> --install  # scaffolds a throwaway Next app, shadcn-adds the component from :3120/r, tsc + next build
+pnpm check:perf <slug|all>   # runtime gate on /dev fixtures (dev server on :3120): long tasks, layout shift, console errors, with and without reduced motion
 ```
+
+CI runs the static gate and `pnpm build` on every push, then the install smoke test for every component in parallel.
 
 A deliberate exception is a comment on the same or previous line: `check-ignore: <rule-id> <reason>`. A WARN needs a one-line reason in the PR; a FAIL blocks.
 

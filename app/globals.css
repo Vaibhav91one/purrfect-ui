@@ -12,6 +12,10 @@
   --border: #e4e4e7;
   --accent: #0a0a0a;
   --accent-foreground: #ffffff;
+  /* shadcn tokens the registry components assume (a fresh `shadcn init` has them) */
+  --primary: #171717;
+  --primary-foreground: #fafafa;
+  --input: #e4e4e7;
   --glow: 0.22; /* hero Milky Way strength */
   --compass: #1346e7; /* runeicons.com brand blue; same in both themes */
 }
@@ -49,6 +53,9 @@
   --border: #232326;
   --accent: #ffffff;
   --accent-foreground: #000000;
+  --primary: #e5e5e5;
+  --primary-foreground: #171717;
+  --input: #2e2e32;
 }
 
 @theme inline {
@@ -58,6 +65,9 @@
   --color-muted-foreground: var(--muted-foreground);
   --color-card: var(--card);
   --color-border: var(--border);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-input: var(--input);
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
   --color-compass: var(--compass);

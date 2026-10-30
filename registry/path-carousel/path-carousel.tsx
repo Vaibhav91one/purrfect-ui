@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useEffectEvent, useRef, type ReactNode } from "react";
+import { useEffect, useRef, type ComponentProps, type ReactNode } from "react";
+import { cn } from "@/lib/utils";
 
 const SCALE = [1, 0.78, 0.6, 0.45, 0.3]; // size by distance from the centre
 const K = 150; // spring stiffness; damping is critical, so there is no overshoot
@@ -13,17 +14,35 @@ const pathD = (w: number, h: number) => {
   return `M ${0.04 * w} ${(0.5 + a) * h} C ${0.3 * w} ${(0.5 + a) * h} ${0.35 * w} ${(0.5 - a) * h} ${0.5 * w} ${0.5 * h} C ${0.65 * w} ${(0.5 + a) * h} ${0.7 * w} ${(0.5 - a) * h} ${0.96 * w} ${(0.5 - a) * h}`;
 };
 
+export interface PathCarouselProps extends Omit<ComponentProps<"div">, "children" | "ref"> {
+  items: ReactNode[];
+  /** Drive it from outside (an auto-advancing demo, a tab list). */
+  active?: number;
+  /** Called with the centred item's index whenever it changes. */
+  onActive?: (index: number) => void;
+  itemWidth?: number;
+  itemHeight?: number;
+  /** Accessible name of the carousel. */
+  label?: string;
+}
+
 /**
- * Items ride a curved path, the centre one biggest. Scroll over it, swipe, press the arrow keys or click a neighbour to
- * rotate; a spring moves the rotation and every frame writes position, size and fade straight to the nodes, so React
- * never re-renders while it moves. With 3+ items it loops. It fills its parent, so give the parent a height.
- * Pass `active` to drive it from outside (an auto-advancing demo, a tab list). Reduced motion jumps instead of gliding.
+ * Items ride a curved path, the centre one biggest. Scroll over it, swipe, use the arrow keys while focus is in it, or
+ * click a neighbour to rotate; a spring moves the rotation and every frame writes position, size and fade straight to the
+ * nodes, so React never re-renders while it moves. With 3+ items it loops. It fills its parent, so give the parent a height.
+ * Every listener is on the carousel itself: the page scrolls and keys work as usual everywhere else. Reduced motion jumps
+ * instead of gliding.
  */
-export function PathCarousel({ items, active, onActive, itemWidth = 300, itemHeight = 220, className = "" }: { items: ReactNode[]; active?: number; onActive?: (index: number) => void; itemWidth?: number; itemHeight?: number; className?: string }) {
+export function PathCarousel({ items, active, onActive, itemWidth = 300, itemHeight = 220, label = "Carousel", className, ...rest }: PathCarouselProps) {
   const box = useRef<HTMLDivElement>(null);
   const path = useRef<SVGPathElement>(null);
+  const live = useRef<HTMLSpanElement>(null);
   const api = useRef<{ select: (i: number) => void; step: (m: number) => void }>({ select() {}, step() {} });
-  const emit = useEffectEvent((i: number) => onActive?.(i));
+  // the frame loop outlives renders: it calls the latest onActive through this ref
+  const emitRef = useRef(onActive);
+  useEffect(() => {
+    emitRef.current = onActive;
+  });
   const n = items.length;
 
   useEffect(() => {
@@ -86,7 +105,18 @@ export function PathCarousel({ items, active, onActive, itemWidth = 300, itemHei
     const kick = () => { if (!raf) raf = requestAnimationFrame(frame); };
     const announce = () => {
       const a = norm(target);
-      if (a !== act) { act = a; emit(a); }
+      if (a === act) return;
+      const had = L.some((el) => el.contains(document.activeElement));
+      act = a;
+      // roving focus: only the centred slide is a tab stop, and focus follows it when it was on a slide
+      L.forEach((el, i) => {
+        el.tabIndex = i === a ? 0 : -1;
+        if (i === a) el.setAttribute("aria-current", "true");
+        else el.removeAttribute("aria-current");
+      });
+      if (had) L[a].focus({ preventScroll: true });
+      if (live.current) live.current.textContent = `${a + 1} of ${n}`;
+      emitRef.current?.(a);
     };
     const go = (i: number) => { target = clamp(Math.round(i)); announce(); kick(); };
     const step = (m: number) => go(Math.round(target) + m);
@@ -112,13 +142,14 @@ export function PathCarousel({ items, active, onActive, itemWidth = 300, itemHei
     const ro = new ResizeObserver(layout);
     ro.observe(st);
 
-    // wheel and arrows only count while the pointer is over it / it is mid-screen, so the page still scrolls
+    // wheel only counts over the carousel, and arrows only while focus is in it, so the rest of the page is untouched
     let acc = 0, lock = 0, idle: ReturnType<typeof setTimeout> | undefined, tx = 0, ty = 0;
-    const dialogOpen = () => !!document.querySelector("dialog[open]");
     const onWheel = (e: WheelEvent) => {
-      if (dialogOpen() || e.ctrlKey || !st.contains(e.target as Node)) return;
-      e.preventDefault();
+      if (e.ctrlKey) return;
       const dv = Math.abs(e.deltaY) >= Math.abs(e.deltaX) ? e.deltaY : e.deltaX;
+      // without the loop, the first and last item hand the wheel back to the page instead of trapping it
+      if (!inf && (Math.round(target) + Math.sign(dv) < 0 || Math.round(target) + Math.sign(dv) > n - 1)) return;
+      e.preventDefault();
       if (performance.now() < lock) { acc = 0; return; }
       acc += dv; // trackpads fire many small deltas: one step per ~60px, then a short lock so inertia doesn't skip items
       clearTimeout(idle);
@@ -126,8 +157,7 @@ export function PathCarousel({ items, active, onActive, itemWidth = 300, itemHei
       if (Math.abs(acc) >= 60) { step(Math.sign(acc)); acc = 0; lock = performance.now() + (reduce ? 0 : 520); }
     };
     const onKey = (e: KeyboardEvent) => {
-      const r = st.getBoundingClientRect();
-      if (r.top > innerHeight / 2 || r.bottom < innerHeight / 2 || dialogOpen() || e.metaKey || e.ctrlKey || (e.target as Element).closest?.("input,textarea,select,[role=radiogroup]")) return;
+      if (e.metaKey || e.ctrlKey || e.altKey || (e.target as Element).closest?.("input,textarea,select,[contenteditable=true],[role=radiogroup],[role=tablist],[role=slider]")) return;
       const m = ({ ArrowDown: 1, ArrowRight: 1, ArrowUp: -1, ArrowLeft: -1 } as Record<string, number>)[e.key];
       if (m) { e.preventDefault(); step(m); }
     };
@@ -137,13 +167,13 @@ export function PathCarousel({ items, active, onActive, itemWidth = 300, itemHei
       // horizontal swipes only: a vertical one belongs to the page (touch-action: pan-y)
       if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)) step(dx < 0 ? 1 : -1);
     };
-    addEventListener("wheel", onWheel, { passive: false });
-    addEventListener("keydown", onKey);
+    st.addEventListener("wheel", onWheel, { passive: false }); // on the carousel only: the rest of the page scrolls off the main thread
+    st.addEventListener("keydown", onKey);
     st.addEventListener("touchstart", onTs, { passive: true });
     st.addEventListener("touchend", onTe, { passive: true });
     return () => {
-      removeEventListener("wheel", onWheel);
-      removeEventListener("keydown", onKey);
+      st.removeEventListener("wheel", onWheel);
+      st.removeEventListener("keydown", onKey);
       mq.removeEventListener("change", onMq);
       st.removeEventListener("touchstart", onTs);
       st.removeEventListener("touchend", onTe);
@@ -160,24 +190,28 @@ export function PathCarousel({ items, active, onActive, itemWidth = 300, itemHei
   }, [active]);
 
   return (
-    <div ref={box} role="group" aria-label="Carousel, scroll or use arrow keys" className={`relative size-full touch-pan-y ${className}`}>
+    <div ref={box} role="region" aria-roledescription="carousel" aria-label={label} className={cn("relative size-full touch-pan-y", className)} {...rest}>
       <svg aria-hidden className="pointer-events-none absolute inset-0 size-full overflow-visible">
         <path ref={path} fill="none" stroke="var(--border)" strokeWidth="1.5" strokeDasharray="2 7" strokeLinecap="round" />
       </svg>
+      <span ref={live} aria-live="polite" aria-atomic className="sr-only" />
       {items.map((item, i) => (
         <div
           key={i}
           data-cell
-          role="button"
-          tabIndex={0}
+          role="group"
+          aria-roledescription="slide"
+          aria-label={`${i + 1} of ${n}`}
+          tabIndex={i === 0 ? 0 : -1}
           onClick={() => api.current.select(i)}
           onKeyDown={(e) => {
-            if (e.key === "Enter" || e.key === " ") {
+            if (e.target === e.currentTarget && (e.key === "Enter" || e.key === " ")) {
               e.preventDefault();
               api.current.select(i);
             }
           }}
-          style={{ width: itemWidth, height: itemHeight, offsetRotate: "0deg" }}
+          // hidden until the first layout places it on the path, so hydration never shows the items piled in a corner
+          style={{ width: itemWidth, height: itemHeight, offsetRotate: "0deg", opacity: 0 }}
           className="absolute top-0 left-0 rounded-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foreground"
         >
           {item}

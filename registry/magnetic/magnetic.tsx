@@ -1,9 +1,10 @@
 "use client";
 
 import gsap from "gsap";
-import { useEffect, useRef, type ReactNode } from "react";
+import { useEffect, useRef, type ComponentProps, type ReactNode } from "react";
+import { cn } from "@/lib/utils";
 
-export interface MagneticProps {
+export interface MagneticProps extends Omit<ComponentProps<"span">, "ref"> {
   /** Whatever should be pulled toward the pointer: a button, a link, an icon. */
   children: ReactNode;
   /** How much of the pointer's offset from the centre the content follows. 1 follows it fully, 0 not at all. */
@@ -15,7 +16,7 @@ export interface MagneticProps {
  * Pulls what it wraps toward the mouse while the pointer is over it, then springs back with an elastic overshoot (GSAP quickTo,
  * one tween per axis). Mouse only (touch and pen leave it still) and still under `prefers-reduced-motion`.
  */
-export function Magnetic({ children, strength = 1, className = "" }: MagneticProps) {
+export function Magnetic({ children, strength = 1, className, ...rest }: MagneticProps) {
   const root = useRef<HTMLSpanElement>(null);
   const power = useRef(strength);
 
@@ -60,7 +61,7 @@ export function Magnetic({ children, strength = 1, className = "" }: MagneticPro
   }, []);
 
   return (
-    <span ref={root} className={`inline-block ${className}`}>
+    <span ref={root} className={cn("inline-block", className)} {...rest}>
       {children}
     </span>
   );

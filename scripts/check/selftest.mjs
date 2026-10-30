@@ -2,8 +2,18 @@
 import assert from "node:assert/strict";
 import { RULES } from "./rules.mjs";
 
-const item = { dependencies: ["motion"] };
+const item = { dependencies: ["motion"], registryDependencies: ["utils"] };
+const slug = "x";
+// a string is the bad source; an object can also override item and slug
 const BAD = {
+  "shadcn-name": { src: "", slug: "button" },
+  "global-listener": `addEventListener("wheel", onWheel, { passive: false });`,
+  "global-keys": `window.addEventListener("keydown", onKey);`,
+  "react-floor": `const emit = useEffectEvent(() => {});`,
+  "hardcoded-color": `<div className="bg-emerald-500" />`,
+  "class-merge": "<div className={`p-2 ${className}`} />",
+  "rest-props": `export function A({ className }) { return <div className={cn("p-2", className)} />; }`,
+  "utils-dep": { src: `import { cn } from "@/lib/utils";`, item: { dependencies: [] } },
   "no-transition-all": `<div className="transition-all" />`,
   "no-scale-zero": `<div className="scale-0" />`,
   "no-ease-in": `<div className="ease-in" />`,
@@ -23,17 +33,19 @@ const BAD = {
   "site-tokens": `<div style={{ color: "var(--site-pink)" }} />`,
 };
 const CLEAN = `"use client";
-import { useState } from "react";
+import { useState, type ComponentProps } from "react";
 import { useReducedMotion } from "motion/react";
-export function A() {
+import { cn } from "@/lib/utils";
+export function A({ className, ...rest }: ComponentProps<"button">) {
   const [a, set] = useState(0);
   const reduce = useReducedMotion();
-  return <button onClick={() => set(a + 1)} className="transition-[translate,opacity] duration-200 ease-out" style={{ color: "var(--foreground)" }}>{reduce ? "a" : "b"}</button>;
+  return <button onClick={() => set(a + 1)} className={cn("bg-primary text-primary-foreground transition-[translate,opacity] duration-200 ease-out", className)} style={{ color: "var(--foreground)" }} {...rest}>{reduce ? "a" : "b"}</button>;
 }`;
 
 for (const r of RULES) {
-  assert.ok(BAD[r.id], `no bad sample for rule ${r.id}`);
-  assert.ok(r.run({ src: BAD[r.id], item }).length > 0, `${r.id} did not fire`);
-  assert.equal(r.run({ src: CLEAN, item }).length, 0, `${r.id} fired on clean code: ${JSON.stringify(r.run({ src: CLEAN, item }))}`);
+  const bad = typeof BAD[r.id] === "string" ? { src: BAD[r.id] } : BAD[r.id];
+  assert.ok(bad, `no bad sample for rule ${r.id}`);
+  assert.ok(r.run({ item, slug, ...bad }).length > 0, `${r.id} did not fire`);
+  assert.equal(r.run({ src: CLEAN, item, slug }).length, 0, `${r.id} fired on clean code: ${JSON.stringify(r.run({ src: CLEAN, item, slug }))}`);
 }
 console.log(`selftest ok: ${RULES.length} rules fire on bad code and stay quiet on clean code`);

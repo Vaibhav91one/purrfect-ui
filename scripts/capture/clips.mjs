@@ -12,7 +12,7 @@ const NAV_MOUNTED = "(() => { const n = document.querySelector('nav[role=navigat
 const NOTCH_NEXT = "(() => { const n = document.querySelector('nav[role=navigation]'); const h = document.querySelector('section .origin-center'); return !!n && getComputedStyle(n).opacity === '0' && !!h && (h.style.transform === 'none' || h.style.transform === ''); })()";
 
 export const CLIPS = {
-  button: { site: ARMOUR, target: 'section button[data-slot="button"]', interact: "hover", label: "armour.vaibhavtomar.com" },
+  "roll-button": { site: ARMOUR, target: 'section button[data-slot="button"]', interact: "hover", label: "armour.vaibhavtomar.com" },
   notch: { site: ARMOUR, interact: "load", start: NOTCH_NEXT, focus: "nav[role=navigation]", push: 1.6, zoom: 2.2, stay: 1.4, label: "armour.vaibhavtomar.com" },
   "hero-reveal": { site: ARMOUR, interact: "load", start: NAV_MOUNTED, seconds: 3.6, label: "armour.vaibhavtomar.com" },
   "layered-menu": { site: ARMOUR, target: 'button[aria-label$=" menu"]', interact: "click", realtime: true, toggle: 2.6, stay: 3.9, zoom: 1, label: "armour.vaibhavtomar.com" },

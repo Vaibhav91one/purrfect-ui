@@ -1,7 +1,7 @@
 import { ArrowRight } from "lucide-react";
 import { GradientCat } from "@/components/gallery/gradient-cat";
 import { RotatingInstall } from "@/components/gallery/rotating-install";
-import { Button } from "@/registry/button/button";
+import { RollButton as Button } from "@/registry/roll-button/roll-button";
 import { sectionClasses } from "@/lib/layout-classes";
 
 export function HeroSection() {
@@ -37,7 +37,7 @@ export function HeroSection() {
         <div className="min-w-0 flex-1 basis-80">
           <RotatingInstall />
         </div>
-        <Button href="/components" cue="navigate" icon={<ArrowRight className="size-4" />} iconPosition="end" className="h-12 px-6 text-[15px]">
+        <Button href="/components" data-cuelume-navigate="" icon={<ArrowRight className="size-4" />} iconPosition="end" className="h-12 px-6 text-[15px]">
           Browse components
         </Button>
       </div>

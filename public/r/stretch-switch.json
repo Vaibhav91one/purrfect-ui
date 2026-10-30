@@ -1,0 +1,25 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "stretch-switch",
+  "title": "Stretch switch",
+  "description": "An on/off switch whose knob stretches as it travels, driven by one spring.",
+  "dependencies": [
+    "motion@^14.6.0"
+  ],
+  "registryDependencies": [
+    "utils"
+  ],
+  "files": [
+    {
+      "path": "registry/stretch-switch/stretch-switch.tsx",
+      "content": "\"use client\";\n\nimport { motion, useReducedMotion, useSpring, useTransform, useVelocity } from \"motion/react\";\nimport { useEffect, useState, type ComponentProps, type MouseEvent } from \"react\";\nimport { cn } from \"@/lib/utils\";\n\nexport interface StretchSwitchProps extends Omit<ComponentProps<\"button\">, \"value\" | \"children\"> {\n  /** Controlled value. Leave it out and the switch keeps its own state. */\n  checked?: boolean;\n  /** Starting value when uncontrolled. */\n  defaultChecked?: boolean;\n  onCheckedChange?: (checked: boolean) => void;\n  /** The switch's accessible name. There is no visible text inside it, so say what it turns on. */\n  label: string;\n  /** Submitted with a form while on, like a checkbox. */\n  name?: string;\n  value?: string;\n}\n\nconst SPRING = { stiffness: 420, damping: 34 };\n\n/**\n * An on/off switch whose knob stretches as it travels. One spring moves the knob and its own speed drives the stretch, so\n * flipping it again mid-way carries on from where the knob is. Space and Enter flip it. Size it with the `--switch-w` and\n * `--switch-h` CSS variables (112 x 64px by default); the knob follows. Under `prefers-reduced-motion` the knob jumps and\n * only the colour fades.\n */\nexport function StretchSwitch({ checked, defaultChecked = false, onCheckedChange, label, name, value = \"on\", className, onClick, ...rest }: StretchSwitchProps) {\n  const reduce = useReducedMotion() ?? false;\n  const [inner, setInner] = useState(defaultChecked);\n  const on = checked ?? inner;\n  const p = useSpring(on ? 1 : 0, SPRING); // 0 off, 1 on: the knob's travel is a share of the track, so any size works\n  const stretch = useTransform(useVelocity(p), [-29, 0, 29], [1.3, 1, 1.3]); // 29 travels/s is the old 1400px/s over 48px\n  const transform = useTransform(() => `translateX(calc((var(--switch-w) - var(--switch-h)) * ${p.get()})) scaleX(${stretch.get()})`);\n\n  useEffect(() => {\n    if (reduce) p.jump(on ? 1 : 0);\n    else p.set(on ? 1 : 0);\n  }, [on, reduce, p]);\n\n  const flip = (e: MouseEvent<HTMLButtonElement>) => {\n    onClick?.(e);\n    if (e.defaultPrevented) return;\n    const next = !on;\n    if (checked === undefined) setInner(next);\n    onCheckedChange?.(next);\n  };\n\n  return (\n    <button\n      type=\"button\"\n      role=\"switch\"\n      aria-checked={on}\n      aria-label={label}\n      onClick={flip}\n      className={cn(\n        \"flex h-[var(--switch-h)] w-[var(--switch-w)] shrink-0 items-center rounded-full p-[calc(var(--switch-h)/8)] transition-colors duration-300 [--switch-h:4rem] [--switch-w:7rem] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foreground disabled:cursor-not-allowed disabled:opacity-50\",\n        on ? \"bg-primary\" : \"bg-input\",\n        className,\n      )}\n      {...rest}\n    >\n      {/* knob colours as in shadcn's Switch, so it sits in a shadcn theme in light and dark */}\n      <motion.span aria-hidden style={{ transform }} className={cn(\"aspect-square h-full rounded-full bg-background shadow\", on ? \"dark:bg-primary-foreground\" : \"dark:bg-foreground\")} />\n      {name && on && <input type=\"hidden\" name={name} value={value} />}\n    </button>\n  );\n}\n",
+      "type": "registry:ui"
+    }
+  ],
+  "meta": {
+    "react": ">=19",
+    "tailwindcss": ">=4",
+    "tokens": "shadcn (background, foreground, muted, border, ...): run shadcn init first"
+  },
+  "type": "registry:ui"
+}

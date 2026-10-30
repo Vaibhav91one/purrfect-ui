@@ -7,7 +7,7 @@ import { useSound } from "@/components/providers/sound-provider";
 import { BASE, EASE } from "@/lib/motion";
 import type { ComponentItem, Extra } from "@/lib/components-data";
 import { SITE_URL } from "@/lib/site";
-import { Button } from "@/registry/button/button";
+import { RollButton as Button } from "@/registry/roll-button/roll-button";
 import { buildPrompt } from "@/lib/component-prompt";
 import { Code } from "./code";
 import { CopyButton, useCopy } from "./copy-button";
@@ -261,11 +261,11 @@ export function ComponentSheet({ item, origin, onClose }: { item: ComponentItem;
           <Controls extras={extras} speed={speed} setSpeed={setSpeed} opts={opts} setOpt={(k, v) => setOpts((o) => ({ ...o, [k]: v }))} />
           <div className="mt-auto flex flex-col gap-2">
             {!item.published && <p className="text-center text-sm text-muted-foreground">Coming soon: install and setup prompt arrive when it ships.</p>}
-            {item.published && <Button variant="ghost" onClick={prompt.copy} icon={prompt.done ? <Check className="size-4" /> : <ClipboardCopy className="size-4" />} className="w-full">
+            {item.published && <Button variant="ghost" data-cuelume-tap="" onClick={prompt.copy} icon={prompt.done ? <Check className="size-4" /> : <ClipboardCopy className="size-4" />} className="w-full">
               {prompt.done ? "Prompt copied" : "Copy prompt"}
             </Button>}
             {item.published && (
-              <Button onClick={install.copy} className="w-full">
+              <Button data-cuelume-tap="" onClick={install.copy} className="w-full">
                 {install.done ? "Copied" : "Copy install command"}
               </Button>
             )}
