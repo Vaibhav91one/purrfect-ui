@@ -20,7 +20,7 @@ Dev server serves stale CSS after editing `app/globals.css` or running `pnpm bui
 ## Layout
 
 - `app/` pages (`/`, `/components`, `/components/category/<name>`, `/docs`, `/changelog`, `/about`; text pages use `sections/prose-page.tsx`); `app/globals.css` holds tokens and the cat keyframes.
-- `registry/<slug>/` one folder per installable component (`<slug>.tsx`, `demo.tsx`, `meta.ts`); `registry.json` lists them; `public/r/*.json` is generated.
+- `registry/<slug>/` one folder per installable component (`<slug>.tsx`, `demo.tsx`, `worst-case.tsx`); `registry.json` lists them; `public/r/*.json` is generated.
 - `components/sections/` home sections; `components/gallery/` gallery, previews, cat; `components/notch/` the floating notch; `components/providers/` sound provider.
 - `lib/` data and helpers: `components-data.ts`, `layout-classes.ts` (section sizing; dev-only blue/red/green outlines show section bounds), `sound.ts`, `site.ts`.
 
@@ -30,7 +30,7 @@ Component cards: `components/gallery/component-card.tsx` (`cardBase`, `CardFace`
 
 The dialog: `components/gallery/use-sheet.tsx` (`openSheet(slug, cardEl)`, `<SheetHost />`, state lives in `?c=`) opens `component-sheet.tsx` from any card; the preview panel grows out of the card (FLIP). Demos in `components/gallery/demos/demos.tsx` take `{ playing, speed, opts }` (`playing` undefined = still card); a component's own controls are `extras` in `lib/components-data.ts`.
 
-The dialog's Usage tab reads `lib/component-docs.ts`; keep the four real entries (button, scroll-reveal, parallax-columns, loader) in step with their `registry/` files.
+The dialog's Usage tab reads `lib/component-docs.ts`; keep every entry in step with its `registry/` file.
 
 `--compass` (#1346E7) is the runeicons.com brand blue, used by the home grid's compass tile.
 
@@ -59,7 +59,7 @@ One shared `<Toaster />` (`components/ui/sonner.tsx`, shadcn's sonner wrapper th
 
 ## Quality gate
 
-`pnpm check <slug>` (rules in `scripts/check/rules.mjs`), `pnpm check <slug> --install` (fresh-app install test), worst-case states at `/dev?c=<slug>` (`registry/<slug>/worst-case.tsx`, listed in `app/dev/fixtures.ts`). The full port checklist is in `README.md` ("Quality gate for a component"). No component goes in `registry.json` with a FAIL.
+`pnpm check <slug>` (rules in `scripts/check/rules.mjs`), `pnpm check <slug> --install` (fresh-app install test), `pnpm check:perf <slug>` (runtime: long tasks, layout shift, console errors on the fixtures), worst-case states at `/dev?c=<slug>` (`registry/<slug>/worst-case.tsx`, listed in `app/dev/fixtures.ts`). The full port checklist is in `README.md` ("Quality gate for a component"). No component goes in `registry.json` with a FAIL. Registry files take `className` through `cn()` from `@/lib/utils`, spread the rest of their props on the root, use shadcn tokens (no raw palette colours), never use a shadcn component name as a slug, and never branch their server HTML on `useReducedMotion()` (it differs on the client's first render: use `motion-reduce:` classes).
 
 ## Own components only
 

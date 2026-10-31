@@ -46,17 +46,25 @@ const item = (slug: string, name: string, category: string, description: string,
 
 // The slugs in registry.json are installable; the rest render a preview until they are ported.
 export const COMPONENTS: ComponentItem[] = [
-  item("button", "Button", "Input", "A pill button whose letters roll up from the middle on hover, with a lift, a springy press and a sound cue.", [420, 300], [{ key: "variant", label: "Variant", kind: "segmented", options: ["Solid", "Ghost"], default: "Solid" }, { key: "size", label: "Size", kind: "segmented", options: ["Medium", "Large"], default: "Medium" }]),
+  item("roll-button", "Roll button", "Input", "A pill button whose letters roll up from the middle on hover, with a lift and a springy press.", [420, 300], [{ key: "variant", label: "Variant", kind: "segmented", options: ["Solid", "Ghost"], default: "Solid" }, { key: "size", label: "Size", kind: "segmented", options: ["Medium", "Large"], default: "Medium" }]),
   item("magnetic", "Magnetic", "Input", "Pulls what it wraps toward the mouse, then springs back with a little overshoot.", [420, 300], [{ key: "strength", label: "Strength", kind: "segmented", options: ["Soft", "Medium", "Full"], default: "Full" }]),
   item("notch", "Notch", "Navigation", "A tab that hangs from the top edge with curved shoulders, dropping in once on mount."),
   item("hero-reveal", "Hero reveal", "Layout", "A hero whose photo frame opens along the y-axis, then the headline blurs up and the action springs in.", [1440, 1056]),
   item("layered-menu", "Layered menu", "Navigation", "A burger that opens a full-frame menu of four coloured panels dropping in turn.", [1440, 1056]),
-  item("toggle", "Toggle", "Input", "An on/off switch whose knob stretches as it travels."),
+  item("stretch-switch", "Stretch switch", "Input", "An on/off switch whose knob stretches as it travels."),
   item("counter", "Counter", "Display", "A number that rolls digit by digit to its target."),
-  item("tabs", "Tabs", "Navigation", "Tabs with a pill that glides under the active label."),
+  item("glide-tabs", "Glide tabs", "Navigation", "Tabs with a pill that glides under the active label."),
   item("scroll-reveal", "Scroll reveal", "Text", "Text that fills in word by word as you scroll it into view."),
-  item("parallax-columns", "Parallax columns", "Layout", "Three columns that scroll at different speeds."),
+  item("parallax-columns", "Parallax columns", "Layout", "Columns that scroll at different speeds."),
   item("path-carousel", "Path carousel", "Layout", "Items ride a curved path, the centre one biggest; scroll, swipe or use the arrows to rotate.", [560, 300]),
+  item("displacement", "Displacement", "Display", "An image or painted canvas that bends around the pointer like wet glass, with a colour split and grain.", [600, 340]),
+  item("hover-preview", "Hover preview", "Navigation", "A list of links where hovering a row floats a preview card that trails the pointer.", [760, 420]),
+  item("scroll-marquee", "Scroll marquee", "Text", "A marquee that flips direction with the page scroll.", [760, 200]),
+  item("roll-link", "Roll link", "Navigation", "A link whose label rolls over on a 3D axis on hover or focus."),
+  item("curtain-reveal", "Curtain reveal", "Layout", "A panel the page lifts away from as you scroll, like a curtain.", [560, 420]),
+  item("preloader", "Preloader", "Display", "A full-screen intro whose words swap in turn before the panel lifts off with a curved edge.", [480, 320]),
+  item("cursor-follower", "Cursor follower", "Display", "A dot that follows the mouse and inverts what is under it."),
+  item("fill-button", "Fill button", "Input", "An outlined pill whose fill sweeps in from the left and out to the right."),
 ];
 
 export const CATEGORIES = [...new Set(COMPONENTS.map((c) => c.category))];

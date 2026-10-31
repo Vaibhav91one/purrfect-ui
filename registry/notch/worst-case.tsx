@@ -11,7 +11,7 @@ const frame = (...kids: ReactNode[]) => (
     ))}
   </div>
 );
-const word = (t: string) => <span className="text-2xl font-medium tracking-tight text-neutral-900">{t}</span>;
+const word = (t: string) => <span className="text-2xl font-medium tracking-tight text-foreground">{t}</span>;
 
 export const states: Record<string, ReactNode> = {
   Demo: frame(<Notch delay={0}>{word("ARMOUR")}</Notch>, <Notch delay={0} offset={8}>{word("ARMOUR, 8px down")}</Notch>, <Notch delay={0} color="#1B1B1B"><span className="text-2xl font-medium tracking-tight text-white">ARMOUR</span></Notch>),

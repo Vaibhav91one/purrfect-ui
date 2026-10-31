@@ -4,16 +4,24 @@
   "homepage": "https://purrfectui.com",
   "items": [
     {
-      "name": "button",
+      "name": "roll-button",
       "type": "registry:ui",
-      "title": "Button",
+      "title": "Roll button",
       "description": "A pill button whose letters roll up from the middle on hover, with a lift and a springy press.",
+      "registryDependencies": [
+        "utils"
+      ],
       "files": [
         {
-          "path": "registry/button/button.tsx",
+          "path": "registry/roll-button/roll-button.tsx",
           "type": "registry:ui"
         }
-      ]
+      ],
+      "meta": {
+        "react": ">=19",
+        "tailwindcss": ">=4",
+        "tokens": "shadcn (background, foreground, muted, border, ...): run shadcn init first"
+      }
     },
     {
       "name": "magnetic",
@@ -21,14 +29,22 @@
       "title": "Magnetic",
       "description": "Pulls what it wraps toward the mouse, then springs back with an elastic overshoot.",
       "dependencies": [
-        "gsap"
+        "gsap@^3.15.0"
+      ],
+      "registryDependencies": [
+        "utils"
       ],
       "files": [
         {
           "path": "registry/magnetic/magnetic.tsx",
           "type": "registry:ui"
         }
-      ]
+      ],
+      "meta": {
+        "react": ">=19",
+        "tailwindcss": ">=4",
+        "tokens": "shadcn (background, foreground, muted, border, ...): run shadcn init first"
+      }
     },
     {
       "name": "scroll-reveal",
@@ -36,14 +52,22 @@
       "title": "Scroll reveal",
       "description": "Text that fills in word by word as you scroll it into view.",
       "dependencies": [
-        "motion"
+        "motion@^14.6.0"
+      ],
+      "registryDependencies": [
+        "utils"
       ],
       "files": [
         {
           "path": "registry/scroll-reveal/scroll-reveal.tsx",
           "type": "registry:ui"
         }
-      ]
+      ],
+      "meta": {
+        "react": ">=19",
+        "tailwindcss": ">=4",
+        "tokens": "shadcn (background, foreground, muted, border, ...): run shadcn init first"
+      }
     },
     {
       "name": "parallax-columns",
@@ -51,26 +75,42 @@
       "title": "Parallax columns",
       "description": "Three columns that scroll at different speeds.",
       "dependencies": [
-        "motion"
+        "motion@^14.6.0"
+      ],
+      "registryDependencies": [
+        "utils"
       ],
       "files": [
         {
           "path": "registry/parallax-columns/parallax-columns.tsx",
           "type": "registry:ui"
         }
-      ]
+      ],
+      "meta": {
+        "react": ">=19",
+        "tailwindcss": ">=4",
+        "tokens": "shadcn (background, foreground, muted, border, ...): run shadcn init first"
+      }
     },
     {
       "name": "path-carousel",
       "type": "registry:ui",
       "title": "Path carousel",
       "description": "Items ride a curved path, the centre one biggest; scroll, swipe or use the arrows to rotate.",
+      "registryDependencies": [
+        "utils"
+      ],
       "files": [
         {
           "path": "registry/path-carousel/path-carousel.tsx",
           "type": "registry:ui"
         }
-      ]
+      ],
+      "meta": {
+        "react": ">=19",
+        "tailwindcss": ">=4",
+        "tokens": "shadcn (background, foreground, muted, border, ...): run shadcn init first"
+      }
     },
     {
       "name": "notch",
@@ -78,14 +118,22 @@
       "title": "Notch",
       "description": "A tab that hangs from the top edge with inverse-rounded shoulders, dropping in once on mount.",
       "dependencies": [
-        "motion"
+        "motion@^14.6.0"
+      ],
+      "registryDependencies": [
+        "utils"
       ],
       "files": [
         {
           "path": "registry/notch/notch.tsx",
           "type": "registry:ui"
         }
-      ]
+      ],
+      "meta": {
+        "react": ">=19",
+        "tailwindcss": ">=4",
+        "tokens": "shadcn (background, foreground, muted, border, ...): run shadcn init first"
+      }
     },
     {
       "name": "hero-reveal",
@@ -93,14 +141,22 @@
       "title": "Hero reveal",
       "description": "A hero whose photo frame opens along the y-axis, then the headline blurs up and the action springs in.",
       "dependencies": [
-        "motion"
+        "motion@^14.6.0"
+      ],
+      "registryDependencies": [
+        "utils"
       ],
       "files": [
         {
           "path": "registry/hero-reveal/hero-reveal.tsx",
           "type": "registry:ui"
         }
-      ]
+      ],
+      "meta": {
+        "react": ">=19",
+        "tailwindcss": ">=4",
+        "tokens": "shadcn (background, foreground, muted, border, ...): run shadcn init first"
+      }
     },
     {
       "name": "layered-menu",
@@ -108,29 +164,45 @@
       "title": "Layered menu",
       "description": "A burger that opens a full-frame menu of four coloured panels dropping in turn.",
       "dependencies": [
-        "motion"
+        "motion@^14.6.0"
+      ],
+      "registryDependencies": [
+        "utils"
       ],
       "files": [
         {
           "path": "registry/layered-menu/layered-menu.tsx",
           "type": "registry:ui"
         }
-      ]
+      ],
+      "meta": {
+        "react": ">=19",
+        "tailwindcss": ">=4",
+        "tokens": "shadcn (background, foreground, muted, border, ...): run shadcn init first"
+      }
     },
     {
-      "name": "toggle",
+      "name": "stretch-switch",
       "type": "registry:ui",
-      "title": "Toggle",
+      "title": "Stretch switch",
       "description": "An on/off switch whose knob stretches as it travels, driven by one spring.",
       "dependencies": [
-        "motion"
+        "motion@^14.6.0"
+      ],
+      "registryDependencies": [
+        "utils"
       ],
       "files": [
         {
-          "path": "registry/toggle/toggle.tsx",
+          "path": "registry/stretch-switch/stretch-switch.tsx",
           "type": "registry:ui"
         }
-      ]
+      ],
+      "meta": {
+        "react": ">=19",
+        "tailwindcss": ">=4",
+        "tokens": "shadcn (background, foreground, muted, border, ...): run shadcn init first"
+      }
     },
     {
       "name": "counter",
@@ -138,29 +210,217 @@
       "title": "Counter",
       "description": "A number that rolls digit by digit to its value.",
       "dependencies": [
-        "motion"
+        "motion@^14.6.0"
+      ],
+      "registryDependencies": [
+        "utils"
       ],
       "files": [
         {
           "path": "registry/counter/counter.tsx",
           "type": "registry:ui"
         }
-      ]
+      ],
+      "meta": {
+        "react": ">=19",
+        "tailwindcss": ">=4",
+        "tokens": "shadcn (background, foreground, muted, border, ...): run shadcn init first"
+      }
     },
     {
-      "name": "tabs",
+      "name": "glide-tabs",
       "type": "registry:ui",
-      "title": "Tabs",
+      "title": "Glide tabs",
       "description": "Tabs with a pill that glides under the active label.",
       "dependencies": [
-        "motion"
+        "motion@^14.6.0"
+      ],
+      "registryDependencies": [
+        "utils"
       ],
       "files": [
         {
-          "path": "registry/tabs/tabs.tsx",
+          "path": "registry/glide-tabs/glide-tabs.tsx",
           "type": "registry:ui"
         }
-      ]
+      ],
+      "meta": {
+        "react": ">=19",
+        "tailwindcss": ">=4",
+        "tokens": "shadcn (background, foreground, muted, border, ...): run shadcn init first"
+      }
+    },
+    {
+      "name": "displacement",
+      "type": "registry:ui",
+      "title": "Displacement",
+      "description": "An image or painted canvas that bends around the pointer like wet glass, with a colour split and grain. WebGL2, no dependencies.",
+      "registryDependencies": [
+        "utils"
+      ],
+      "files": [
+        {
+          "path": "registry/displacement/displacement.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "meta": {
+        "react": ">=19",
+        "tailwindcss": ">=4",
+        "tokens": "shadcn (background, foreground, muted, border, ...): run shadcn init first"
+      }
+    },
+    {
+      "name": "hover-preview",
+      "type": "registry:ui",
+      "title": "Hover preview",
+      "description": "A list of links where hovering a row floats a preview card that trails the pointer.",
+      "dependencies": [
+        "motion@^14.6.0"
+      ],
+      "registryDependencies": [
+        "utils"
+      ],
+      "files": [
+        {
+          "path": "registry/hover-preview/hover-preview.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "meta": {
+        "react": ">=19",
+        "tailwindcss": ">=4",
+        "tokens": "shadcn (background, foreground, muted, border, ...): run shadcn init first"
+      }
+    },
+    {
+      "name": "scroll-marquee",
+      "type": "registry:ui",
+      "title": "Scroll marquee",
+      "description": "A marquee that flips direction with the page scroll.",
+      "dependencies": [
+        "motion@^14.6.0"
+      ],
+      "registryDependencies": [
+        "utils"
+      ],
+      "files": [
+        {
+          "path": "registry/scroll-marquee/scroll-marquee.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "meta": {
+        "react": ">=19",
+        "tailwindcss": ">=4",
+        "tokens": "shadcn (background, foreground, muted, border, ...): run shadcn init first"
+      }
+    },
+    {
+      "name": "roll-link",
+      "type": "registry:ui",
+      "title": "Roll link",
+      "description": "A link whose label rolls over on a 3D axis on hover or focus. CSS only.",
+      "registryDependencies": [
+        "utils"
+      ],
+      "files": [
+        {
+          "path": "registry/roll-link/roll-link.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "meta": {
+        "react": ">=19",
+        "tailwindcss": ">=4",
+        "tokens": "shadcn (background, foreground, muted, border, ...): run shadcn init first"
+      }
+    },
+    {
+      "name": "curtain-reveal",
+      "type": "registry:ui",
+      "title": "Curtain reveal",
+      "description": "A panel the page lifts away from as you scroll, like a curtain. CSS only.",
+      "registryDependencies": [
+        "utils"
+      ],
+      "files": [
+        {
+          "path": "registry/curtain-reveal/curtain-reveal.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "meta": {
+        "react": ">=19",
+        "tailwindcss": ">=4",
+        "tokens": "shadcn (background, foreground, muted, border, ...): run shadcn init first"
+      }
+    },
+    {
+      "name": "preloader",
+      "type": "registry:ui",
+      "title": "Preloader",
+      "description": "A full-screen intro whose words swap in turn before the panel lifts off with a curved edge.",
+      "dependencies": [
+        "motion@^14.6.0"
+      ],
+      "registryDependencies": [
+        "utils"
+      ],
+      "files": [
+        {
+          "path": "registry/preloader/preloader.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "meta": {
+        "react": ">=19",
+        "tailwindcss": ">=4",
+        "tokens": "shadcn (background, foreground, muted, border, ...): run shadcn init first"
+      }
+    },
+    {
+      "name": "cursor-follower",
+      "type": "registry:ui",
+      "title": "Cursor follower",
+      "description": "A dot that follows the mouse and inverts what is under it, growing over anything marked data-cursor-scale.",
+      "dependencies": [
+        "motion@^14.6.0"
+      ],
+      "registryDependencies": [
+        "utils"
+      ],
+      "files": [
+        {
+          "path": "registry/cursor-follower/cursor-follower.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "meta": {
+        "react": ">=19",
+        "tailwindcss": ">=4",
+        "tokens": "shadcn (background, foreground, muted, border, ...): run shadcn init first"
+      }
+    },
+    {
+      "name": "fill-button",
+      "type": "registry:ui",
+      "title": "Fill button",
+      "description": "An outlined pill whose fill sweeps in from the left and out to the right.",
+      "registryDependencies": [
+        "utils"
+      ],
+      "files": [
+        {
+          "path": "registry/fill-button/fill-button.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "meta": {
+        "react": ">=19",
+        "tailwindcss": ">=4",
+        "tokens": "shadcn (background, foreground, muted, border, ...): run shadcn init first"
+      }
     }
   ]
 }

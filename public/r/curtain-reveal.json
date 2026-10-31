@@ -1,0 +1,22 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "curtain-reveal",
+  "title": "Curtain reveal",
+  "description": "A panel the page lifts away from as you scroll, like a curtain. CSS only.",
+  "registryDependencies": [
+    "utils"
+  ],
+  "files": [
+    {
+      "path": "registry/curtain-reveal/curtain-reveal.tsx",
+      "content": "import type { ComponentProps, CSSProperties } from \"react\";\nimport { cn } from \"@/lib/utils\";\n\nexport interface CurtainRevealProps extends ComponentProps<\"div\"> {\n  /** Height of the revealed panel, any CSS length. One screen by default. */\n  height?: string;\n  /** Classes for the panel itself (background, padding, text colour). */\n  className?: string;\n  /** Classes for the outer box that sits in the page flow. */\n  frameClassName?: string;\n}\n\n/**\n * A curtain reveal for the end of a page: as you scroll down, the page above lifts away and uncovers this panel, which\n * stays put underneath instead of scrolling up with it. A clipped box in the page flow holds a sticky panel twice its\n * height, so the browser does it all: no JavaScript, no scroll listener, nothing to slow down, and it renders on the\n * server. Put it last on the page (a footer, a contact block). There is no animation, so reduced motion changes nothing.\n */\nexport function CurtainReveal({ height = \"100svh\", className, frameClassName, style, children, ...rest }: CurtainRevealProps) {\n  return (\n    <div className={cn(\"relative h-[var(--curtain-h)] [clip-path:inset(0)]\", frameClassName)} style={{ \"--curtain-h\": height } as CSSProperties}>\n      <div className=\"relative -top-[var(--curtain-h)] h-[calc(var(--curtain-h)*2)]\">\n        <div className={cn(\"sticky top-0 h-[var(--curtain-h)] overflow-hidden bg-foreground text-background\", className)} style={style} {...rest}>\n          {children}\n        </div>\n      </div>\n    </div>\n  );\n}\n",
+      "type": "registry:ui"
+    }
+  ],
+  "meta": {
+    "react": ">=19",
+    "tailwindcss": ">=4",
+    "tokens": "shadcn (background, foreground, muted, border, ...): run shadcn init first"
+  },
+  "type": "registry:ui"
+}

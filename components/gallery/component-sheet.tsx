@@ -7,7 +7,7 @@ import { useSound } from "@/components/providers/sound-provider";
 import { BASE, EASE } from "@/lib/motion";
 import type { ComponentItem, Extra } from "@/lib/components-data";
 import { SITE_URL } from "@/lib/site";
-import { Button } from "@/registry/button/button";
+import { RollButton as Button } from "@/registry/roll-button/roll-button";
 import { buildPrompt } from "@/lib/component-prompt";
 import { Code } from "./code";
 import { CopyButton, useCopy } from "./copy-button";
@@ -108,8 +108,9 @@ export function ComponentSheet({ item, origin, onClose }: { item: ComponentItem;
   // the loop yields while the person is hovering or focused in the preview, and picks up again 2s after they leave
   const [engaged, setEngaged] = useState(false);
   const resume = useRef<ReturnType<typeof setTimeout>>(undefined);
-  const engage = () => { clearTimeout(resume.current); setEngaged(true); };
-  const release = () => { clearTimeout(resume.current); resume.current = setTimeout(() => setEngaged(false), 2000); };
+  const opening = useRef(false);
+  const engage = () => { if (opening.current) return; clearTimeout(resume.current); setEngaged(true); };
+  const release = () => { if (opening.current) return; clearTimeout(resume.current); resume.current = setTimeout(() => setEngaged(false), 2000); };
   useEffect(() => () => clearTimeout(resume.current), []);
   const extras = item.extras ?? [];
   const [opts, setOpts] = useState<Record<string, string | boolean>>(() => Object.fromEntries(extras.map((x) => [x.key, x.default])));
@@ -139,8 +140,10 @@ export function ComponentSheet({ item, origin, onClose }: { item: ComponentItem;
   useEffect(() => {
     const d = dialog.current!;
     document.documentElement.dataset.sheet = "";
+    opening.current = true; // showModal() focuses the first focusable thing (a demo's scroll box): that is not the person engaging
     if (!d.open) d.showModal();
     d.focus(); // not the demo's first control, so no focus ring on open; Tab still reaches everything
+    opening.current = false;
     const { prev, rest } = panels();
     const opts = { duration: MORPH, easing: CURVE, fill: "backwards" as const };
     const anims: Animation[] = [];
@@ -261,11 +264,11 @@ export function ComponentSheet({ item, origin, onClose }: { item: ComponentItem;
           <Controls extras={extras} speed={speed} setSpeed={setSpeed} opts={opts} setOpt={(k, v) => setOpts((o) => ({ ...o, [k]: v }))} />
           <div className="mt-auto flex flex-col gap-2">
             {!item.published && <p className="text-center text-sm text-muted-foreground">Coming soon: install and setup prompt arrive when it ships.</p>}
-            {item.published && <Button variant="ghost" onClick={prompt.copy} icon={prompt.done ? <Check className="size-4" /> : <ClipboardCopy className="size-4" />} className="w-full">
+            {item.published && <Button variant="ghost" data-cuelume-tap="" onClick={prompt.copy} icon={prompt.done ? <Check className="size-4" /> : <ClipboardCopy className="size-4" />} className="w-full">
               {prompt.done ? "Prompt copied" : "Copy prompt"}
             </Button>}
             {item.published && (
-              <Button onClick={install.copy} className="w-full">
+              <Button data-cuelume-tap="" onClick={install.copy} className="w-full">
                 {install.done ? "Copied" : "Copy install command"}
               </Button>
             )}

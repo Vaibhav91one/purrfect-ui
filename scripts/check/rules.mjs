@@ -21,6 +21,9 @@ function openingTag(src, from) {
 }
 
 const SHADCN_VARS = /^(background|foreground|card|popover|primary|secondary|muted|accent|destructive|border|input|ring|radius|chart-\d|sidebar[\w-]*|[\w-]*-foreground)$/;
+// shadcn's own components/ui file names: a registry:ui item with one of these overwrites the user's file on install
+const SHADCN_UI = new Set("accordion alert alert-dialog aspect-ratio avatar badge breadcrumb button button-group calendar card carousel chart checkbox collapsible combobox command context-menu dialog drawer dropdown-menu empty field form hover-card input input-group input-otp item kbd label menubar native-select navigation-menu pagination popover progress radio-group resizable scroll-area select separator sheet sidebar skeleton slider sonner spinner switch table tabs textarea toast toggle toggle-group tooltip".split(" "));
+const PALETTE = /(?<![\w-])(?:[\w-]+:)*(bg|text|border|fill|stroke|ring|outline|from|via|to|shadow|decoration|accent|caret)-(?:(?:slate|gray|zinc|neutral|stone|red|orange|amber|yellow|lime|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink|rose)-\d{2,3}|white|black|\[#[\da-fA-F]{3,8}\])(?![\w-])/;
 
 export const RULES = [
   {
@@ -78,7 +81,7 @@ export const RULES = [
     id: "reduced-motion",
     level: "FAIL",
     why: "Honor prefers-reduced-motion: gentler (keep opacity/colour), not nothing.",
-    run: ({ src }) => (/transition|animate|motion|keyframes|requestAnimationFrame/.test(src) && !/useReducedMotion|motion-reduce|motion-safe|prefers-reduced-motion/.test(src) ? [{ line: 1, msg: "animates but never checks reduced motion" }] : []),
+    run: ({ src }) => (/transition|animate|motion|keyframes|requestAnimationFrame/.test(lines(src).filter((l) => !isComment(l)).join("\n")) && !/useReducedMotion|motion-reduce|motion-safe|prefers-reduced-motion/.test(src) ? [{ line: 1, msg: "animates but never checks reduced motion" }] : []),
   },
   {
     id: "reduced-motion-live",
@@ -111,7 +114,7 @@ export const RULES = [
     level: "FAIL",
     why: "Every external import must be listed in the item's `dependencies` in registry.json, or the shadcn CLI will not install it.",
     run: ({ src, item }) => {
-      const declared = new Set(item.dependencies ?? []);
+      const declared = new Set((item.dependencies ?? []).map((d) => d.replace(/(?<=.)@.*$/, ""))); // "motion@^14" -> "motion"
       const out = [];
       lines(src).forEach((l, i) => {
         const m = !isComment(l) && l.match(/from\s+["']((?:@[\w-]+\/)?[\w-]+)(?:\/[^"']*)?["']/);
@@ -160,12 +163,64 @@ export const RULES = [
     },
   },
   {
+    id: "shadcn-name",
+    level: "FAIL",
+    why: "A slug shadcn already uses (button, tabs, toggle...) installs over the user's own components/ui file and breaks every import of it. Pick a distinct slug.",
+    run: ({ slug }) => (slug && SHADCN_UI.has(slug) ? [{ line: 1, msg: `slug "${slug}" is a shadcn component name` }] : []),
+  },
+  {
+    id: "global-listener",
+    level: "FAIL",
+    why: "A non-passive wheel/touch listener on window or document makes every scroll on the page wait for the main thread. Listen on the component's own element.",
+    run: ({ src }) => scan(src, /(?:^|[^.\w]|\b(?:window|document)\.)addEventListener\(\s*["'](wheel|touchmove|touchstart|mousewheel)["'][^)]*passive:\s*false/, (m) => `page-wide non-passive ${m[1]} listener`),
+  },
+  {
+    id: "global-keys",
+    level: "WARN",
+    why: "Keys heard on window/document fire while focus is anywhere on the page. Listen on the component (focus inside it) or only while it is open/modal, and say which.",
+    run: ({ src }) => scan(src, /(?:^|[^.\w]|\b(?:window|document)\.)addEventListener\(\s*["']key(down|up)["']/, (m) => `page-wide key${m[1]} listener`),
+  },
+  {
+    id: "react-floor",
+    level: "FAIL",
+    why: "useEffectEvent only exists in React 19.2+, so the component breaks on React 18 and 19.0/19.1. Keep the latest callback in a ref instead.",
+    run: ({ src }) => scan(src, /\buseEffectEvent\b/, "useEffectEvent needs React 19.2+"),
+  },
+  {
+    id: "hardcoded-color",
+    level: "FAIL",
+    why: "Raw palette classes (bg-emerald-500, text-white, text-[#hex]) ignore the user's theme and dark mode. Use shadcn tokens (bg-primary, text-foreground) or a prop.",
+    run: ({ src }) => scan(src, PALETTE, (m) => `raw colour ${m[0]}`),
+  },
+  {
+    id: "class-merge",
+    level: "FAIL",
+    why: "Joining className with a template string lets the built-in classes and the user's fight by CSS order. Merge with cn() from @/lib/utils so the user's class wins.",
+    run: ({ src }) => [
+      ...scan(src, /\$\{className\}/, "className joined by hand"),
+      ...(/\bclassName\b/.test(src) && /^export (function|const) [A-Z]/m.test(src) && !/\bcn\(/.test(src) ? [{ line: 1, msg: "takes className but never calls cn()" }] : []),
+    ],
+  },
+  {
+    id: "rest-props",
+    level: "FAIL",
+    why: "The root element must take the rest of the props (id, style, data-*, aria-*, ref) so the component composes like a native one.",
+    run: ({ src }) => (/^export (function|const) [A-Z]/m.test(src) && !/\{\s*\.\.\.\(?(rest|props)\b/.test(src) ? [{ line: 1, msg: "no {...rest} spread onto the root element" }] : []),
+  },
+  {
+    id: "utils-dep",
+    level: "FAIL",
+    why: "Importing @/lib/utils needs \"registryDependencies\": [\"utils\"], or a project without shadcn init has no cn().",
+    run: ({ src, item }) => (/from\s+["']@\/lib\/utils["']/.test(src) && !(item.registryDependencies ?? []).includes("utils") ? [{ line: src.split("\n").findIndex((l) => /@\/lib\/utils/.test(l)) + 1, msg: "imports @/lib/utils without registryDependencies utils" }] : []),
+  },
+  {
     id: "site-tokens",
     level: "WARN",
     why: "CSS variables that only exist in this site break in other projects unless they have a fallback: var(--x, fallback).",
     run: ({ src }) => scan(src, /var\(--([\w-]+)\)/, (m) => `var(--${m[1]}) has no fallback`, (l) => {
       const m = l.match(/var\(--([\w-]+)\)/g) ?? [];
-      return m.some((v) => !SHADCN_VARS.test(v.slice(6, -1)));
+      // a variable the component sets itself ("--x": or [--x:...]) is its own, not the site's
+      return m.some((v) => !SHADCN_VARS.test(v.slice(6, -1)) && !new RegExp(`["\\[]${v.slice(4, -1)}["\\]:]`).test(src));
     }),
   },
 ];

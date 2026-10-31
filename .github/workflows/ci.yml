@@ -8,6 +8,8 @@ on:
 jobs:
   check:
     runs-on: ubuntu-latest
+    outputs:
+      slugs: ${{ steps.slugs.outputs.slugs }}
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -17,5 +19,28 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm exec next typegen # PageProps and route types are generated, not committed
+      - run: pnpm check:selftest
       - run: pnpm check all
       - run: pnpm build
+      - id: slugs
+        run: echo "slugs=$(node -p 'JSON.stringify(require("./registry.json").items.map(i => i.name))')" >> "$GITHUB_OUTPUT"
+
+  # every component installs and builds in a fresh Next + shadcn app, from the registry JSON the build produced
+  install:
+    needs: check
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        slug: ${{ fromJSON(needs.check.outputs.slugs) }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm registry:build
+      - run: python3 -m http.server 3120 --directory public & sleep 1
+      - run: node scripts/check/install-smoke.mjs ${{ matrix.slug }}

@@ -1,11 +1,12 @@
 "use client";
 
 import { AnimatePresence, motion, useIsPresent, useReducedMotion } from "motion/react";
-import { useEffect, useRef, useState, type KeyboardEvent, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ComponentProps, type KeyboardEvent, type ReactNode } from "react";
+import { cn } from "@/lib/utils";
 
 export type MenuLink = { label: string; href: string };
 
-export interface LayeredMenuProps {
+export interface LayeredMenuProps extends Omit<ComponentProps<"div">, "children" | "color"> {
   /** The big links on the right. */
   primary: MenuLink[];
   /** The smaller list on the left. */
@@ -27,7 +28,7 @@ export interface LayeredMenuProps {
   delay?: number;
   /** Burger and "Close" colour while the menu is shut: set it to suit the page behind. Cream by default, as on Armour. */
   color?: string;
-  /** Their colour while the menu is open, over the panels. Cream by default. */
+  /** Their colour while the menu is open, over the panels, and the colour of the links. Cream by default. */
   activeColor?: string;
   /** Classes for the burger button's position (top-left, 20px in, by default). */
   className?: string;
@@ -55,6 +56,7 @@ function Layer({ pos, children }: { pos: string; children: ReactNode }) {
   );
 }
 
+// the links take the front panel's colour (`activeColor`) through `currentColor`
 function Links({ links, size, blur, y, dur, base, step, onPick, reduce }: { links: MenuLink[]; size: string; blur: number; y: number; dur: number; base: number; step: number; onPick: () => void; reduce: boolean }) {
   return (
     <>
@@ -67,7 +69,7 @@ function Links({ links, size, blur, y, dur, base, step, onPick, reduce }: { link
           // check-ignore: duration the links settle after the panels land; stagger is what makes the list read as one move
           transition={{ duration: dur, delay: reduce ? 0 : base + Math.min(i, 8) * step, ease: OUT }}
         >
-          <a href={l.href} onClick={onPick} className={`block [overflow-wrap:break-word] text-[#F4F1DE] transition-opacity [@media(hover:hover)]:hover:opacity-80 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#F4F1DE] ${size}`}>
+          <a href={l.href} onClick={onPick} className={`block [overflow-wrap:break-word] transition-opacity [@media(hover:hover)]:hover:opacity-80 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-current ${size}`}>
             {l.label}
           </a>
         </motion.div>
@@ -82,13 +84,18 @@ function Links({ links, size, blur, y, dur, base, step, onPick, reduce }: { link
  * focus moves into the menu and comes back to the burger, and Tab stays inside while it is open.
  * Reduced motion: the panels and links fade, nothing slides or blurs.
  */
-export function LayeredMenu({ primary, secondary = [], legal = [], colors = COLORS, logo, contained = false, defaultOpen = false, open, onOpenChange, delay = 1.62, color = "#F4F1DE", activeColor = "#F4F1DE", className = "" }: LayeredMenuProps) {
+export function LayeredMenu({ primary, secondary = [], legal = [], colors = COLORS, logo, contained = false, defaultOpen = false, open, onOpenChange, delay = 0, color = "#F4F1DE", activeColor = "#F4F1DE", className, onKeyDown, ...rest }: LayeredMenuProps) {
   const reduce = useReducedMotion() ?? false;
   const [inner, setInner] = useState(defaultOpen);
   const isOpen = open ?? inner;
+  // the Escape listener outlives the render that added it: read the latest callback, not the one it closed over
+  const change = useRef(onOpenChange);
+  useEffect(() => {
+    change.current = onOpenChange;
+  });
   const set = (v: boolean) => {
     setInner(v);
-    onOpenChange?.(v);
+    change.current?.(v);
   };
   const burger = useRef<HTMLButtonElement>(null);
   const menu = useRef<HTMLDivElement>(null);
@@ -101,25 +108,32 @@ export function LayeredMenu({ primary, secondary = [], legal = [], colors = COLO
       if (changed) burger.current?.focus({ preventScroll: true }); // back where it came from
       return;
     }
-    const prev = [document.body.style.overflow, document.documentElement.style.overflow];
-    if (!contained) document.body.style.overflow = document.documentElement.style.overflow = "hidden";
+    const body = document.body.style;
+    const prev = [body.overflow, document.documentElement.style.overflow, body.paddingRight];
+    if (!contained) {
+      // hiding the scrollbar widens the page: pad by its width so nothing behind the menu shifts sideways
+      const bar = innerWidth - document.documentElement.clientWidth;
+      if (bar > 0) body.paddingRight = `calc(${getComputedStyle(document.body).paddingRight} + ${bar}px)`;
+      body.overflow = document.documentElement.style.overflow = "hidden";
+    }
     const esc = (e: globalThis.KeyboardEvent) => {
       if (e.key !== "Escape") return;
       e.preventDefault(); // the menu takes this Esc: a dialog or sheet around it stays open
       set(false);
     };
+    // check-ignore: global-keys only while the menu is open: it is modal, so Escape closes it wherever focus is
     window.addEventListener("keydown", esc);
     const id = !changed ? 0 : setTimeout(() => menu.current?.querySelector<HTMLElement>(FOCUSABLE)?.focus({ preventScroll: true }), 120);
     return () => {
       clearTimeout(id);
       window.removeEventListener("keydown", esc);
-      [document.body.style.overflow, document.documentElement.style.overflow] = prev;
+      [body.overflow, document.documentElement.style.overflow, body.paddingRight] = prev;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- `set` only forwards to props and state
   }, [isOpen, contained]);
 
   // Tab cycles through the menu's links and the burger, never out to the page behind
-  const trap = (e: KeyboardEvent) => {
+  const trap = (e: KeyboardEvent<HTMLDivElement>) => {
+    onKeyDown?.(e);
     if (!isOpen || e.key !== "Tab") return;
     const all = [...(menu.current?.querySelectorAll<HTMLElement>(FOCUSABLE) ?? []), burger.current!];
     const at = all.indexOf(document.activeElement as HTMLElement);
@@ -132,15 +146,16 @@ export function LayeredMenu({ primary, secondary = [], legal = [], colors = COLO
   const tall = contained ? ["h-[90%]", "h-[85%]"] : ["h-[90dvh]", "h-[85dvh]"];
   const close = () => set(false);
   const line = "absolute left-0 top-1/2 block h-[2px] w-(--menu-line-width) transition-transform duration-300 ease-out motion-reduce:transition-none";
+  // reduced motion keeps only the fade: the line class drops the transform in CSS, so the server HTML and the first client render agree
   const draw = (extra: number) => ({
-    initial: { transform: reduce ? "scaleX(1)" : "scaleX(0)", opacity: reduce ? 0 : 1 },
+    initial: { transform: "scaleX(0)", opacity: 0 },
     animate: { transform: "scaleX(1)", opacity: 1 },
     // check-ignore: duration the burger draws itself once on first paint
     transition: { duration: reduce ? 0.2 : 0.42, delay: reduce ? 0 : delay + extra, ease: OUT },
   });
 
   return (
-    <div onKeyDown={trap}>
+    <div onKeyDown={trap} {...rest}>
       <button
         ref={burger}
         type="button"
@@ -148,24 +163,26 @@ export function LayeredMenu({ primary, secondary = [], legal = [], colors = COLO
         aria-label={isOpen ? "Close menu" : "Open menu"}
         onClick={() => set(!isOpen)}
         style={{ color: isOpen ? activeColor : color }}
-        className={`absolute top-5 left-5 z-[75] inline-flex h-12 items-center gap-3 rounded-full px-1 transition-[opacity,color] duration-300 motion-reduce:transition-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-current sm:top-7 sm:left-7 [@media(hover:hover)]:hover:opacity-85 ${className}`}
+        className={cn("absolute top-5 left-5 z-[75] inline-flex h-12 items-center gap-3 rounded-full px-1 transition-[opacity,color] duration-300 motion-reduce:transition-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-current sm:top-7 sm:left-7 [@media(hover:hover)]:hover:opacity-85", className)}
       >
         <span className="relative block h-10 w-10 [--menu-line-width:2rem] sm:[--menu-line-width:3rem]">
           <span className={`${line} ${isOpen ? "translate-y-0 rotate-45" : "-translate-y-[5px]"}`}>
-            <motion.span className="block h-full w-full origin-left rounded-full bg-current" {...draw(0)} />
+            <motion.span className="block h-full w-full origin-left rounded-full bg-current motion-reduce:!transform-none" {...draw(0)} />
           </span>
           <span className={`${line} ${isOpen ? "translate-y-0 -rotate-45" : "translate-y-[5px]"}`}>
-            <motion.span className="block h-full w-full origin-left rounded-full bg-current" {...draw(0.06)} />
+            <motion.span className="block h-full w-full origin-left rounded-full bg-current motion-reduce:!transform-none" {...draw(0.06)} />
           </span>
         </span>
         {/* the label's width opens with it, as on Armour: shut, the button is just the burger (60px), not a wider invisible target. check-ignore: gpu-props a one-word label, and Armour's own motion */}
         <span aria-hidden className={`hidden overflow-hidden text-sm tracking-tight transition-[max-width,opacity] duration-300 ease-out motion-reduce:transition-none sm:block ${isOpen ? "max-w-20 opacity-100" : "max-w-0 opacity-0"}`}>Close</span>
       </button>
 
-      <AnimatePresence>
+      {/* a menu that starts open (defaultOpen) is drawn open, without the entrance: nothing to replay on page load, and the server HTML matches */}
+      <AnimatePresence initial={false}>
         {isOpen && (
           <Layer key="menu" pos={pos}>
-            <motion.div className="absolute inset-0 bg-black/45" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.28, ease: OUT }} />
+            {/* the strip of scrim under the panels closes it on click (Escape is the keyboard path). check-ignore: hardcoded-color a scrim dims whatever is behind, in either theme */}
+            <motion.div aria-hidden onClick={close} className="absolute inset-0 bg-black/45" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.28, ease: OUT }} />
             {colors.map((c, i) => {
               const front = i === 3;
               const t = TIMING[i];
@@ -180,11 +197,11 @@ export function LayeredMenu({ primary, secondary = [], legal = [], colors = COLO
                   style={{ background: c }}
                   initial={reduce ? { opacity: 0 } : { transform: "translateY(-100%)" }}
                   // the reduced-motion target still names the resting transform: useReducedMotion only settles after the first render, so a panel can mount with the slide-in start state
-                  animate={reduce ? { opacity: 1, transform: "translateY(0%)", transition: { duration: 0.2 } } : { transform: "translateY(0%)", transition: { duration: t.in[0], delay: t.in[1], ease: OUT } }}
+                  animate={reduce ? { opacity: 1, transform: "translateY(0%)", transition: { duration: 0.2 } } : { opacity: 1, transform: "translateY(0%)", transition: { duration: t.in[0], delay: t.in[1], ease: OUT } }}
                   exit={reduce ? { opacity: 0, transition: { duration: 0.2 } } : { transform: "translateY(-100%)", transition: { duration: t.out[0], delay: t.out[1], ease: OUT } }}
                 >
                   {front && (
-                    <div className="flex h-full flex-col px-6 pt-6 pb-8 text-[#F4F1DE] @2xl:px-10 @2xl:pt-7 @2xl:pb-10">
+                    <div className="flex h-full flex-col px-6 pt-6 pb-8 @2xl:px-10 @2xl:pt-7 @2xl:pb-10" style={{ color: activeColor }}>
                       <div className="mt-2 flex min-h-8 justify-center text-2xl @2xl:text-3xl">{logo}</div>
                       <div className="mt-10 grid min-h-0 flex-1 grid-cols-1 gap-10 overflow-y-auto @3xl:grid-cols-[220px_minmax(0,1fr)] @3xl:gap-14 @5xl:mt-12">
                         <div className="order-2 flex min-w-0 flex-col justify-between gap-8 @3xl:order-1 @3xl:pt-8">

@@ -24,7 +24,7 @@ export default function DocsPage() {
       <section>
         <h2>Install with the shadcn CLI</h2>
         <p>Point the CLI at a component&apos;s registry file:</p>
-        <Snippet code={`npx shadcn@latest add ${SITE_URL}/r/button.json`} />
+        <Snippet code={`npx shadcn@latest add ${SITE_URL}/r/roll-button.json`} />
         <p className="mt-4">
           Swap <code>button</code> for any slug from <Link href="/components">the components page</Link>. Each component page has the command ready to copy, for npm, pnpm, yarn and bun.
         </p>
