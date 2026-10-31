@@ -68,6 +68,10 @@ export const COMPONENTS: ComponentItem[] = [
   item("curtain-reveal", "Curtain reveal", "Layout", "A panel the page lifts away from as you scroll, like a curtain.", [560, 420]),
   item("preloader", "Preloader", "Display", "A full-screen intro whose words swap in turn before the panel lifts off with a curved edge.", [480, 320]),
   item("cursor-follower", "Cursor follower", "Display", "A dot that follows the mouse and inverts what is under it."),
+  item("load-preloader", "Load preloader", "Display", "A full-screen cover with a big 0 to 100 count that tracks real loading, then fades away.", [480, 320]),
+  item("star-rise", "Star rise", "Display", "A liquid-metal asterisk that rises into place, then turns as you scroll.", [1000, 560]),
+  item("marquee-rows", "Marquee rows", "Text", "Big text rows that swap to a coloured scrolling band on hover, focus or tap.", [1000, 560]),
+  item("peek-card", "Peek card", "Display", "A card whose image zooms and info panel slides up on hover, with a wide row variant.", [1000, 760]),
   item("fill-button", "Fill button", "Input", "An outlined pill whose fill sweeps in from the left and out to the right."),
 ];
 
