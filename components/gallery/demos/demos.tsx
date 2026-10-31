@@ -26,6 +26,10 @@ import LoadPreloaderDemo from "@/registry/load-preloader/demo";
 import StarRiseDemo from "@/registry/star-rise/demo";
 import MarqueeRowsDemo from "@/registry/marquee-rows/demo";
 import PeekCardDemo from "@/registry/peek-card/demo";
+import CounterLoaderDemo from "@/registry/counter-loader/demo";
+import StickerCoverDemo from "@/registry/sticker-cover/demo";
+import InertiaGalleryDemo from "@/registry/inertia-gallery/demo";
+import FitTitleDemo from "@/registry/fit-title/demo";
 import RollLinkDemo from "@/registry/roll-link/demo";
 import { useTick } from "./use-tick";
 
@@ -75,7 +79,11 @@ function ButtonLoop({ playing, speed, opts }: DemoProps) {
 }
 
 const SCENERY = "/demo/scenery.jpg"; // the Armour hero's photo; the live clip shows the rest of the hero
-const frame = "relative h-[282px] w-96 overflow-hidden rounded-2xl bg-[#0E7DDA]"; // Armour's blue; 1.364 is the clip stage's ratio
+// demo photos in public/demo (Unsplash licence, via picsum.photos): real images instead of flat placeholders
+const PHOTOS = ["fjord", "canyon", "cliffs", "storm", "valley", "coast", "city", "jellyfish", "field", "canal", "hiker", "dunes"];
+// eslint-disable-next-line @next/next/no-img-element -- demo art; the registry components take plain <img> too
+const photo = (i: number, className = "") => <img src={`/demo/${PHOTOS[i % PHOTOS.length]}.jpg`} alt="" className={`size-full object-cover ${className}`} />;
+const frame = "relative h-[282px] w-96 overflow-hidden rounded-2xl bg-[#0E7DDA] bg-[url(/demo/valley.jpg)] bg-cover bg-center"; // a photo over Armour's blue (shown while it loads); 1.364 is the clip stage's ratio
 const pageFrame = "relative size-full overflow-hidden rounded-[64px] bg-white"; // a full-page demo is drawn at a page's size and scaled down; the card's stage supplies the padding
 
 /** Notch drops in once on mount, so the loop remounts it to replay the drop. */
@@ -204,7 +212,7 @@ function RevealLoop({ playing, speed }: DemoProps) {
 
 function ParallaxLoop({ playing, speed }: DemoProps) {
   const box = useRef<HTMLDivElement>(null);
-  const tile = (n: number) => <div key={n} className="grid aspect-[3/4] place-items-center rounded-xl bg-muted text-xl">{n}</div>;
+  const tile = (n: number) => <div key={n} className="aspect-[3/4] overflow-hidden rounded-xl bg-muted">{photo(n)}</div>;
   return (
     <ScrollBox playing={playing} speed={speed} boxRef={box}>
       <div className="h-20" />
@@ -242,9 +250,11 @@ function CurtainLoop({ playing, speed }: DemoProps) {
   );
 }
 
-const PATH_ITEMS =["Alpha", "Beta", "Gamma", "Delta", "Epsilon"].map((name) => (
-  <div key={name} className="grid size-full place-items-center rounded-[32px] bg-muted text-xl font-light">
-    {name}
+const PATH_ITEMS = ["Fjord", "Canyon", "Cliffs", "Coast", "Dunes"].map((name) => (
+  <div key={name} className="relative size-full overflow-hidden rounded-[32px] bg-muted">
+    {photo(PHOTOS.indexOf(name.toLowerCase()))}
+    {/* check-ignore: hardcoded-color white label over a photo, in either theme */}
+    <span className="absolute bottom-4 left-5 text-xl font-light text-white drop-shadow">{name}</span>
   </div>
 ));
 
@@ -302,6 +312,10 @@ export const DEMOS: Record<string, (p: DemoProps) => ReactNode> = {
   "star-rise": StarRiseDemo,
   "marquee-rows": MarqueeRowsDemo,
   "peek-card": PeekCardDemo,
+  "counter-loader": CounterLoaderDemo,
+  "sticker-cover": StickerCoverDemo,
+  "inertia-gallery": InertiaGalleryDemo,
+  "fit-title": FitTitleDemo,
   "cursor-follower": CursorLoop,
   "fill-button": FillButtonDemo,
 };

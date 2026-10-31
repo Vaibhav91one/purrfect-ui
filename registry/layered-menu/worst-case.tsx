@@ -5,7 +5,7 @@ import { LayeredMenu, type LayeredMenuProps } from "./layered-menu";
 
 const l = (...labels: string[]) => labels.map((label, i) => ({ label, href: `#${i}` }));
 const frame = (p: Partial<LayeredMenuProps>) => (
-  <div className="relative h-[560px] overflow-hidden rounded-3xl bg-gradient-to-b from-sky-700 to-sky-300">
+  <div className="relative h-[560px] overflow-hidden rounded-3xl bg-[url(/demo/valley.jpg)] bg-cover bg-center">
     <LayeredMenu contained defaultOpen delay={0} primary={l("Experience", "Technology", "Company")} logo={<span className="font-medium tracking-tight">ARMOUR</span>} {...p} />
   </div>
 );

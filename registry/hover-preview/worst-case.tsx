@@ -3,8 +3,10 @@
 import type { ReactNode } from "react";
 import { HoverPreview, type HoverPreviewItem } from "./hover-preview";
 
-const shot = (hue: number) => <div className="size-full" style={{ background: `linear-gradient(135deg, hsl(${hue} 70% 45%), hsl(${hue + 60} 70% 60%))` }} />;
-const items = (titles: string[]): HoverPreviewItem[] => titles.map((title, i) => ({ title, meta: "Design & development", href: `#${i}`, preview: shot(i * 47) }));
+const PHOTOS = ["fjord", "canyon", "cliffs", "storm", "valley", "coast", "city", "jellyfish", "field", "canal", "hiker", "dunes"];
+// eslint-disable-next-line @next/next/no-img-element -- a registry fixture cannot assume next/image
+const shot = (i: number) => <img src={`/demo/${PHOTOS[i % PHOTOS.length]}.jpg`} alt="" className="size-full object-cover" />;
+const items = (titles: string[]): HoverPreviewItem[] => titles.map((title, i) => ({ title, meta: "Design & development", href: `#${i}`, preview: shot(i) }));
 const page = (node: ReactNode) => <div className="mx-auto max-w-4xl px-6 pt-[40svh] pb-[60svh]">{node}</div>;
 
 export const states: Record<string, ReactNode> = {

@@ -1,7 +1,6 @@
 import { HeroReveal } from "./hero-reveal";
 
-// a gradient stands in for a photo so the demo needs no asset
-const SKY = "data:image/svg+xml;utf8," + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="800" height="500"><defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2a5a96"/><stop offset=".6" stop-color="#9fb8d3"/><stop offset="1" stop-color="#3d6b3a"/></linearGradient></defs><rect width="800" height="500" fill="url(#g)"/></svg>');
+const SKY = "/demo/fjord.jpg";
 
 export default function HeroRevealDemo() {
   return (
