@@ -20,5 +20,8 @@ export const CLIPS = {
   "roll-link": { target: 'nav a[style*="perspective"]', interact: "hover", label: "vaibhavtomar.com" },
   "scroll-marquee": { target: 'p[class*="lg:text-[200px]"]', interact: "scroll", label: "vaibhavtomar.com" },
   "curtain-reveal": { target: 'div[style*="clip-path"]', interact: "scroll", label: "vaibhavtomar.com" },
+  // fresh: the site's own intro plays (the capture otherwise marks it seen); 5s of words, a 0.3s pause, a 1s lift
+  preloader: { interact: "load", fresh: true, start: "!!document.querySelector('.fixed.inset-0.bg-black')", seconds: 6.8, label: "vaibhavtomar.com" },
+  "cursor-follower": { target: ".titleAbout", interact: "hover", label: "vaibhavtomar.com" },
   "scroll-reveal": { site: ARMOUR, target: 'p[class*="flex-wrap"][class*="leading-[1.1]"]', interact: "scroll", seconds: 4.5, endAt: 0.12, label: "armour.vaibhavtomar.com" },
 };

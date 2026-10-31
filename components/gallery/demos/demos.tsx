@@ -2,6 +2,8 @@
 
 import { Rocket } from "lucide-react";
 import { useEffect, useRef, useState, type ReactNode, type RefObject } from "react";
+import { createPortal } from "react-dom";
+import { cn } from "@/lib/utils";
 import { RollButton as Button } from "@/registry/roll-button/roll-button";
 import { Counter } from "@/registry/counter/counter";
 import { HeroReveal } from "@/registry/hero-reveal/hero-reveal";
@@ -14,6 +16,7 @@ import { ScrollReveal } from "@/registry/scroll-reveal/scroll-reveal";
 import { GlideTabs as Tabs } from "@/registry/glide-tabs/glide-tabs";
 import { StretchSwitch as Toggle } from "@/registry/stretch-switch/stretch-switch";
 import { CurtainReveal } from "@/registry/curtain-reveal/curtain-reveal";
+import { CursorFollower } from "@/registry/cursor-follower/cursor-follower";
 import { ScrollMarquee } from "@/registry/scroll-marquee/scroll-marquee";
 import DisplacementDemo from "@/registry/displacement/demo";
 import FillButtonDemo from "@/registry/fill-button/demo";
@@ -159,7 +162,7 @@ function MagneticLoop({ playing, speed, opts }: DemoProps) {
 }
 
 /** A small scrolling box that drives scroll-linked components: it eases up and down on its own while playing, and scrolls by hand when paused. */
-function ScrollBox({ playing, speed, children, boxRef }: { playing?: boolean; speed: number; children: ReactNode; boxRef: RefObject<HTMLDivElement | null> }) {
+function ScrollBox({ playing, speed, children, boxRef, className }: { playing?: boolean; speed: number; children: ReactNode; boxRef: RefObject<HTMLDivElement | null>; className?: string }) {
   useEffect(() => {
     const box = boxRef.current;
     if (!playing || !box) return;
@@ -177,7 +180,7 @@ function ScrollBox({ playing, speed, children, boxRef }: { playing?: boolean; sp
   return (
     <div
       ref={boxRef}
-      className="relative h-72 w-full max-w-md overflow-y-auto overscroll-contain [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+      className={cn("relative h-72 w-full max-w-md overflow-y-auto overscroll-contain [scrollbar-width:none] [&::-webkit-scrollbar]:hidden", className)}
     >
       {children}
     </div>
@@ -207,15 +210,18 @@ function ParallaxLoop({ playing, speed }: DemoProps) {
   );
 }
 
-// the box scrolls the marquee, so it flips each time the loop turns back up
+// the box scrolls the marquee, so it flips each time the loop turns back up; it is pinned, so it is in view from the first frame
 function MarqueeLoop({ playing, speed }: DemoProps) {
   const box = useRef<HTMLDivElement>(null);
   return (
-    <ScrollBox playing={playing} speed={speed} boxRef={box}>
-      <div className="flex h-[40rem] items-center">
-        <ScrollMarquee container={box} className="w-full">
-          <p className="pr-12 text-7xl font-medium whitespace-nowrap">Scroll to flip me —</p>
-        </ScrollMarquee>
+    <ScrollBox playing={playing} speed={speed} boxRef={box} className="h-full max-w-none">
+      <div className="h-[300%]">
+        <div className="sticky top-0 flex h-[calc(100%/3)] flex-col justify-center gap-6">
+          <ScrollMarquee container={box} className="w-full">
+            <p className="pr-16 text-8xl font-medium whitespace-nowrap">Scroll to flip me —</p>
+          </ScrollMarquee>
+          <span className="text-center text-3xl text-muted-foreground">↕ Scroll</span>
+        </div>
       </div>
     </ScrollBox>
   );
@@ -249,13 +255,25 @@ function PathLoop({ playing, speed }: DemoProps) {
   );
 }
 
-/** The follower is page-level (position: fixed), so a scaled card shows what it does instead of running it. */
-function CursorStill() {
+/**
+ * The follower is position: fixed, and the preview is scaled to fit (a scaled parent traps fixed children), so the real one
+ * is portalled out: into the dialog (top layer) or the page. A card is inert, so it shows a still dot instead.
+ */
+function CursorLoop() {
+  const stage = useRef<HTMLDivElement>(null);
+  const [host, setHost] = useState<Element | null>(null);
+  useEffect(() => {
+    const el = stage.current!;
+    setHost(el.closest("dialog") ?? (el.closest("[inert]") ? null : document.body));
+  }, []);
   return (
-    <div className="relative grid h-64 w-96 grid-cols-2 overflow-hidden rounded-2xl text-lg">
+    <div ref={stage} className="relative grid h-64 w-96 grid-cols-2 overflow-hidden rounded-2xl text-lg">
       <div className="grid place-items-center bg-muted">Page</div>
       <div className="grid place-items-center bg-foreground text-background">Inverted</div>
-      <span className="absolute top-1/2 left-1/2 size-10 -translate-1/2 rounded-full bg-white mix-blend-difference" />
+      <a href="#grow" onClick={(e) => e.preventDefault()} data-cursor-scale="4" className="absolute bottom-6 left-1/2 -translate-x-1/2 rounded-full border border-foreground bg-background px-5 py-2 text-sm whitespace-nowrap">
+        Hover me: it grows
+      </a>
+      {host ? createPortal(<CursorFollower />, host) : <span className="absolute top-1/2 left-1/2 size-10 -translate-1/2 rounded-full bg-white mix-blend-difference" />}
     </div>
   );
 }
@@ -278,6 +296,6 @@ export const DEMOS: Record<string, (p: DemoProps) => ReactNode> = {
   "roll-link": RollLinkDemo,
   "curtain-reveal": CurtainLoop,
   preloader: PreloaderDemo,
-  "cursor-follower": CursorStill,
+  "cursor-follower": CursorLoop,
   "fill-button": FillButtonDemo,
 };
