@@ -3,9 +3,15 @@
 // overrides SITE for components lifted from another site.
 export const SITE = "https://vaibhavtomar.com";
 export const ARMOUR = "https://armour.vaibhavtomar.com";
+export const MAPINLY = "https://mapinly.vaibhavtomar.com";
+export const POINU = "https://poinu.vercel.app";
+// Mapinly asks for a language once per browser; every Mapinly clip marks it answered
+const ML = { hasSeenLocaleDialog: "true" };
+export const BOUNTYDESK = "https://bountydesk.vaibhav.quest";
 // interact: hover | click (toggle: seconds until a second click) | scroll (target scrolled through the viewport) | load (the
 // page's own entrance; start is a page expression that turns true on its first frame; focus + zoom aim the camera).
-// zoom overrides the automatic camera push; seconds the length.
+// zoom overrides the automatic camera push; seconds the length. session: sessionStorage flags preset before the page loads
+// (the site's intro marked seen; default the portfolio's seenPreloader); fresh: true sets none, so the intro plays.
 // the first frame of Armour's own entrance: its nav is mounted but still at opacity 0, so the notch drop is in the clip
 const NAV_MOUNTED = "(() => { const n = document.querySelector('nav[role=navigation]'); return !!n && getComputedStyle(n).opacity === '0'; })()";
 // the notch clip starts once the hero has finished opening and the nav is still hidden, so it opens on the real page with no notch and the drop follows
@@ -23,6 +29,11 @@ export const CLIPS = {
   // fresh: the site's own intro plays (the capture otherwise marks it seen); 5s of words, a 0.3s pause, a 1s lift
   preloader: { interact: "load", fresh: true, start: "!!document.querySelector('.fixed.inset-0.bg-black')", seconds: 6.8, label: "vaibhavtomar.com" },
   "cursor-follower": { target: ".titleAbout", interact: "hover", label: "vaibhavtomar.com" },
+  // Mapinly: its own intro plays for these two (fresh); the star rises after the preloader opens its gate
+  "load-preloader": { site: MAPINLY, interact: "load", fresh: true, realtime: true, start: "!!document.querySelector('.preloader')", seconds: 3.6, local: ML, label: "mapinly.vaibhavtomar.com" },
+  "star-rise": { site: MAPINLY, interact: "load", fresh: true, start: "(() => { const e = document.querySelector('main > section:first-of-type [data-intro]'); if (!e) return false; const t = getComputedStyle(e).transform; return t !== 'none' && new DOMMatrix(t).m42 < innerHeight * 0.98; })()", seconds: 4.2, local: ML, label: "mapinly.vaibhavtomar.com" },
+  "marquee-rows": { site: MAPINLY, target: 'div.cursor-pointer[class*="h-[8rem]"]', interact: "hover", session: { "mapinly-intro": "1" }, local: ML, label: "mapinly.vaibhavtomar.com" },
+  "peek-card": { site: MAPINLY, target: "[data-slot=carousel-item]:first-child", interact: "hover", session: { "mapinly-intro": "1" }, local: ML, label: "mapinly.vaibhavtomar.com" },
   "fill-button": { target: '[class*="isolate"][class*="rounded-full"]', interact: "hover", label: "vaibhavtomar.com" },
   "scroll-reveal": { site: ARMOUR, target: 'p[class*="flex-wrap"][class*="leading-[1.1]"]', interact: "scroll", seconds: 4.5, endAt: 0.12, label: "armour.vaibhavtomar.com" },
 };

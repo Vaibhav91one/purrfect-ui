@@ -22,6 +22,10 @@ import DisplacementDemo from "@/registry/displacement/demo";
 import FillButtonDemo from "@/registry/fill-button/demo";
 import HoverPreviewDemo from "@/registry/hover-preview/demo";
 import PreloaderDemo from "@/registry/preloader/demo";
+import LoadPreloaderDemo from "@/registry/load-preloader/demo";
+import StarRiseDemo from "@/registry/star-rise/demo";
+import MarqueeRowsDemo from "@/registry/marquee-rows/demo";
+import PeekCardDemo from "@/registry/peek-card/demo";
 import RollLinkDemo from "@/registry/roll-link/demo";
 import { useTick } from "./use-tick";
 
@@ -294,6 +298,10 @@ export const DEMOS: Record<string, (p: DemoProps) => ReactNode> = {
   "roll-link": RollLinkDemo,
   "curtain-reveal": CurtainLoop,
   preloader: PreloaderDemo,
+  "load-preloader": LoadPreloaderDemo,
+  "star-rise": StarRiseDemo,
+  "marquee-rows": MarqueeRowsDemo,
+  "peek-card": PeekCardDemo,
   "cursor-follower": CursorLoop,
   "fill-button": FillButtonDemo,
 };

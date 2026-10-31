@@ -414,4 +414,99 @@ import { RollLink } from "@/components/ui/roll-link";
       "One CSS transition and a data attribute: React never re-renders. Touch and pen get the press colour only.",
     ],
   },
+  "load-preloader": {
+    usage: `import { LoadPreloader } from "@/components/ui/load-preloader";
+
+// in your root layout, once
+<LoadPreloader />
+<LoadPreloader ready={heroImage.decode()} minDuration={1.5} onDone={() => console.log("in")} />`,
+    props: [
+      { name: "ready", type: "Promise<unknown> | boolean", default: "fonts + window load", description: "What it waits for: a promise (settled either way counts) or a flag that turns true." },
+      { name: "minDuration", type: "number", default: "1.2", description: "Seconds the count takes at the least, so a fast load still reads as intentional." },
+      { name: "maxWait", type: "number", default: "7", description: "Seconds it waits at most before it counts to 100 anyway." },
+      { name: "storageKey", type: "string | false", default: '"load-preloader-seen"', description: "sessionStorage key that makes it play once per tab; false plays it every load." },
+      { name: "onDone", type: "() => void", description: "Called when it reaches 100 and starts to fade, releasing the page (right away when already seen)." },
+      { name: "contained", type: "boolean", default: "false", description: "Fill the nearest relative parent and leave page scroll alone: for a card or preview." },
+    ],
+    behaviors: [
+      "The count eases toward the real load but never runs ahead of the minimum-time ramp, so it always looks continuous.",
+      "At 100 it holds for 250ms, then fades out over 1s; page scroll unlocks as the fade starts (padded for the scrollbar while locked).",
+      "The number is written straight to the text node, so React does not re-render every frame.",
+      "On a repeat visit an inline script hides it before the first paint; with no JavaScript it uncovers the page by itself.",
+      "Reduced motion: the number jumps with the load instead of counting, with no minimum time, then a 0.3s fade.",
+    ],
+  },
+  "star-rise": {
+    usage: `import { StarRise } from "@/components/ui/star-rise";
+
+<section className="relative min-h-svh overflow-hidden">
+  <StarRise size={320} onRiseComplete={() => setReady(true)} />
+</section>`,
+    props: [
+      { name: "children", type: "ReactNode", description: "The mark. Defaults to the liquid-metal asterisk; pass any SVG or image to skip the shader." },
+      { name: "size", type: "number", default: "320", description: "Width and height in pixels. The shader canvas is this size." },
+      { name: "duration", type: "number", default: "3.6", description: "Seconds for the rise and half-turn. The fade takes half of it." },
+      { name: "delay", type: "number", default: "0", description: "Seconds before it rises." },
+      { name: "turns", type: "number", default: "3", description: "Full turns as the mark scrolls through the viewport. 0 turns it off." },
+      { name: "container", type: "RefObject<HTMLElement | null>", description: "Follow a scrolling box instead of the page." },
+      { name: "shader", type: "boolean", default: "true", description: "Default asterisk only: false draws the plain SVG in the text colour, no WebGL." },
+      { name: "colorBack", type: "string", default: "--background", description: "Default asterisk only: the shader's background. The page background by default; set it when the mark sits on another surface." },
+      { name: "colorTint", type: "string", default: "text colour", description: "Default asterisk only: the metal's tint; by default it follows the text colour, so it reads in light and dark themes." },
+      { name: "onRiseComplete", type: "() => void", description: "Called once the mark has settled." },
+    ],
+    behaviors: [
+      "Rises a full viewport height while turning from -180° to 0 (3.6s), fading in over the first half.",
+      "Starts hidden in the server HTML, so nothing flashes; WebGL loads only on the client, and the plain SVG asterisk is the fallback.",
+      "After the rise it keeps turning with its own scroll through the viewport (or container). The shader stops its frame loop while off screen.",
+      "Put it inside an overflow-hidden section so the rise does not grow the page.",
+      "Reduced motion: it only fades in, does not rise, spin or turn on scroll, and the metal holds still.",
+    ],
+  },
+  "marquee-rows": {
+    usage: `import { MarqueeRows } from "@/components/ui/marquee-rows";
+
+<MarqueeRows
+  items={[{ label: "We listen" }, { label: "We experiment" }, { label: "We measure" }, { label: "We share", href: "/about" }]}
+  speed={120}
+/>`,
+    props: [
+      { name: "items", type: "{ label: ReactNode; href?: string }[]", description: "One row each. With href the row is a link, without it a button." },
+      { name: "speed", type: "number", default: "120", description: "Pixels per second the open row's marquee runs at." },
+      { name: "separator", type: "ReactNode", default: "spinning asterisk", description: "What sits between the repeats in the band." },
+      { name: "indent", type: "boolean", default: "true", description: "Stagger the rows' start (from md up)." },
+      { name: "bandClassName", type: "string", default: '"bg-primary text-primary-foreground"', description: "Classes for the band, e.g. bg-foreground text-background." },
+      { name: "className", type: "string", description: "Extra classes on the root (text size lives here)." },
+    ],
+    behaviors: [
+      "Opens on mouse hover, keyboard focus, or tap (a tap toggles; on a link the second tap follows it). No stuck hover on touch.",
+      "Row height comes from its text; the band covers the row and repeats the label with separators.",
+      "Fixed speed per second whatever the frame rate; as many copies as the width needs, wrapped by exactly one copy.",
+      "Only the open row's marquee runs, and only while on screen. The band is aria-hidden and inert.",
+      "Reduced motion: the band fades in without the slide and its marquee stands still.",
+    ],
+  },
+  "peek-card": {
+    usage: `import { PeekCard } from "@/components/ui/peek-card";
+
+<PeekCard index={1} image="/event.jpg" title="Mapping the old town" description="A walk through the lanes." meta="Sat, 12 Oct" href="/events/old-town" />
+<PeekCard variant="row" muted image="/past.jpg" title="Last month's meetup" meta={<span>Closed</span>} href="/events/past" />`,
+    props: [
+      { name: "image", type: "string | ReactNode", description: "An image URL, or any node (gradient, video) that fills the media area." },
+      { name: "imgProps", type: "ImgHTMLAttributes", description: "Extra attributes for the <img> when image is a URL (alt, loading, sizes)." },
+      { name: "title", type: "ReactNode", description: "The heading; with href it is the link text and the whole card is clickable." },
+      { name: "description", type: "ReactNode", description: "Fades in once the panel opens." },
+      { name: "meta", type: "ReactNode", description: "Small lines under the description (date, place, status)." },
+      { name: "index", type: "number | string", description: "The big number top-left (bottom-left of the image in a row)." },
+      { name: "href", type: "string", description: "Makes the whole card a link." },
+      { name: "variant", type: '"card" | "row"', default: '"card"', description: "A tall card with a peeking panel, or a wide row with an arrow." },
+      { name: "muted", type: "boolean", default: "false", description: "A past or closed item: dimmed, the arrow stays put." },
+    ],
+    behaviors: [
+      "The card fades up once as it scrolls into view.",
+      "Hover zooms the image to 1.1 and slides the panel up from 52%; the description and meta fade in after 0.1s and 0.15s. An asterisk spins in the panel.",
+      "Row variant: the up-right arrow scales from 0.8 and fades in on hover; muted dims the row and keeps the arrow showing.",
+      "Touch shows the panel open and the arrow visible; keyboard focus opens it too. All CSS, no re-render on hover.",
+      "Reduced motion: no fade-up travel, no zoom, no spin, and the panel's details fade in place instead of sliding.",
+    ],
+  },
 };

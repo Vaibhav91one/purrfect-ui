@@ -18,6 +18,10 @@ import { states as curtainReveal } from "@/registry/curtain-reveal/worst-case";
 import { states as preloader } from "@/registry/preloader/worst-case";
 import { states as cursorFollower } from "@/registry/cursor-follower/worst-case";
 import { states as fillButton } from "@/registry/fill-button/worst-case";
+import { states as loadPreloader } from "@/registry/load-preloader/worst-case";
+import { states as starRise } from "@/registry/star-rise/worst-case";
+import { states as marqueeRows } from "@/registry/marquee-rows/worst-case";
+import { states as peekCard } from "@/registry/peek-card/worst-case";
 
 /** Dev-only worst-case states per component (see /dev). Add a component's `registry/<slug>/worst-case.tsx` here when you port it. */
-export const FIXTURES: Record<string, Record<string, ReactNode>> = { "roll-button": button, magnetic, notch, "hero-reveal": heroReveal, "layered-menu": layeredMenu, "stretch-switch": toggle, counter, "glide-tabs": tabs, "scroll-reveal": scrollReveal, "parallax-columns": parallaxColumns, "path-carousel": pathCarousel, displacement, "hover-preview": hoverPreview, "scroll-marquee": scrollMarquee, "roll-link": rollLink, "curtain-reveal": curtainReveal, preloader, "cursor-follower": cursorFollower, "fill-button": fillButton };
+export const FIXTURES: Record<string, Record<string, ReactNode>> = { "roll-button": button, magnetic, notch, "hero-reveal": heroReveal, "layered-menu": layeredMenu, "stretch-switch": toggle, counter, "glide-tabs": tabs, "scroll-reveal": scrollReveal, "parallax-columns": parallaxColumns, "path-carousel": pathCarousel, displacement, "hover-preview": hoverPreview, "scroll-marquee": scrollMarquee, "roll-link": rollLink, "curtain-reveal": curtainReveal, preloader, "cursor-follower": cursorFollower, "fill-button": fillButton, "load-preloader": loadPreloader, "star-rise": starRise, "marquee-rows": marqueeRows, "peek-card": peekCard };

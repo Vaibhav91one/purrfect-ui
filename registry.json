@@ -421,6 +421,96 @@
         "tailwindcss": ">=4",
         "tokens": "shadcn (background, foreground, muted, border, ...): run shadcn init first"
       }
+    },
+    {
+      "name": "load-preloader",
+      "type": "registry:ui",
+      "title": "Load preloader",
+      "description": "A full-screen cover with a big 0 to 100 count that tracks real loading, then fades away.",
+      "dependencies": [
+        "motion@^14.6.0"
+      ],
+      "registryDependencies": [
+        "utils"
+      ],
+      "files": [
+        {
+          "path": "registry/load-preloader/load-preloader.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "meta": {
+        "react": ">=19",
+        "tailwindcss": ">=4",
+        "tokens": "shadcn (background, foreground, muted, border, ...): run shadcn init first"
+      }
+    },
+    {
+      "name": "star-rise",
+      "type": "registry:ui",
+      "title": "Star rise",
+      "description": "A liquid-metal asterisk that rises into place while turning, then keeps turning as you scroll.",
+      "dependencies": [
+        "motion@^14.6.0",
+        "@paper-design/shaders-react@0.0.71"
+      ],
+      "registryDependencies": [
+        "utils"
+      ],
+      "files": [
+        {
+          "path": "registry/star-rise/star-rise.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "meta": {
+        "react": ">=19",
+        "tailwindcss": ">=4",
+        "tokens": "shadcn (background, foreground, muted, border, ...): run shadcn init first"
+      }
+    },
+    {
+      "name": "marquee-rows",
+      "type": "registry:ui",
+      "title": "Marquee rows",
+      "description": "Big text rows that swap to a coloured scrolling band on hover, focus or tap.",
+      "dependencies": [
+        "motion@^14.6.0"
+      ],
+      "registryDependencies": [
+        "utils"
+      ],
+      "files": [
+        {
+          "path": "registry/marquee-rows/marquee-rows.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "meta": {
+        "react": ">=19",
+        "tailwindcss": ">=4",
+        "tokens": "shadcn (background, foreground, muted, border, ...): run shadcn init first"
+      }
+    },
+    {
+      "name": "peek-card",
+      "type": "registry:ui",
+      "title": "Peek card",
+      "description": "A card whose image zooms and info panel slides up on hover, with a wide row variant.",
+      "registryDependencies": [
+        "utils"
+      ],
+      "files": [
+        {
+          "path": "registry/peek-card/peek-card.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "meta": {
+        "react": ">=19",
+        "tailwindcss": ">=4",
+        "tokens": "shadcn (background, foreground, muted, border, ...): run shadcn init first"
+      }
     }
   ]
 }

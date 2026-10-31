@@ -134,15 +134,18 @@ async function render(slug, clip, base, browser) {
   const mode = clip.interact ?? "hover";
   const dir = mkdtempSync(path.join(tmpdir(), `clip-${slug}-`));
   const ctx = await browser.newContext({ viewport: { width: W, height: H }, deviceScaleFactor: DPR });
-  // the site's welcome animation is skipped on a repeat visit in the same tab (unless the clip is of that animation: fresh)
-  await ctx.addInitScript((fresh) => {
+  // a site's intro is skipped on a repeat visit in the same tab: preset its sessionStorage flags (clip.session, the portfolio's
+  // by default), or none with fresh: true when the clip is of that intro
+  // clip.local: localStorage flags for the same reason (a site's one-time dialog, Mapinly's language picker)
+  await ctx.addInitScript(([session, local]) => {
     try {
-      if (!fresh) sessionStorage.setItem("seenPreloader", "1");
+      for (const [k, v] of Object.entries(session)) sessionStorage.setItem(k, v);
+      for (const [k, v] of Object.entries(local)) localStorage.setItem(k, v);
     } catch {}
     // motion runs opacity through the Web Animations API, which the virtual clock does not delay, while it drives
     // transforms from its own JS clock: an entrance would fade in long before it moves. Without WAAPI both share one clock.
     delete Element.prototype.animate;
-  }, !!clip.fresh);
+  }, [clip.fresh ? {} : (clip.session ?? { seenPreloader: "1" }), clip.local ?? {}]);
   const page = await ctx.newPage();
   const mixer = await ctx.newPage(); // blank page that composes frames
   await mixer.goto("about:blank");
@@ -189,7 +192,12 @@ async function render(slug, clip, base, browser) {
     await cdp.send("Page.enable");
     await cdp.send("Page.navigate", { url: base });
     let started = false;
-    for (let i = 0; i < 2400 && !started; i++) {
+    // realtime: a page whose intro never lets a screenshot finish under paused time (Mapinly's preloader); poll the real clock
+    for (let i = 0; clip.realtime && i < 1500 && !started; i++) {
+      started = !!(await evalIn(clip.start).catch(() => false));
+      if (!started) await page.waitForTimeout(10);
+    }
+    for (let i = 0; !clip.realtime && i < 2400 && !started; i++) {
       await step(false);
       started = !!(await evalIn(clip.start));
       if (i % 20 === 0) process.stdout.write(`\r  waiting for the entrance ${i} ${await evalIn("document.readyState + ' ' + (document.querySelector('nav')?.style.cssText ?? 'no nav')")}  `);
@@ -233,8 +241,10 @@ async function render(slug, clip, base, browser) {
     // Armour's open menu never lets a screenshot finish while virtual time is paused, so this clip runs on the real clock:
     // raw screenshots are stamped as they arrive (a few tens of ms apart), then composed at the full frame rate with the
     // camera and cursor evaluated at each exact frame time, so the push-in stays smooth.
-    await cdp.send("Input.dispatchMouseEvent", { type: "mouseMoved", x: PARK[0], y: PARK[1] });
-    await page.waitForTimeout(1000);
+    if (mode !== "load") {
+      await cdp.send("Input.dispatchMouseEvent", { type: "mouseMoved", x: PARK[0], y: PARK[1] });
+      await page.waitForTimeout(1000);
+    }
     const rt = planFor(clip, m);
     const shots = [];
     let t0 = 0;
