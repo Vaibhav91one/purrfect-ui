@@ -27,9 +27,12 @@ export type ComponentItem = {
   clip?: Clip;
   /** a one-shot entrance (not a loop you pause): the dialog offers Replay instead of Pause/Play */
   replay?: boolean;
+  /** a scrolling stage: its width scales like any preview, its height stretches to the whole cell */
+  fill?: boolean;
 };
 
 const REPLAY = new Set(["notch", "hero-reveal"]);
+const FILL = new Set(["scroll-marquee"]);
 
 const item = (slug: string, name: string, category: string, description: string, nat: [number, number] = [420, 300], extras?: Extra[]): ComponentItem => ({
   slug,
@@ -42,6 +45,7 @@ const item = (slug: string, name: string, category: string, description: string,
   published: PUBLISHED.has(slug),
   clip: CLIPS[slug],
   replay: REPLAY.has(slug),
+  fill: FILL.has(slug),
 });
 
 // The slugs in registry.json are installable; the rest render a preview until they are ported.

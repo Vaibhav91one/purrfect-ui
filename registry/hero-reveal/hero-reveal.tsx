@@ -65,10 +65,10 @@ export function HeroReveal({ src, alt = "", imgProps, title, description, action
           // check-ignore: duration a one-off entrance, seen once per page load
           transition={{ duration: 0.9, ease: OUT }}
         >
-          {/* a dark frame behind the photo: if it fails to load, the white text still has something to sit on. check-ignore: hardcoded-color it sits under a photo, not the theme */}
+          {/* a dark frame behind the photo (the photo is `relative` so it paints over this): if it fails to load, the white text still has something to sit on. check-ignore: hardcoded-color it sits under a photo, not the theme */}
           <div className="absolute inset-x-2 inset-y-2 rounded-[2rem] bg-neutral-900" />
           {/* eslint-disable-next-line @next/next/no-img-element -- a registry file cannot assume next/image */}
-          <img src={src} alt={alt} fetchPriority="high" {...imgProps} className={cn("h-full w-full rounded-[2rem] object-cover p-2", imgProps?.className)} />
+          <img src={src} alt={alt} fetchPriority="high" {...imgProps} className={cn("relative h-full w-full rounded-[2rem] object-cover p-2", imgProps?.className)} />
           {/* check-ignore: hardcoded-color a scrim darkens the photo for the white text in either theme */}
           <div className="absolute inset-x-2 inset-y-2 rounded-[2rem] bg-black/10" />
         </motion.div>
