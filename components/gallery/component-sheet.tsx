@@ -108,8 +108,9 @@ export function ComponentSheet({ item, origin, onClose }: { item: ComponentItem;
   // the loop yields while the person is hovering or focused in the preview, and picks up again 2s after they leave
   const [engaged, setEngaged] = useState(false);
   const resume = useRef<ReturnType<typeof setTimeout>>(undefined);
-  const engage = () => { clearTimeout(resume.current); setEngaged(true); };
-  const release = () => { clearTimeout(resume.current); resume.current = setTimeout(() => setEngaged(false), 2000); };
+  const opening = useRef(false);
+  const engage = () => { if (opening.current) return; clearTimeout(resume.current); setEngaged(true); };
+  const release = () => { if (opening.current) return; clearTimeout(resume.current); resume.current = setTimeout(() => setEngaged(false), 2000); };
   useEffect(() => () => clearTimeout(resume.current), []);
   const extras = item.extras ?? [];
   const [opts, setOpts] = useState<Record<string, string | boolean>>(() => Object.fromEntries(extras.map((x) => [x.key, x.default])));
@@ -139,8 +140,10 @@ export function ComponentSheet({ item, origin, onClose }: { item: ComponentItem;
   useEffect(() => {
     const d = dialog.current!;
     document.documentElement.dataset.sheet = "";
+    opening.current = true; // showModal() focuses the first focusable thing (a demo's scroll box): that is not the person engaging
     if (!d.open) d.showModal();
     d.focus(); // not the demo's first control, so no focus ring on open; Tab still reaches everything
+    opening.current = false;
     const { prev, rest } = panels();
     const opts = { duration: MORPH, easing: CURVE, fill: "backwards" as const };
     const anims: Animation[] = [];

@@ -312,6 +312,7 @@ const [tab, setTab] = useState("preview");
       { name: "children", type: "ReactNode", description: "One copy of what scrolls past. Put the gap after it (padding-right) inside." },
       { name: "speed", type: "number", default: "80", description: "Pixels per second." },
       { name: "direction", type: '"left" | "right"', default: '"left"', description: "Which way it runs before the first scroll." },
+      { name: "container", type: "RefObject<HTMLElement | null>", default: "the page", description: "Follow a scrolling box instead of the page." },
       { name: "className", type: "string", description: "Extra classes on the root." },
     ],
     behaviors: [

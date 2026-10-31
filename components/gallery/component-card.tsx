@@ -24,7 +24,7 @@ export function CardFace({ item, hideLabel = false }: { item: ComponentItem; hid
       </div>
       {!hideLabel && (
         <>
-          <ArrowUpRight aria-hidden className="absolute top-4 right-4 size-5 text-muted-foreground opacity-0 transition-opacity duration-200 ease-snappy group-hover:opacity-100 group-focus-visible:opacity-100 motion-reduce:transition-none" />
+          <ArrowUpRight aria-hidden className="absolute top-4 right-4 size-5 text-muted-foreground opacity-0 transition-opacity duration-200 ease-snappy group-hover:opacity-100 group-focus-visible:opacity-100 group-has-[a:focus-visible]:opacity-100 motion-reduce:transition-none" />
           <span className={cardLabel}>
             <span className="sr-only">Open </span>
             {item.name}

@@ -16,5 +16,9 @@ export const CLIPS = {
   notch: { site: ARMOUR, interact: "load", start: NOTCH_NEXT, focus: "nav[role=navigation]", push: 1.6, zoom: 2.2, stay: 1.4, label: "armour.vaibhavtomar.com" },
   "hero-reveal": { site: ARMOUR, interact: "load", start: NAV_MOUNTED, seconds: 3.6, label: "armour.vaibhavtomar.com" },
   "layered-menu": { site: ARMOUR, target: 'button[aria-label$=" menu"]', interact: "click", realtime: true, toggle: 2.6, stay: 3.9, zoom: 1, label: "armour.vaibhavtomar.com" },
+  "hover-preview": { target: 'a[class*="border-gray-300"]', interact: "hover", label: "vaibhavtomar.com" },
+  "roll-link": { target: 'nav a[style*="perspective"]', interact: "hover", label: "vaibhavtomar.com" },
+  "scroll-marquee": { target: 'p[class*="lg:text-[200px]"]', interact: "scroll", label: "vaibhavtomar.com" },
+  "curtain-reveal": { target: 'div[style*="clip-path"]', interact: "scroll", label: "vaibhavtomar.com" },
   "scroll-reveal": { site: ARMOUR, target: 'p[class*="flex-wrap"][class*="leading-[1.1]"]', interact: "scroll", seconds: 4.5, endAt: 0.12, label: "armour.vaibhavtomar.com" },
 };

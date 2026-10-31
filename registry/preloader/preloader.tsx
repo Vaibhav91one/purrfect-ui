@@ -18,16 +18,15 @@ export interface PreloaderProps extends Omit<ComponentProps<"div">, "children" |
 }
 
 const WELCOME = ["Welcome", "Bienvenido", "Bienvenue", "Willkommen", "Benvenuto", "欢迎", "ようこそ", "환영합니다", "مرحبا", "स्वागत है"];
-const OUT = [0.76, 0, 0.24, 1] as const; // in-out: the lift is a scene change, not a control responding
+const OUT = [0.45, 0, 0.55, 1] as const; // in-out (GSAP power2.inOut): the lift is a scene change, not a control responding
 const noop = () => () => {};
 
 /**
  * A full-screen intro: the words swap one after another, then the panel lifts off the page with a curved bottom edge.
  * Click, tap or Escape skips it, it locks page scroll while it covers the page, and it plays once per tab (`storageKey`).
  * The server HTML already covers the page, so nothing flashes before it; an inline script hides it before the first paint
- * on a repeat visit, and if JavaScript never runs it uncovers the page by itself after a few seconds. The lift is a
- * transform (a bulge rides under the panel), not an animated border radius, so it never repaints the whole screen.
- * Reduced motion: one word, then the panel fades out.
+ * on a repeat visit, and if JavaScript never runs it uncovers the page by itself after a few seconds. As it lifts, both
+ * bottom corners round to 50%, so the edge leaving the page is one curve. Reduced motion: one word, then the panel fades out.
  */
 export function Preloader({ words = WELCOME, duration = 2.4, storageKey = "preloader-seen", onDone, contained = false, className, style, ...rest }: PreloaderProps) {
   const reduce = useReducedMotion();
@@ -94,8 +93,15 @@ export function Preloader({ words = WELCOME, duration = 2.4, storageKey = "prelo
       aria-live="polite"
       onClick={() => setPhase("lift")}
       initial={false}
-      animate={phase === "lift" ? (reduce ? { opacity: 0 } : { transform: "translateY(-100%)" }) : { opacity: 1, transform: "translateY(0%)" }}
-      transition={{ duration: reduce ? 0.3 : 0.9, ease: OUT }}
+      // ponytail: the radius repaints the panel for the 1s lift only; a clip-path ellipse if that ever shows in a trace
+      animate={
+        phase === "lift"
+          ? reduce
+            ? { opacity: 0 }
+            : { opacity: 1, y: "-100%", borderBottomLeftRadius: "50%", borderBottomRightRadius: "50%" }
+          : { opacity: 1, y: "0%", borderBottomLeftRadius: "0%", borderBottomRightRadius: "0%" }
+      }
+      transition={{ duration: reduce ? 0.3 : 1, ease: OUT }}
       onAnimationComplete={() => phase === "lift" && finish()}
       className={cn(contained ? "absolute" : "fixed", "inset-0 z-[9999] grid cursor-pointer place-items-center bg-foreground text-background", className)}
       style={{ animation: `preloader-failsafe 0s linear ${duration + 3}s forwards`, ...style }}
@@ -104,8 +110,6 @@ export function Preloader({ words = WELCOME, duration = 2.4, storageKey = "prelo
       {/* no JavaScript: uncover the page 3s after the words would have ended. Seen before: hide it before the first paint, no flash */}
       <style>{`@keyframes preloader-failsafe{to{visibility:hidden}}html[data-preloader-seen] [data-preloader]{display:none}`}</style>
       {key && !hydrated && <script dangerouslySetInnerHTML={{ __html: `try{if(sessionStorage.getItem(${key})==="1")document.documentElement.dataset.preloaderSeen=""}catch(e){}` }} />}
-      {/* the bulge under the panel: off screen while it covers the page, the curved edge while it lifts */}
-      <div aria-hidden className="absolute top-full left-[-10%] h-[18svh] w-[120%] -translate-y-px rounded-b-[50%] bg-foreground" />
       <div aria-hidden className="relative h-16 overflow-hidden text-3xl">
         <AnimatePresence initial={false} mode="popLayout">
           <motion.span

@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, useAnimationFrame, useInView, useMotionValue, useMotionValueEvent, useReducedMotion, useScroll, useVelocity } from "motion/react";
-import { useEffect, useRef, useState, type ComponentProps, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ComponentProps, type ReactNode, type RefObject } from "react";
 import { cn } from "@/lib/utils";
 
 export interface ScrollMarqueeProps extends Omit<ComponentProps<"div">, "ref" | "onDrag" | "onDragStart" | "onDragEnd" | "onAnimationStart"> {
@@ -11,6 +11,8 @@ export interface ScrollMarqueeProps extends Omit<ComponentProps<"div">, "ref" | 
   speed?: number;
   /** Which way it runs before the first scroll. Scrolling down runs it left, scrolling up runs it right. */
   direction?: "left" | "right";
+  /** Follow a scrolling box instead of the page. */
+  container?: RefObject<HTMLElement | null>;
 }
 
 /**
@@ -20,7 +22,7 @@ export interface ScrollMarqueeProps extends Omit<ComponentProps<"div">, "ref" | 
  * repeats are inert, so links inside are not doubled).
  * Reduced motion: it stands still.
  */
-export function ScrollMarquee({ children, speed = 80, direction = "left", className, ...rest }: ScrollMarqueeProps) {
+export function ScrollMarquee({ children, speed = 80, direction = "left", container, className, ...rest }: ScrollMarqueeProps) {
   const root = useRef<HTMLDivElement>(null);
   const first = useRef<HTMLDivElement>(null);
   const reduce = useReducedMotion();
@@ -30,7 +32,7 @@ export function ScrollMarquee({ children, speed = 80, direction = "left", classN
   const copy = useRef(0);
   const [count, setCount] = useState(2);
 
-  const { scrollY } = useScroll();
+  const { scrollY } = useScroll({ container });
   useMotionValueEvent(useVelocity(scrollY), "change", (v) => {
     if (v) dir.current = v > 0 ? -1 : 1;
   });

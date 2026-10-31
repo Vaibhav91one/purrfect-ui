@@ -13,13 +13,13 @@ import { ParallaxColumns } from "@/registry/parallax-columns/parallax-columns";
 import { ScrollReveal } from "@/registry/scroll-reveal/scroll-reveal";
 import { GlideTabs as Tabs } from "@/registry/glide-tabs/glide-tabs";
 import { StretchSwitch as Toggle } from "@/registry/stretch-switch/stretch-switch";
-import CurtainRevealDemo from "@/registry/curtain-reveal/demo";
+import { CurtainReveal } from "@/registry/curtain-reveal/curtain-reveal";
+import { ScrollMarquee } from "@/registry/scroll-marquee/scroll-marquee";
 import DisplacementDemo from "@/registry/displacement/demo";
 import FillButtonDemo from "@/registry/fill-button/demo";
 import HoverPreviewDemo from "@/registry/hover-preview/demo";
 import PreloaderDemo from "@/registry/preloader/demo";
 import RollLinkDemo from "@/registry/roll-link/demo";
-import ScrollMarqueeDemo from "@/registry/scroll-marquee/demo";
 import { useTick } from "./use-tick";
 
 /** What the dialog hands every demo: the Loop switch, the Speed slider and the component's own extras. `playing` undefined = a still card. */
@@ -207,7 +207,34 @@ function ParallaxLoop({ playing, speed }: DemoProps) {
   );
 }
 
-const PATH_ITEMS = ["Alpha", "Beta", "Gamma", "Delta", "Epsilon"].map((name) => (
+// the box scrolls the marquee, so it flips each time the loop turns back up
+function MarqueeLoop({ playing, speed }: DemoProps) {
+  const box = useRef<HTMLDivElement>(null);
+  return (
+    <ScrollBox playing={playing} speed={speed} boxRef={box}>
+      <div className="flex h-[40rem] items-center">
+        <ScrollMarquee container={box} className="w-full">
+          <p className="pr-12 text-7xl font-medium whitespace-nowrap">Scroll to flip me —</p>
+        </ScrollMarquee>
+      </div>
+    </ScrollBox>
+  );
+}
+
+// sticky works inside a scrolling box as it does on the page, so this is the real component
+function CurtainLoop({ playing, speed }: DemoProps) {
+  const box = useRef<HTMLDivElement>(null);
+  return (
+    <ScrollBox playing={playing} speed={speed} boxRef={box}>
+      <section className="grid h-72 place-items-center bg-muted text-3xl">Scroll down</section>
+      <CurtainReveal height="18rem" className="grid place-items-center">
+        <p className="text-4xl font-medium">Let&apos;s work together</p>
+      </CurtainReveal>
+    </ScrollBox>
+  );
+}
+
+const PATH_ITEMS =["Alpha", "Beta", "Gamma", "Delta", "Epsilon"].map((name) => (
   <div key={name} className="grid size-full place-items-center rounded-[32px] bg-muted text-xl font-light">
     {name}
   </div>
@@ -247,9 +274,9 @@ export const DEMOS: Record<string, (p: DemoProps) => ReactNode> = {
   "path-carousel": PathLoop,
   displacement: DisplacementDemo,
   "hover-preview": HoverPreviewDemo,
-  "scroll-marquee": ScrollMarqueeDemo,
+  "scroll-marquee": MarqueeLoop,
   "roll-link": RollLinkDemo,
-  "curtain-reveal": CurtainRevealDemo,
+  "curtain-reveal": CurtainLoop,
   preloader: PreloaderDemo,
   "cursor-follower": CursorStill,
   "fill-button": FillButtonDemo,
