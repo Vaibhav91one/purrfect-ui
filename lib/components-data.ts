@@ -59,7 +59,7 @@ export const COMPONENTS: ComponentItem[] = [
   item("path-carousel", "Path carousel", "Layout", "Items ride a curved path, the centre one biggest; scroll, swipe or use the arrows to rotate.", [560, 300]),
   item("displacement", "Displacement", "Display", "An image or painted canvas that bends around the pointer like wet glass, with a colour split and grain.", [600, 340]),
   item("hover-preview", "Hover preview", "Navigation", "A list of links where hovering a row floats a preview card that trails the pointer.", [760, 420]),
-  item("scroll-marquee", "Scroll marquee", "Text", "A marquee that flips direction with the page scroll.", [760, 200]),
+  item("scroll-marquee", "Scroll marquee", "Text", "A marquee that flips direction with the page scroll.", [1000, 320]),
   item("roll-link", "Roll link", "Navigation", "A link whose label rolls over on a 3D axis on hover or focus."),
   item("curtain-reveal", "Curtain reveal", "Layout", "A panel the page lifts away from as you scroll, like a curtain.", [560, 420]),
   item("preloader", "Preloader", "Display", "A full-screen intro whose words swap in turn before the panel lifts off with a curved edge.", [480, 320]),

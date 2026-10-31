@@ -134,15 +134,15 @@ async function render(slug, clip, base, browser) {
   const mode = clip.interact ?? "hover";
   const dir = mkdtempSync(path.join(tmpdir(), `clip-${slug}-`));
   const ctx = await browser.newContext({ viewport: { width: W, height: H }, deviceScaleFactor: DPR });
-  // the site's welcome animation is skipped on a repeat visit in the same tab
-  await ctx.addInitScript(() => {
+  // the site's welcome animation is skipped on a repeat visit in the same tab (unless the clip is of that animation: fresh)
+  await ctx.addInitScript((fresh) => {
     try {
-      sessionStorage.setItem("seenPreloader", "1");
+      if (!fresh) sessionStorage.setItem("seenPreloader", "1");
     } catch {}
     // motion runs opacity through the Web Animations API, which the virtual clock does not delay, while it drives
     // transforms from its own JS clock: an entrance would fade in long before it moves. Without WAAPI both share one clock.
     delete Element.prototype.animate;
-  });
+  }, !!clip.fresh);
   const page = await ctx.newPage();
   const mixer = await ctx.newPage(); // blank page that composes frames
   await mixer.goto("about:blank");
