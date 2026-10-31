@@ -88,5 +88,29 @@
     "href": "https://mapinly.vaibhavtomar.com",
     "w": 960,
     "h": 704
+  },
+  "counter-loader": {
+    "label": "poinu.vercel.app",
+    "href": "https://poinu.vercel.app/about",
+    "w": 960,
+    "h": 704
+  },
+  "sticker-cover": {
+    "label": "poinu.vercel.app",
+    "href": "https://poinu.vercel.app",
+    "w": 960,
+    "h": 704
+  },
+  "inertia-gallery": {
+    "label": "poinu.vercel.app",
+    "href": "https://poinu.vercel.app",
+    "w": 960,
+    "h": 704
+  },
+  "fit-title": {
+    "label": "poinu.vercel.app",
+    "href": "https://poinu.vercel.app/shop",
+    "w": 960,
+    "h": 704
   }
 }

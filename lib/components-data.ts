@@ -72,6 +72,10 @@ export const COMPONENTS: ComponentItem[] = [
   item("star-rise", "Star rise", "Display", "A liquid-metal asterisk that rises into place, then turns as you scroll.", [1000, 560]),
   item("marquee-rows", "Marquee rows", "Text", "Big text rows that swap to a coloured scrolling band on hover, focus or tap.", [1000, 560]),
   item("peek-card", "Peek card", "Display", "A card whose image zooms and info panel slides up on hover, with a wide row variant.", [1000, 760]),
+  item("counter-loader", "Counter loader", "Display", "A full-screen intro whose counter rolls to 100 while stickers pile up, then a block wipes up and it lifts away.", [480, 320]),
+  item("sticker-cover", "Sticker cover", "Navigation", "A page-transition sheet that rises, swaps the page, pops a sticker and lifts away.", [480, 320]),
+  item("inertia-gallery", "Inertia gallery", "Layout", "An endless strip of frames you push with the wheel or a drag; it coasts, snaps by intent and morphs between list and slider.", [900, 560]),
+  item("fit-title", "Fit title", "Text", "One line of display type sized to exactly fill its container, rising out of a mask on first view.", [480, 260]),
   item("fill-button", "Fill button", "Input", "An outlined pill whose fill sweeps in from the left and out to the right."),
 ];
 

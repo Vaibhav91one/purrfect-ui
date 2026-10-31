@@ -5,7 +5,7 @@ import { Notch } from "./notch";
 const frame = (...kids: ReactNode[]) => (
   <div className="flex flex-col gap-6 p-4">
     {kids.map((k, i) => (
-      <div key={i} className="relative h-40 overflow-hidden rounded-3xl bg-gradient-to-b from-sky-700 to-sky-300">
+      <div key={i} className="relative h-40 overflow-hidden rounded-3xl bg-[url(/demo/valley.jpg)] bg-cover bg-center">
         {k}
       </div>
     ))}

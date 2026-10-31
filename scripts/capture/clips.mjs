@@ -7,6 +7,8 @@ export const MAPINLY = "https://mapinly.vaibhavtomar.com";
 export const POINU = "https://poinu.vercel.app";
 // Mapinly asks for a language once per browser; every Mapinly clip marks it answered
 const ML = { hasSeenLocaleDialog: "true" };
+// Poinu marks its loader and gallery intro seen per tab
+const PS = { "poinu-loader": "1", "poinu-gallery": "1" };
 export const BOUNTYDESK = "https://bountydesk.vaibhav.quest";
 // interact: hover | click (toggle: seconds until a second click) | scroll (target scrolled through the viewport) | load (the
 // page's own entrance; start is a page expression that turns true on its first frame; focus + zoom aim the camera).
@@ -34,6 +36,12 @@ export const CLIPS = {
   "star-rise": { site: MAPINLY, interact: "load", fresh: true, start: "(() => { const e = document.querySelector('main > section:first-of-type [data-intro]'); if (!e) return false; const t = getComputedStyle(e).transform; return t !== 'none' && new DOMMatrix(t).m42 < innerHeight * 0.98; })()", seconds: 4.2, local: ML, label: "mapinly.vaibhavtomar.com" },
   "marquee-rows": { site: MAPINLY, target: 'div.cursor-pointer[class*="h-[8rem]"]', interact: "hover", session: { "mapinly-intro": "1" }, local: ML, label: "mapinly.vaibhavtomar.com" },
   "peek-card": { site: MAPINLY, target: "[data-slot=carousel-item]:first-child", interact: "hover", session: { "mapinly-intro": "1" }, local: ML, label: "mapinly.vaibhavtomar.com" },
+  // Poinu: the intro skipped (session) except for counter-loader, which plays its own; on / it hands off into the gallery,
+  // so it is recorded landing on /about, where it wipes and lifts like the component
+  "counter-loader": { site: `${POINU}/about`, interact: "load", fresh: true, realtime: true, start: "!!document.querySelector('.ui-ld')", seconds: 3.4, label: "poinu.vercel.app" },
+  "sticker-cover": { site: POINU, target: 'nav[aria-label="Primary"] a:not([aria-current])', interact: "click", realtime: true, stay: 2.2, zoom: 1, session: PS, label: "poinu.vercel.app" },
+  "inertia-gallery": { site: POINU, target: '[role=group][aria-label="Work view"] button:last-child', interact: "click", realtime: true, stay: 2.4, zoom: 1, session: PS, label: "poinu.vercel.app" },
+  "fit-title": { site: `${POINU}/shop`, interact: "load", realtime: true, start: "!!document.querySelector('h1.ui-mk')", seconds: 2.5, session: PS, label: "poinu.vercel.app" },
   "fill-button": { target: '[class*="isolate"][class*="rounded-full"]', interact: "hover", label: "vaibhavtomar.com" },
   "scroll-reveal": { site: ARMOUR, target: 'p[class*="flex-wrap"][class*="leading-[1.1]"]', interact: "scroll", seconds: 4.5, endAt: 0.12, label: "armour.vaibhavtomar.com" },
 };

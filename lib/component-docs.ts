@@ -509,4 +509,103 @@ import { RollLink } from "@/components/ui/roll-link";
       "Reduced motion: no fade-up travel, no zoom, no spin, and the panel's details fade in place instead of sliding.",
     ],
   },
+  "counter-loader": {
+    usage: `import { CounterLoader } from "@/components/ui/counter-loader";
+
+// in your root layout, once
+<CounterLoader />
+<CounterLoader stickers={[<img key="a" src="/a.webp" alt="" />, <img key="b" src="/b.webp" alt="" />]} steps={[0, 42, 100]} onDone={() => console.log("in")} />`,
+    props: [
+      { name: "stickers", type: "ReactNode[]", default: "4 token-coloured shapes", description: "Popped one by one into a fanned pile while the counter runs; [] for none." },
+      { name: "steps", type: "number[]", default: "[0, 27, 64, 100]", description: "The numbers the counter rolls through." },
+      { name: "duration", type: "number", default: "1.4", description: "Seconds the counter takes, before the block wipes up." },
+      { name: "storageKey", type: "string | false", default: '"counter-loader-seen"', description: "sessionStorage key that makes it play once per tab; false plays it every load." },
+      { name: "onDone", type: "() => void", description: "Called once the page is uncovered (right away when already seen)." },
+      { name: "contained", type: "boolean", default: "false", description: "Fill the nearest relative parent and leave page scroll alone: for a card or preview." },
+    ],
+    behaviors: [
+      "The counter rolls through the steps while the stickers pop into a fanned pile; they pop back out, a block wipes up, and the loader lifts away (transforms only).",
+      "Click, tap or Escape skips it. It locks page scroll while it covers the page, padding for the scrollbar.",
+      "On a repeat visit an inline script hides it before the first paint; with no JavaScript it uncovers the page by itself.",
+      "Reduced motion: the number jumps from step to step, the stickers appear without the pop, and the loader fades out.",
+    ],
+  },
+  "sticker-cover": {
+    usage: `import { StickerCover, type StickerCoverHandle } from "@/components/ui/sticker-cover";
+
+const cover = useRef<StickerCoverHandle>(null);
+<StickerCover ref={cover} sticker={<img src="/sticker.webp" alt="" className="size-40" />}>{page}</StickerCover>
+<button onClick={() => cover.current?.play(() => setPage("about"))}>About</button>
+
+// Next App Router (in a client layout): resolve once the new route has committed
+const router = useRouter();
+const path = usePathname();
+const done = useRef<() => void>(undefined);
+useEffect(() => done.current?.(), [path]);
+const go = (href: string) => href !== path && cover.current?.play(() => new Promise<void>((r) => { done.current = r; router.push(href); }));`,
+    props: [
+      { name: "ref", type: "Ref<StickerCoverHandle>", description: "ref.current.play(change, { instant }) plays the cover; resolves once it has lifted." },
+      { name: "sticker", type: "ReactNode", description: "Pops in at the centre once the sheet is up. None: the sheet lifts as soon as the new content has painted." },
+      { name: "duration", type: "number", default: "0.5", description: "Seconds the sheet takes to rise; the lift takes 1.2x." },
+      { name: "contained", type: "boolean", default: "false", description: "Cover the nearest relative parent (give it overflow-hidden) instead of the screen." },
+      { name: "className", type: "string", default: '"bg-foreground"', description: "Classes for the sheet, e.g. its colour (bg-primary)." },
+      { name: "pageClassName", type: "string", description: "Classes for the box around children: the page that drifts up and goes inert." },
+    ],
+    behaviors: [
+      "The sheet rises while the page drifts up 7rem, your change runs, two frames paint, the sticker pops, then the sheet lifts.",
+      "A play() while the sheet is up runs under the same cover (latest wins); one during the lift covers again afterwards. { instant: true } drops it in place for back/forward.",
+      "The sheet is aria-hidden, the page is inert while covered, and focus returns to where it was (or the page box if that element is gone).",
+      "No router dependency and no global attributes; React never re-renders while it plays.",
+      "Reduced motion: a quick crossfade, no drift and no sticker.",
+    ],
+  },
+  "inertia-gallery": {
+    usage: `import { InertiaGallery } from "@/components/ui/inertia-gallery";
+
+<div className="h-[560px]">
+  <InertiaGallery items={[{ src: "/a.jpg", alt: "A", title: "A", href: "/work/a" }, { node: <Art />, title: "B" }]} />
+</div>`,
+    props: [
+      { name: "items", type: "{ src?: string; node?: ReactNode; alt?: string; href?: string; title?: ReactNode }[]", description: "Frames. node draws instead of an image; an empty frame shows bg-muted." },
+      { name: "layout", type: '"list" | "slider"', description: "Controlled layout. Pair with onLayoutChange." },
+      { name: "defaultLayout", type: '"list" | "slider"', default: '"list"', description: "Uncontrolled starting layout." },
+      { name: "onLayoutChange", type: "(layout) => void", description: "Fires when the bar's List / Slider buttons ask for a layout." },
+      { name: "onActiveChange", type: "(index: number) => void", description: "Fires when the centred item changes." },
+      { name: "intro", type: "boolean", default: "false", description: "Play the squares intro the first time it scrolls into view." },
+      { name: "friction", type: "number", default: "0.97", description: "Velocity kept per 60fps frame; higher coasts further." },
+      { name: "frameWidth", type: "number", default: "240", description: "Largest list frame width in px; slider frames are 2x. Both shrink to fit." },
+      { name: "frameHeight", type: "number", default: "320", description: "Largest list frame height in px." },
+      { name: "bar", type: "boolean", default: "true", description: "Bottom bar with title, counter and the List / Slider buttons." },
+      { name: "label", type: "string", default: '"Gallery"', description: "Accessible name." },
+    ],
+    behaviors: [
+      "Wheel or drag adds velocity; the strip coasts, then settles by intent: a nudge returns, anything more moves at least one frame.",
+      "Each image is zoomed past its frame and drifts against the frame's distance from the centre (parallax).",
+      "Switching layout moves every frame to its new spot over 1.5s, outer frames first.",
+      "Arrow keys move one frame and Home / End jump to the ends while the strip has focus; Enter opens the centred frame's link.",
+      "Touch only takes horizontal swipes (touch-action: pan-y), so the page still scrolls on phones.",
+      "The frame loop runs only while something moves and pauses off screen.",
+      "Reduced motion: no parallax or coasting (jumps to the settled frame), layout switches crossfade, no intro.",
+    ],
+  },
+  "fit-title": {
+    usage: `import { FitTitle } from "@/components/ui/fit-title";
+
+<FitTitle>shop</FitTitle>`,
+    props: [
+      { name: "children", type: "string", description: "The title text." },
+      { name: "as", type: '"h1" | "h2" | "p"', default: '"h1"', description: "The element to render." },
+      { name: "min", type: "number", default: "28", description: "Smallest font size in px; a title that would fit smaller wraps instead." },
+      { name: "max", type: "number", description: "Largest font size in px." },
+      { name: "rise", type: "boolean", default: "true", description: "Rise out of a mask the first time it scrolls into view." },
+      { name: "className", type: "string", description: "Font family, weight and colour (the size is computed)." },
+    ],
+    behaviors: [
+      "Fills its container's width exactly; very short titles stop at half the width.",
+      "Sized in CSS with container units, so the first paint is already right; one measurement corrects it, and resizing needs no JS.",
+      "Wraps onto more lines when it would fit smaller than min.",
+      "Rises out of a mask the first time it scrolls into view; with JavaScript off it is simply visible.",
+      "Reduced motion: no rise, a short fade instead.",
+    ],
+  },
 };

@@ -22,6 +22,10 @@ import { states as loadPreloader } from "@/registry/load-preloader/worst-case";
 import { states as starRise } from "@/registry/star-rise/worst-case";
 import { states as marqueeRows } from "@/registry/marquee-rows/worst-case";
 import { states as peekCard } from "@/registry/peek-card/worst-case";
+import { states as counterLoader } from "@/registry/counter-loader/worst-case";
+import { states as stickerCover } from "@/registry/sticker-cover/worst-case";
+import { states as inertiaGallery } from "@/registry/inertia-gallery/worst-case";
+import { states as fitTitle } from "@/registry/fit-title/worst-case";
 
 /** Dev-only worst-case states per component (see /dev). Add a component's `registry/<slug>/worst-case.tsx` here when you port it. */
-export const FIXTURES: Record<string, Record<string, ReactNode>> = { "roll-button": button, magnetic, notch, "hero-reveal": heroReveal, "layered-menu": layeredMenu, "stretch-switch": toggle, counter, "glide-tabs": tabs, "scroll-reveal": scrollReveal, "parallax-columns": parallaxColumns, "path-carousel": pathCarousel, displacement, "hover-preview": hoverPreview, "scroll-marquee": scrollMarquee, "roll-link": rollLink, "curtain-reveal": curtainReveal, preloader, "cursor-follower": cursorFollower, "fill-button": fillButton, "load-preloader": loadPreloader, "star-rise": starRise, "marquee-rows": marqueeRows, "peek-card": peekCard };
+export const FIXTURES: Record<string, Record<string, ReactNode>> = { "roll-button": button, magnetic, notch, "hero-reveal": heroReveal, "layered-menu": layeredMenu, "stretch-switch": toggle, counter, "glide-tabs": tabs, "scroll-reveal": scrollReveal, "parallax-columns": parallaxColumns, "path-carousel": pathCarousel, displacement, "hover-preview": hoverPreview, "scroll-marquee": scrollMarquee, "roll-link": rollLink, "curtain-reveal": curtainReveal, preloader, "cursor-follower": cursorFollower, "fill-button": fillButton, "load-preloader": loadPreloader, "star-rise": starRise, "marquee-rows": marqueeRows, "peek-card": peekCard, "counter-loader": counterLoader, "sticker-cover": stickerCover, "inertia-gallery": inertiaGallery, "fit-title": fitTitle };

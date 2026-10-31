@@ -511,6 +511,95 @@
         "tailwindcss": ">=4",
         "tokens": "shadcn (background, foreground, muted, border, ...): run shadcn init first"
       }
+    },
+    {
+      "name": "counter-loader",
+      "type": "registry:ui",
+      "title": "Counter loader",
+      "description": "A full-screen intro whose counter rolls to 100 while stickers pile up, then a block wipes up and it lifts away.",
+      "dependencies": [
+        "motion@^14.6.0"
+      ],
+      "registryDependencies": [
+        "utils"
+      ],
+      "files": [
+        {
+          "path": "registry/counter-loader/counter-loader.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "meta": {
+        "react": ">=19",
+        "tailwindcss": ">=4",
+        "tokens": "shadcn (background, foreground, muted, border, ...): run shadcn init first"
+      }
+    },
+    {
+      "name": "sticker-cover",
+      "type": "registry:ui",
+      "title": "Sticker cover",
+      "description": "A page-transition sheet that rises, swaps the page, pops a sticker and lifts away.",
+      "dependencies": [
+        "motion@^14.6.0"
+      ],
+      "registryDependencies": [
+        "utils"
+      ],
+      "files": [
+        {
+          "path": "registry/sticker-cover/sticker-cover.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "meta": {
+        "react": ">=19",
+        "tailwindcss": ">=4",
+        "tokens": "shadcn (background, foreground, muted, border, ...): run shadcn init first"
+      }
+    },
+    {
+      "name": "inertia-gallery",
+      "type": "registry:ui",
+      "title": "Inertia gallery",
+      "description": "An endless strip of frames you push with the wheel or a drag; it coasts, snaps by intent, and switches between list and slider.",
+      "registryDependencies": [
+        "utils"
+      ],
+      "files": [
+        {
+          "path": "registry/inertia-gallery/inertia-gallery.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "meta": {
+        "react": ">=19",
+        "tailwindcss": ">=4",
+        "tokens": "shadcn (background, foreground, muted, border, ...): run shadcn init first"
+      }
+    },
+    {
+      "name": "fit-title",
+      "type": "registry:ui",
+      "title": "Fit title",
+      "description": "One line of display type sized to exactly fill its container, rising out of a mask on first view.",
+      "dependencies": [
+        "motion@^14.6.0"
+      ],
+      "registryDependencies": [
+        "utils"
+      ],
+      "files": [
+        {
+          "path": "registry/fit-title/fit-title.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "meta": {
+        "react": ">=19",
+        "tailwindcss": ">=4",
+        "tokens": "shadcn (background, foreground, muted, border, ...): run shadcn init first"
+      }
     }
   ]
 }

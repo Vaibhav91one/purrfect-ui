@@ -2,7 +2,7 @@ import { LayeredMenu } from "./layered-menu";
 
 export default function LayeredMenuDemo() {
   return (
-    <div className="relative h-72 w-full max-w-md overflow-hidden rounded-3xl bg-gradient-to-b from-sky-700 to-sky-300">
+    <div className="relative h-72 w-full max-w-md overflow-hidden rounded-3xl bg-[url(/demo/valley.jpg)] bg-cover bg-center">
       <LayeredMenu
         contained
         delay={0.2}
