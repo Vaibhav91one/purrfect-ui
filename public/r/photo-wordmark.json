@@ -1,0 +1,25 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "photo-wordmark",
+  "title": "Photo wordmark",
+  "description": "A huge wordmark filled with a photo and cropped at the bottom edge, rising out of the crop as it scrolls in.",
+  "dependencies": [
+    "motion@^14.6.0"
+  ],
+  "registryDependencies": [
+    "utils"
+  ],
+  "files": [
+    {
+      "path": "registry/photo-wordmark/photo-wordmark.tsx",
+      "content": "\"use client\";\n\nimport { motion, useScroll, useTransform, type MotionStyle } from \"motion/react\";\nimport { useRef, type ComponentProps, type CSSProperties, type RefObject } from \"react\";\nimport { cn } from \"@/lib/utils\";\n\nexport interface PhotoWordmarkProps extends Omit<ComponentProps<\"div\">, \"children\" | \"ref\" | \"onDrag\" | \"onDragStart\" | \"onDragEnd\" | \"onAnimationStart\"> {\n  /** The word. One line, sized to fill the width. */\n  text: string;\n  /** The photo inside the letters. */\n  src: string;\n  /** The text element. A `p` by default so a footer does not add an h1. */\n  as?: \"p\" | \"h1\" | \"h2\" | \"span\";\n  /** Fraction of the glyph height hidden under the bottom edge, 0 to 0.9. */\n  crop?: number;\n  /** A blurred copy of the photo behind the word, as a glow. */\n  glow?: boolean;\n  /** Follow a scrolling box instead of the page. */\n  container?: RefObject<HTMLElement | null>;\n}\n\n/**\n * A huge wordmark filled with a photo (`background-clip: text`) and cropped at the bottom edge, with an optional blurred\n * copy behind it as a glow (hidden from screen readers, so the word is read once). It fills the width with no measuring:\n * the root is an inline-size container and the font size is `100cqi / (characters x --advance)`, where `--advance` is the\n * font's average glyph width in em (0.75 suits a heavy sans; set `[--advance:0.9]` in className for a wide face). Every\n * offset is in em, so it holds at any size. As it scrolls into view the word rises a little out of the crop and the photo\n * drifts inside the letters, both tied to scroll progress.\n * Reduced motion: static, the word sits at its final crop and the photo stays put.\n */\nexport function PhotoWordmark({ text, src, as = \"p\", crop = 0.3, glow = true, container, className, style, ...rest }: PhotoWordmarkProps) {\n  const root = useRef<HTMLDivElement>(null);\n  const Tag = as;\n  const { scrollYProgress } = useScroll({ target: root, container, offset: [\"start end\", \"end end\"] });\n  const y = useTransform(scrollYProgress, [0, 1], [\"14%\", \"0%\"]);\n  const drift = useTransform(scrollYProgress, [0, 1], [\"20%\", \"100%\"]);\n  const c = Math.min(Math.max(crop, 0), 0.9);\n\n  const fill: CSSProperties = { backgroundImage: `url(\"${src}\")`, WebkitBackgroundClip: \"text\" };\n  const word = \"block whitespace-nowrap bg-cover bg-clip-text text-transparent [background-position:50%_var(--drift)]\";\n\n  return (\n    <div\n      ref={root}\n      className={cn(\"@container overflow-x-visible overflow-y-clip [--advance:0.75]\", className)}\n      style={{ \"--chars\": Math.max(Array.from(text).length, 1), ...style } as CSSProperties}\n      {...rest}\n    >\n      {/* room above for the glow; the box ends (1 - crop) em down, so the rest of the glyphs is clipped */}\n      <div className=\"pt-[0.1em] text-[length:calc(100cqi/(var(--chars)*var(--advance)))] leading-none\" style={{ height: `calc(0.1em + ${1 - c}em)` }}>\n        {/* check-ignore: gpu-props background-position is the photo drift, a scroll-linked paint the source already pays for */}\n        <motion.div\n          style={{ y, \"--drift\": drift } as MotionStyle}\n          className=\"relative will-change-transform motion-reduce:transform-none! motion-reduce:[--drift:100%]!\"\n        >\n          {glow && (\n            <span aria-hidden className={cn(word, \"absolute inset-0 opacity-80 blur-[0.04em] select-none\")} style={fill}>\n              {text}\n            </span>\n          )}\n          <Tag className={cn(word, \"relative\")} style={fill}>\n            {text}\n          </Tag>\n        </motion.div>\n      </div>\n    </div>\n  );\n}\n",
+      "type": "registry:ui"
+    }
+  ],
+  "meta": {
+    "react": ">=19",
+    "tailwindcss": ">=4",
+    "tokens": "shadcn (background, foreground, muted, border, ...): run shadcn init first"
+  },
+  "type": "registry:ui"
+}

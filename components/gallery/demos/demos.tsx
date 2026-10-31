@@ -30,6 +30,10 @@ import CounterLoaderDemo from "@/registry/counter-loader/demo";
 import StickerCoverDemo from "@/registry/sticker-cover/demo";
 import InertiaGalleryDemo from "@/registry/inertia-gallery/demo";
 import FitTitleDemo from "@/registry/fit-title/demo";
+import FanOutCardsDemo from "@/registry/fan-out-cards/demo";
+import StatRotatorDemo from "@/registry/stat-rotator/demo";
+import ShimmerTextDemo from "@/registry/shimmer-text/demo";
+import { PhotoWordmark } from "@/registry/photo-wordmark/photo-wordmark";
 import RollLinkDemo from "@/registry/roll-link/demo";
 import { useTick } from "./use-tick";
 
@@ -237,6 +241,31 @@ function MarqueeLoop({ playing, speed }: DemoProps) {
   );
 }
 
+// the box scrolls the footer in, so the word rises out of its crop and the photo drifts, then back
+function WordmarkLoop({ playing, speed }: DemoProps) {
+  const box = useRef<HTMLDivElement>(null);
+  return (
+    <ScrollBox playing={playing} speed={speed} boxRef={box} className="h-full max-w-none">
+      <div className="grid h-full place-items-center text-3xl text-muted-foreground">↓ Scroll</div>
+      <div className="h-1/3" />
+      <footer className="overflow-hidden rounded-3xl border border-border bg-card px-10 pt-10 text-card-foreground">
+        <div className="grid grid-cols-3 gap-8 text-lg">
+          <p className="font-medium">Armour</p>
+          <ul className="space-y-1 text-muted-foreground">
+            <li>Shop</li>
+            <li>Journal</li>
+          </ul>
+          <ul className="space-y-1 text-muted-foreground">
+            <li>Instagram</li>
+            <li>Contact</li>
+          </ul>
+        </div>
+        <PhotoWordmark text="ARMOUR" src="/demo/field.jpg" container={box} className="mt-12 font-black tracking-tight" />
+      </footer>
+    </ScrollBox>
+  );
+}
+
 // sticky works inside a scrolling box as it does on the page, so this is the real component
 function CurtainLoop({ playing, speed }: DemoProps) {
   const box = useRef<HTMLDivElement>(null);
@@ -316,6 +345,10 @@ export const DEMOS: Record<string, (p: DemoProps) => ReactNode> = {
   "sticker-cover": StickerCoverDemo,
   "inertia-gallery": InertiaGalleryDemo,
   "fit-title": FitTitleDemo,
+  "fan-out-cards": FanOutCardsDemo,
+  "stat-rotator": StatRotatorDemo,
+  "shimmer-text": ShimmerTextDemo,
+  "photo-wordmark": WordmarkLoop,
   "cursor-follower": CursorLoop,
   "fill-button": FillButtonDemo,
 };

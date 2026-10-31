@@ -42,6 +42,10 @@ export const CLIPS = {
   "sticker-cover": { site: POINU, target: 'nav[aria-label="Primary"] a:not([aria-current])', interact: "click", realtime: true, stay: 2.2, zoom: 1, session: PS, label: "poinu.vercel.app" },
   "inertia-gallery": { site: POINU, target: '[role=group][aria-label="Work view"] button:last-child', interact: "click", realtime: true, stay: 2.4, zoom: 1, session: PS, label: "poinu.vercel.app" },
   "fit-title": { site: `${POINU}/shop`, interact: "load", realtime: true, start: "!!document.querySelector('h1.ui-mk')", seconds: 2.5, session: PS, label: "poinu.vercel.app" },
+  // Armour, batch 3 (stat-rotator has no clip: Armour shows it only below 1024px and clips are desktop width)
+  "fan-out-cards": { site: ARMOUR, target: 'article[class*="min-h-[104px]"]', interact: "scroll", seconds: 4, label: "armour.vaibhavtomar.com" },
+  "shimmer-text": { site: ARMOUR, target: ".rounded-full > span.bg-clip-text", interact: "hover", label: "armour.vaibhavtomar.com" },
+  "photo-wordmark": { site: ARMOUR, target: "footer h1:not([aria-hidden])", interact: "scroll", label: "armour.vaibhavtomar.com" },
   "fill-button": { target: '[class*="isolate"][class*="rounded-full"]', interact: "hover", label: "vaibhavtomar.com" },
   "scroll-reveal": { site: ARMOUR, target: 'p[class*="flex-wrap"][class*="leading-[1.1]"]', interact: "scroll", seconds: 4.5, endAt: 0.12, label: "armour.vaibhavtomar.com" },
 };

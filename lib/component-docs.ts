@@ -608,4 +608,92 @@ const go = (href: string) => href !== path && cover.current?.play(() => new Prom
       "Reduced motion: no rise, a short fade instead.",
     ],
   },
+  "fan-out-cards": {
+    usage: `import { FanOutCards } from "@/components/ui/fan-out-cards";
+
+<FanOutCards
+  className="h-[480px]"
+  center={<img src="/phone.png" alt="" className="h-72 rounded-3xl" />}
+  cards={[
+    { x: -30, y: -25, rotate: -6, content: <p>Your AAPL position is up 12%</p> },
+    { x: 30, y: -25, rotate: 6, content: <p>On track to save $400 this month</p> },
+    { x: -32, y: 25, rotate: 5, content: <p>Rebalancing opportunity detected</p> },
+  ]}
+/>`,
+    props: [
+      { name: "cards", type: "{ content, x, y, rotate? }[]", description: "x and y are where each card's centre lands, in % of the container from its centre (-50 is the left or top edge); rotate is the tilt in degrees." },
+      { name: "center", type: "ReactNode", description: "Something in the middle that the cards fan out from: a phone, a photo, a pill." },
+      { name: "stagger", type: "number", default: "0.08", description: "Seconds between one card leaving the stack and the next." },
+      { name: "cardClassName", type: "string", description: "Classes for every card box (w-64 by default)." },
+    ],
+    behaviors: [
+      "Plays once, when 30% of the group is in view.",
+      "Offsets are container-relative, so the fan scales with its box; give the root a height (480px by default).",
+      "Each card springs out from the centre, tilting as it goes, while its opacity and scale ease in.",
+      "Reduced motion: the cards are already in place and tilted, and only fade in.",
+    ],
+  },
+  "stat-rotator": {
+    usage: `import { StatRotator } from "@/components/ui/stat-rotator";
+
+<StatRotator
+  stats={[
+    { value: "3.2x", label: "Faster savings growth" },
+    { value: "$1.2M", label: "Saved in year one" },
+    { value: "98%", label: "Hit their monthly goal" },
+  ]}
+/>`,
+    props: [
+      { name: "stats", type: "{ value: string; label: ReactNode; description?: ReactNode }[]", description: 'value holds one number ("3.2x", "$1.2M", "12,400"); the number counts up, the prefix and suffix stay put. A value with no number shows as text.' },
+      { name: "interval", type: "number", default: "3.6", description: "Seconds each stat stays up before the next rises in." },
+      { name: "className", type: "string", description: "Classes on the root (card plus dots)." },
+    ],
+    behaviors: [
+      "Every interval the card lifts out 38px and the next rises in from below (0.45s).",
+      "The number counts up from 0 over 2.2s on odometer digit columns, driven by one motion value (no re-render per frame).",
+      "Rotation pauses on mouse hover, while focus is inside, and while the card is off screen.",
+      "Pill dots are buttons that jump to a stat; the current one stretches and has aria-current.",
+      "Silent to screen readers while it rotates by itself; once a dot is used, each new stat is announced once, never the counting digits.",
+      "Reduced motion: cards cross-fade in place and the number shows its final value.",
+    ],
+  },
+  "shimmer-text": {
+    usage: `import { ShimmerText } from "@/components/ui/shimmer-text";
+
+<ShimmerText>Thinking…</ShimmerText>
+<ShimmerText as="p" duration={2} className="text-sm font-medium">Generating report…</ShimmerText>`,
+    props: [
+      { name: "as", type: "ElementType", default: '"span"', description: "The element to render (p, h2, div...)." },
+      { name: "duration", type: "number", default: "2.8", description: "Seconds for one linear sweep of the band." },
+      { name: "className", type: "string", description: "Merged onto the root; set size and weight here." },
+    ],
+    behaviors: [
+      "The base colour is muted-foreground and the band is foreground, both from tokens, so it reads on light and dark backgrounds.",
+      "One CSS keyframe moves background-position, with no JavaScript per frame. It pauses while off screen.",
+      "The text is a single node, so screen readers read it once.",
+      "Reduced motion: it stands still in muted-foreground, fully readable.",
+    ],
+  },
+  "photo-wordmark": {
+    usage: `import { PhotoWordmark } from "@/components/ui/photo-wordmark";
+
+<footer className="overflow-hidden">
+  <PhotoWordmark text="ARMOUR" src="/field.jpg" className="font-black tracking-tight" />
+</footer>`,
+    props: [
+      { name: "text", type: "string", description: "The word. One line, sized to fill the width." },
+      { name: "src", type: "string", description: "The photo inside the letters." },
+      { name: "as", type: '"p" | "h1" | "h2" | "span"', default: '"p"', description: "The text element. A p so a footer does not add an h1." },
+      { name: "crop", type: "number", default: "0.3", description: "Fraction of the glyph height hidden under the bottom edge, 0 to 0.9." },
+      { name: "glow", type: "boolean", default: "true", description: "A blurred copy of the photo behind the word." },
+      { name: "container", type: "RefObject<HTMLElement | null>", default: "the page", description: "Follow a scrolling box instead of the page." },
+      { name: "className", type: "string", description: "Font family and tracking. Set [--advance:0.9] for a wider face (average glyph width in em, default 0.75)." },
+    ],
+    behaviors: [
+      "Fills its width with no measuring: a cqi font size from the character count and --advance.",
+      "Scrolling it into view raises the word a little out of the crop and drifts the photo inside the letters.",
+      "The glow copy is aria-hidden, so the word is read once.",
+      "Reduced motion: static, at its final crop with the photo still.",
+    ],
+  },
 };

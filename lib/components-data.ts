@@ -31,8 +31,8 @@ export type ComponentItem = {
   fill?: boolean;
 };
 
-const REPLAY = new Set(["notch", "hero-reveal"]);
-const FILL = new Set(["scroll-marquee"]);
+const REPLAY = new Set(["notch", "hero-reveal", "fan-out-cards"]);
+const FILL = new Set(["scroll-marquee", "photo-wordmark"]);
 
 const item = (slug: string, name: string, category: string, description: string, nat: [number, number] = [420, 300], extras?: Extra[]): ComponentItem => ({
   slug,
@@ -76,6 +76,10 @@ export const COMPONENTS: ComponentItem[] = [
   item("sticker-cover", "Sticker cover", "Navigation", "A page-transition sheet that rises, swaps the page, pops a sticker and lifts away.", [480, 320]),
   item("inertia-gallery", "Inertia gallery", "Layout", "An endless strip of frames you push with the wheel or a drag; it coasts, snaps by intent and morphs between list and slider.", [900, 560]),
   item("fit-title", "Fit title", "Text", "One line of display type sized to exactly fill its container, rising out of a mask on first view.", [480, 260]),
+  item("fan-out-cards", "Fan-out cards", "Layout", "Cards that start stacked in the centre and spring out to their own tilted spots when scrolled into view.", [900, 520]),
+  item("stat-rotator", "Stat rotator", "Display", "A glass card that cycles through stats, each number counting up on rolling digits.", [360, 400]),
+  item("shimmer-text", "Shimmer text", "Text", "Text with a light band sweeping across it, for labels that say something is running.", [420, 300]),
+  item("photo-wordmark", "Photo wordmark", "Text", "A huge wordmark filled with a photo, cropped at the bottom and rising out of the crop as it scrolls in.", [800, 320]),
   item("fill-button", "Fill button", "Input", "An outlined pill whose fill sweeps in from the left and out to the right."),
 ];
 
