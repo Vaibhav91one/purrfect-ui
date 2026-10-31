@@ -210,18 +210,16 @@ function ParallaxLoop({ playing, speed }: DemoProps) {
   );
 }
 
-// the box scrolls the marquee, so it flips each time the loop turns back up; it is pinned, so it is in view from the first frame
+// the box scrolls the marquee into view under a "Scroll" hint, and it flips each time the loop turns back up
 function MarqueeLoop({ playing, speed }: DemoProps) {
   const box = useRef<HTMLDivElement>(null);
   return (
     <ScrollBox playing={playing} speed={speed} boxRef={box} className="h-full max-w-none">
-      <div className="h-[300%]">
-        <div className="sticky top-0 flex h-[calc(100%/3)] flex-col justify-center gap-6">
-          <ScrollMarquee container={box} className="w-full">
-            <p className="pr-16 text-8xl font-medium whitespace-nowrap">Scroll to flip me —</p>
-          </ScrollMarquee>
-          <span className="text-center text-3xl text-muted-foreground">↕ Scroll</span>
-        </div>
+      <div className="grid h-full place-items-center text-3xl text-muted-foreground">↓ Scroll</div>
+      <div className="flex h-full items-center">
+        <ScrollMarquee container={box} className="w-full">
+          <p className="pr-16 text-8xl font-medium whitespace-nowrap">Scroll to flip me —</p>
+        </ScrollMarquee>
       </div>
     </ScrollBox>
   );
