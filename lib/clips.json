@@ -112,5 +112,23 @@
     "href": "https://poinu.vercel.app/shop",
     "w": 960,
     "h": 704
+  },
+  "fan-out-cards": {
+    "label": "armour.vaibhavtomar.com",
+    "href": "https://armour.vaibhavtomar.com",
+    "w": 960,
+    "h": 704
+  },
+  "shimmer-text": {
+    "label": "armour.vaibhavtomar.com",
+    "href": "https://armour.vaibhavtomar.com",
+    "w": 960,
+    "h": 704
+  },
+  "photo-wordmark": {
+    "label": "armour.vaibhavtomar.com",
+    "href": "https://armour.vaibhavtomar.com",
+    "w": 960,
+    "h": 704
   }
 }

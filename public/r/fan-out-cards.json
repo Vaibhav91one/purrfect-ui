@@ -1,0 +1,25 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "fan-out-cards",
+  "title": "Fan-out cards",
+  "description": "Cards that start stacked in the centre and spring out to their own tilted spots when scrolled into view.",
+  "dependencies": [
+    "motion@^14.6.0"
+  ],
+  "registryDependencies": [
+    "utils"
+  ],
+  "files": [
+    {
+      "path": "registry/fan-out-cards/fan-out-cards.tsx",
+      "content": "\"use client\"; // check-ignore: use-client-unneeded the variants are functions (custom), which cannot cross from a server component\n\nimport { motion, type Variants } from \"motion/react\";\nimport type { CSSProperties, ComponentProps, ReactNode } from \"react\";\nimport { cn } from \"@/lib/utils\";\n\nexport type FanOutCard = {\n  content: ReactNode;\n  /** Where the card's centre lands, in % of the container's width from its centre (-50 is the left edge). */\n  x: number;\n  /** Where the card's centre lands, in % of the container's height from its centre (-50 is the top edge). */\n  y: number;\n  /** Tilt in degrees once it lands. */\n  rotate?: number;\n};\n\nexport interface FanOutCardsProps extends Omit<ComponentProps<\"div\">, \"children\" | \"ref\" | \"onDrag\" | \"onDragStart\" | \"onDragEnd\" | \"onAnimationStart\"> {\n  cards: FanOutCard[];\n  /** Something in the middle that the cards fan out from: a phone, a photo, a pill. */\n  center?: ReactNode;\n  /** Seconds between one card leaving the stack and the next. */\n  stagger?: number;\n  /** Classes for every card box (its width: 16rem by default). */\n  cardClassName?: string;\n}\n\nconst EASE = [0.22, 1, 0.36, 1] as const;\nconst SPRING = { type: \"spring\", stiffness: 210, damping: 20, mass: 0.75 } as const;\n\n/**\n * Cards that start stacked in the centre and spring out to their own spots, tilted, when the group scrolls into view,\n * one after another. Offsets are percentages of the container (each card rides a full-size layer, so \"30%\" of that layer\n * is 30% of the container), which means the fan scales with whatever box it is in: no pixel offsets, no media queries.\n * Give the root a height. It plays once. Reduced motion: the cards are already in place and only fade in.\n */\nexport function FanOutCards({ cards, center, stagger = 0.08, cardClassName, className, ...rest }: FanOutCardsProps) {\n  const layer: Variants = {\n    hidden: { x: \"0%\", y: \"0%\" },\n    shown: (c: { x: number; y: number; delay: number }) => ({ x: `${c.x}%`, y: `${c.y}%`, transition: { ...SPRING, delay: c.delay } }),\n  };\n  const card: Variants = {\n    hidden: { opacity: 0, scale: 0.88, rotate: 0 },\n    shown: (c: { rotate: number; delay: number }) => ({\n      opacity: 1,\n      scale: 1,\n      rotate: c.rotate,\n      // check-ignore: duration a one-off entrance that plays once on scroll, not a response to input\n      transition: { opacity: { duration: 0.4, ease: EASE, delay: c.delay }, scale: { duration: 0.55, ease: EASE, delay: c.delay }, rotate: { ...SPRING, delay: c.delay } },\n    }),\n  };\n\n  return (\n    <motion.div\n      initial=\"hidden\"\n      whileInView=\"shown\"\n      viewport={{ once: true, amount: 0.3 }}\n      className={cn(\"relative isolate h-[480px] w-full\", className)}\n      {...rest}\n    >\n      {center != null && <div className=\"absolute inset-0 grid place-items-center\">{center}</div>}\n      {cards.map((c, i) => {\n        const custom = { x: c.x, y: c.y, rotate: c.rotate ?? 0, delay: i * stagger };\n        return (\n          <motion.div\n            key={i}\n            custom={custom}\n            variants={layer}\n            style={{ \"--x\": `${c.x}%`, \"--y\": `${c.y}%`, \"--r\": `${custom.rotate}deg` } as CSSProperties}\n            className=\"pointer-events-none absolute inset-0 grid place-items-center motion-reduce:![transform:translate(var(--x),var(--y))]\"\n          >\n            <motion.div\n              custom={custom}\n              variants={card}\n              className={cn(\n                \"pointer-events-auto w-64 rounded-lg border border-border bg-card p-3 text-card-foreground shadow-lg motion-reduce:![transform:rotate(var(--r))]\",\n                cardClassName,\n              )}\n            >\n              {c.content}\n            </motion.div>\n          </motion.div>\n        );\n      })}\n    </motion.div>\n  );\n}\n",
+      "type": "registry:ui"
+    }
+  ],
+  "meta": {
+    "react": ">=19",
+    "tailwindcss": ">=4",
+    "tokens": "shadcn (background, foreground, muted, border, ...): run shadcn init first"
+  },
+  "type": "registry:ui"
+}

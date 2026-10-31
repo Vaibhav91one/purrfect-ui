@@ -1,0 +1,22 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "shimmer-text",
+  "title": "Shimmer text",
+  "description": "Text with a light band sweeping across it, clipped to the glyphs, for labels that say something is running.",
+  "registryDependencies": [
+    "utils"
+  ],
+  "files": [
+    {
+      "path": "registry/shimmer-text/shimmer-text.tsx",
+      "content": "\"use client\";\n\nimport { useEffect, useRef, type ComponentProps, type CSSProperties, type ElementType } from \"react\";\nimport { cn } from \"@/lib/utils\";\n\nexport interface ShimmerTextProps extends Omit<ComponentProps<\"span\">, \"ref\"> {\n  /** The element to render, `span` by default (`p`, `h2`, `div`...). */\n  as?: ElementType;\n  /** Seconds for one sweep of the band across the text. */\n  duration?: number;\n}\n\nconst KEYFRAMES = \"@keyframes shimmer-text{from{background-position:200% 0}to{background-position:-200% 0}}\";\n\n/**\n * Text that reads as busy: a bright band sweeps across the glyphs, which are clipped to a gradient (`bg-clip-text`).\n * The base is `muted-foreground` and the band `foreground`, so it reads on light and dark backgrounds and follows the theme.\n * One CSS keyframe moves `background-position`: a repaint of the text box, cheap on a short label, no JavaScript per frame.\n * The loop pauses while the text is off screen. The text is one node, so screen readers read it once.\n * Reduced motion: it stands still in the base colour, fully readable.\n */\nexport function ShimmerText({ as: Tag = \"span\", duration = 2.8, className, style, children, ...rest }: ShimmerTextProps) {\n  const ref = useRef<HTMLElement>(null);\n\n  useEffect(() => {\n    const el = ref.current;\n    if (!el) return;\n    const io = new IntersectionObserver(([e]) => {\n      el.style.animationPlayState = e.isIntersecting ? \"running\" : \"paused\";\n    });\n    io.observe(el);\n    return () => io.disconnect();\n  }, []);\n\n  return (\n    <Tag\n      ref={ref}\n      className={cn(\n        \"inline-block bg-[linear-gradient(90deg,var(--color-muted-foreground)_35%,var(--color-foreground)_50%,var(--color-muted-foreground)_65%)] bg-[length:200%_100%] bg-clip-text text-transparent\",\n        // ponytail: background-position repaints the text box every frame; fine for a label, a masked transform layer if it ever covers a paragraph\n        \"animate-[shimmer-text_var(--shimmer-duration)_linear_infinite]\",\n        \"motion-reduce:animate-none motion-reduce:bg-none motion-reduce:text-muted-foreground\",\n        className,\n      )}\n      style={{ \"--shimmer-duration\": `${duration}s`, ...style } as CSSProperties}\n      {...rest}\n    >\n      {/* React 19 hoists this into <head> once, however many instances render */}\n      <style href=\"shimmer-text\" precedence=\"default\">\n        {KEYFRAMES}\n      </style>\n      {children}\n    </Tag>\n  );\n}\n",
+      "type": "registry:ui"
+    }
+  ],
+  "meta": {
+    "react": ">=19",
+    "tailwindcss": ">=4",
+    "tokens": "shadcn (background, foreground, muted, border, ...): run shadcn init first"
+  },
+  "type": "registry:ui"
+}

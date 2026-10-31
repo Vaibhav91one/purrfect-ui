@@ -600,6 +600,95 @@
         "tailwindcss": ">=4",
         "tokens": "shadcn (background, foreground, muted, border, ...): run shadcn init first"
       }
+    },
+    {
+      "name": "fan-out-cards",
+      "type": "registry:ui",
+      "title": "Fan-out cards",
+      "description": "Cards that start stacked in the centre and spring out to their own tilted spots when scrolled into view.",
+      "dependencies": [
+        "motion@^14.6.0"
+      ],
+      "registryDependencies": [
+        "utils"
+      ],
+      "files": [
+        {
+          "path": "registry/fan-out-cards/fan-out-cards.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "meta": {
+        "react": ">=19",
+        "tailwindcss": ">=4",
+        "tokens": "shadcn (background, foreground, muted, border, ...): run shadcn init first"
+      }
+    },
+    {
+      "name": "stat-rotator",
+      "type": "registry:ui",
+      "title": "Stat rotator",
+      "description": "A glass card that cycles through stats, each rising in while its number counts up on rolling digits.",
+      "dependencies": [
+        "motion@^14.6.0"
+      ],
+      "registryDependencies": [
+        "utils"
+      ],
+      "files": [
+        {
+          "path": "registry/stat-rotator/stat-rotator.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "meta": {
+        "react": ">=19",
+        "tailwindcss": ">=4",
+        "tokens": "shadcn (background, foreground, muted, border, ...): run shadcn init first"
+      }
+    },
+    {
+      "name": "shimmer-text",
+      "type": "registry:ui",
+      "title": "Shimmer text",
+      "description": "Text with a light band sweeping across it, clipped to the glyphs, for labels that say something is running.",
+      "registryDependencies": [
+        "utils"
+      ],
+      "files": [
+        {
+          "path": "registry/shimmer-text/shimmer-text.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "meta": {
+        "react": ">=19",
+        "tailwindcss": ">=4",
+        "tokens": "shadcn (background, foreground, muted, border, ...): run shadcn init first"
+      }
+    },
+    {
+      "name": "photo-wordmark",
+      "type": "registry:ui",
+      "title": "Photo wordmark",
+      "description": "A huge wordmark filled with a photo and cropped at the bottom edge, rising out of the crop as it scrolls in.",
+      "dependencies": [
+        "motion@^14.6.0"
+      ],
+      "registryDependencies": [
+        "utils"
+      ],
+      "files": [
+        {
+          "path": "registry/photo-wordmark/photo-wordmark.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "meta": {
+        "react": ">=19",
+        "tailwindcss": ">=4",
+        "tokens": "shadcn (background, foreground, muted, border, ...): run shadcn init first"
+      }
     }
   ]
 }
