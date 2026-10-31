@@ -28,7 +28,7 @@ Dev server serves stale CSS after editing `app/globals.css` or running `pnpm bui
 
 Component cards: `components/gallery/component-card.tsx` (`cardBase`, `CardFace`) on both home and /components. Shell motion tokens (ease, springs, durations): `lib/motion.ts`; registry components keep their own.
 
-The dialog: `components/gallery/use-sheet.tsx` (`openSheet(slug, cardEl)`, `<SheetHost />`, state lives in `?c=`) opens `component-sheet.tsx` from any card; the preview panel grows out of the card (FLIP). Demos in `components/gallery/demos/demos.tsx` take `{ playing, speed, opts }` (`playing` undefined = still card); a component's own controls are `extras` in `lib/components-data.ts`.
+The dialog: `components/gallery/use-sheet.tsx` (`openSheet(slug, cardEl)`, `<SheetHost />`, state lives in `?c=`) opens `component-sheet.tsx` from any card; the preview panel grows out of the card (FLIP). Demos in `components/gallery/demos/demos.tsx` take `{ playing, speed, opts }` (cards pass `playing={inView && !reduce}`, the dialog adds Loop/Speed); a component's own controls are `extras` in `lib/components-data.ts`. `preview.tsx` `Fit` draws a demo at its `nat` size and scales it to the box; `fill` items (`FILL` in `components-data.ts`) scale by width and stretch to the full height. A scaled parent traps `position: fixed`, so page-level demos portal out (see `CursorLoop`). Scroll-linked demos run in `ScrollBox` with `container={box}`.
 
 The dialog's Usage tab reads `lib/component-docs.ts`; keep every entry in step with its `registry/` file.
 
@@ -56,6 +56,10 @@ One shared `<Toaster />` (`components/ui/sonner.tsx`, shadcn's sonner wrapper th
 ## The cat
 
 `gallery/gradient-cat.tsx` is the mascot: each part is drawn twice (a fattened outline copy and a white copy inside a `<mask>`), gradient blobs spin inside the mask, head follows the cursor. The hero uses the sitting cat; the notch uses it (`notch/notch-cat.tsx`) with a new colour variant (`cat-variants.ts`) every time it ducks out and returns. Parked and unwired for now: `hero-cat.tsx` + `walking-cat.tsx` (walk-in), `purr-cat.tsx` + `motion-lines.tsx` (click lines), `lib/cat-sounds.ts` (purr/meow/steps). They are untracked files, so do not delete them without asking.
+
+## Site clips ("In the wild")
+
+`pnpm capture <slug>` records the component on the live site it came from into `public/previews/<slug>.{mp4,webm,jpg}` and lists it in `lib/clips.json`; cards play it on hover, the dialog shows it in a tab. Each clip is an entry in `scripts/capture/clips.mjs` (`target` selector, `interact`: hover | click | scroll | load, `site` for non-portfolio sites, `fresh: true` to let the site's own intro play instead of marking it seen). Check the frames before committing (ffmpeg tile contact sheet).
 
 ## Quality gate
 

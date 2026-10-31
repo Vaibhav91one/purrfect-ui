@@ -38,6 +38,7 @@
     "check:behaviour": "node scripts/check/behaviour.mjs"
   },
   "dependencies": {
+    "@paper-design/shaders-react": "0.0.71",
     "clsx": "^2.1.1",
     "cuelume": "^0.2.8",
     "gsap": "^3.15.0",
