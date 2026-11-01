@@ -47,8 +47,10 @@ export function Preloader({ words = WELCOME, duration = 2.4, storageKey = "prelo
     done.current = onDone;
   });
 
+  const gone = seen || phase === "gone";
+
   useEffect(() => {
-    if (seen) return;
+    if (gone) return;
     const body = document.body.style;
     const prev = [body.overflow, body.paddingRight];
     if (!contained) {
@@ -70,7 +72,7 @@ export function Preloader({ words = WELCOME, duration = 2.4, storageKey = "prelo
       window.removeEventListener("keydown", skip);
       [body.overflow, body.paddingRight] = prev;
     };
-  }, [words.length, duration, reduce, contained, seen]);
+  }, [words.length, duration, reduce, contained, gone]);
 
   const finish = () => {
     try {
@@ -78,7 +80,6 @@ export function Preloader({ words = WELCOME, duration = 2.4, storageKey = "prelo
     } catch {}
     setPhase("gone");
   };
-  const gone = seen || phase === "gone";
   useEffect(() => {
     if (gone) done.current?.();
   }, [gone]);

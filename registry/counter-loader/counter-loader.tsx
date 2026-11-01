@@ -56,9 +56,10 @@ export function CounterLoader({ stickers = SHAPES, steps = STEPS, duration = 1.4
     done.current = onDone;
   });
   const pile = stickers.length > 0;
+  const gone = seen || phase === "gone";
 
   useEffect(() => {
-    if (seen) return;
+    if (gone) return;
     const body = document.body.style;
     const prev = [body.overflow, body.paddingRight];
     if (!contained) {
@@ -80,7 +81,7 @@ export function CounterLoader({ stickers = SHAPES, steps = STEPS, duration = 1.4
       window.removeEventListener("keydown", skip);
       [body.overflow, body.paddingRight] = prev;
     };
-  }, [duration, reduce, contained, seen, pile]);
+  }, [duration, reduce, contained, gone, pile]);
 
   const finish = () => {
     try {
@@ -88,7 +89,6 @@ export function CounterLoader({ stickers = SHAPES, steps = STEPS, duration = 1.4
     } catch {}
     setPhase("gone");
   };
-  const gone = seen || phase === "gone";
   useEffect(() => {
     if (gone) done.current?.();
   }, [gone]);

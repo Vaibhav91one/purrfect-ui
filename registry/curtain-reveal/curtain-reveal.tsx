@@ -20,7 +20,8 @@ export function CurtainReveal({ height = "100svh", className, frameClassName, st
   return (
     <div className={cn("relative h-[var(--curtain-h)] [clip-path:inset(0)]", frameClassName)} style={{ "--curtain-h": height } as CSSProperties}>
       <div className="relative -top-[var(--curtain-h)] h-[calc(var(--curtain-h)*2)]">
-        <div className={cn("sticky top-0 h-[var(--curtain-h)] overflow-hidden bg-foreground text-background", className)} style={style} {...rest}>
+        {/* pinned to the bottom of the screen, so a panel shorter than it shows too; a taller one pins to the top */}
+        <div className={cn("sticky top-[max(0px,calc(100svh-var(--curtain-h)))] h-[var(--curtain-h)] overflow-hidden bg-foreground text-background", className)} style={style} {...rest}>
           {children}
         </div>
       </div>

@@ -49,8 +49,8 @@ import { RollButton } from "@/components/ui/roll-button";
       "While the mouse is over it, the content follows the pointer; on leave it springs back with a little overshoot.",
       "Mouse only: touch and pen leave it still, so there is no stuck offset on phones.",
       "One spring per axis, only running while it moves; it never re-renders React.",
-      "No dependencies.",
-      "Reduced motion: it does not move.",
+      "Needs the motion package (its springs drive the pull).",
+      "Reduced motion: it follows a quarter as far and settles without overshoot.",
     ],
   },
   notch: {
@@ -150,7 +150,7 @@ import { RollButton } from "@/components/ui/roll-button";
       { name: "container", type: "RefObject<HTMLElement>", description: "Follow a scrolling box instead of the page." },
       { name: "mode", type: '"words" | "chars"', default: '"words"', description: "words fills in word by word; chars grows each letter from half size as it rises and fades in." },
     ],
-    behaviors: ["Every word starts faint and turns solid in reading order.", "Finishes when the text is centred on screen.", "One CSS variable carries the progress, so a long paragraph costs one style write per frame.", "chars mode: letters grow, rise and fade in a staggered scrub; words never break mid-word.", "Reduced motion: words mode is solid; chars mode keeps only the fade."],
+    behaviors: ["Every word starts faint and turns solid in reading order.", "Starts as the text's top enters the lower fifth of the screen and finishes when its top reaches the upper sixth (change it with offset).", "One CSS variable carries the progress, so a long paragraph costs one style write per frame.", "chars mode: letters grow, rise and fade in a staggered scrub; words never break mid-word.", "Reduced motion: words mode is solid; chars mode keeps only the fade."],
   },
   "parallax-columns": {
     usage: `import { ParallaxColumns } from "@/components/ui/parallax-columns";
@@ -241,7 +241,7 @@ const [tab, setTab] = useState("preview");
     props: [
       { name: "tabs", type: "(string | { value, label, disabled? })[]", description: "The tabs, in order. A string is both label and value. Values must be unique." },
       { name: "value", type: "string", description: "Controlled value. Leave it out and the tabs keep their own state." },
-      { name: "defaultValue", type: "string", description: "Starting tab when uncontrolled. Defaults to the first." },
+      { name: "defaultValue", type: "string", description: "Starting tab when uncontrolled. Defaults to the first enabled one." },
       { name: "onValueChange", type: "(value: string) => void", description: "Called when another tab is picked." },
       { name: "label", type: "string", default: '"Tabs"', description: "Accessible name for the tab list." },
       { name: "orientation", type: '"horizontal" | "vertical"', default: '"horizontal"', description: "Vertical stacks the tabs and uses the up and down arrows." },
@@ -249,7 +249,7 @@ const [tab, setTab] = useState("preview");
       { name: "className", type: "string", description: "Size comes from here, e.g. text-lg. Merged with cn()." },
     ],
     behaviors: [
-      "Reduced motion: the pill moves instantly.",
+      "Reduced motion: the pill slides over in a short ease-out instead of the spring.",
       "A pill glides under the active label on one spring, and picking another tab mid-glide carries on from where it is.",
       "Arrow keys, Home and End move between enabled tabs, with one tab stop (roving tabindex).",
       "It renders the tab bar only: show your own panel for the selected value.",
@@ -340,6 +340,7 @@ import { RollLink } from "@/components/ui/roll-link";
       "Reduced motion: the two faces cross-fade, nothing turns.",
       "On hover or keyboard focus the label tips back on a 3D axis while a copy swings up from below.",
       "CSS only: it renders on the server and ships no JavaScript. Hover only runs on devices that can hover.",
+      "It never grows past its container: a label too long for one line ends in an ellipsis.",
     ],
   },
   "curtain-reveal": {
@@ -374,10 +375,10 @@ import { RollLink } from "@/components/ui/roll-link";
       { name: "contained", type: "boolean", default: "false", description: "Fill the nearest relative parent and leave page scroll alone: for a card or preview." },
     ],
     behaviors: [
-      "Reduced motion: one word, then the panel fades out.",
-      "The words swap in turn, then the panel lifts with a curved bottom edge (a transform, not an animated border radius).",
+      "The words swap in turn, then the panel lifts as its bottom corners round, so the edge leaving the page is one curve.",
       "Click, tap or Escape skips it. It locks page scroll while it covers the page, padding for the scrollbar.",
       "On a repeat visit an inline script hides it before the first paint; with no JavaScript it uncovers the page by itself.",
+      "Reduced motion: one word, then the panel fades out.",
     ],
   },
   "cursor-follower": {

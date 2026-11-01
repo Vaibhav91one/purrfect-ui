@@ -45,8 +45,8 @@ export interface HeroRevealProps extends Omit<ComponentProps<"section">, "title"
 }
 
 /**
- * A full-height hero: the photo frame opens from the middle along the y-axis, then the headline and the line under it
- * fade up out of a blur, and the action springs in last. Everything plays once, when the hero first scrolls into view.
+ * A full-height hero: the photo frame opens from the middle along the y-axis while the headline and the line under
+ * it fade up out of a blur, and the action springs in last. Everything plays once, when the hero first scrolls into view.
  * The text is white over a darkened photo, so it reads in light and dark themes alike.
  * Reduced motion: the frame and text fade in, nothing moves, and the action appears without the spring.
  */
@@ -62,8 +62,10 @@ export function HeroReveal({ src, alt = "", imgProps, title, description, action
           initial={appear ? { opacity: 0, transform: "scaleY(0)" } : false}
           whileInView={{ opacity: 1, transform: "scaleY(1)" }}
           viewport={{ once: true, amount: 0.5 }}
+          // reduced motion snaps the transform instead of running it under the CSS override: Chrome's layout-shift tracker
+          // still reads the running scaleY(0) and counts the frame as a box appearing out of nothing (CLS ~0.4)
           // check-ignore: duration a one-off entrance, seen once per page load
-          transition={{ duration: 0.9, ease: OUT }}
+          transition={{ duration: 0.9, ease: OUT, ...(reduce && { transform: { duration: 0 } }) }}
         >
           {/* a dark frame behind the photo (the photo is `relative` so it paints over this): if it fails to load, the white text still has something to sit on. check-ignore: hardcoded-color it sits under a photo, not the theme */}
           <div className="absolute inset-x-2 inset-y-2 rounded-[2rem] bg-neutral-900" />
