@@ -13,6 +13,7 @@ import { openSheet } from "./use-sheet";
 export function CardFace({ item, hideLabel = false }: { item: ComponentItem; hideLabel?: boolean }) {
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { amount: 0.3 });
+  const near = useInView(ref, { margin: "200px" }); // the demo is mounted only near the viewport
   const reduce = useReducedMotion();
   const staged = !!item.clip || item.nat[0] >= 1000; // a clip, or a demo drawn at a full page's size, sits in the padded stage
   // cards loop while on screen, so you can see what each one does without opening it
@@ -20,7 +21,7 @@ export function CardFace({ item, hideLabel = false }: { item: ComponentItem; hid
     <>
       {/* a staged card shows the component in a padded stage, and the clip (if any) swaps in only inside it (same ratio as the clip) */}
       <div ref={ref} data-hover-sound="off" className={staged ? "absolute inset-[12%] overflow-hidden rounded-2xl" : "absolute inset-0"}>
-        <Preview item={item} playing={inView && !reduce} pad={staged ? 0 : undefined} />
+        <Preview item={item} live={near} playing={inView && !reduce} pad={staged ? 0 : undefined} />
         {item.clip && <SiteClip slug={item.slug} hover className="pointer-events-none absolute inset-0 size-full object-cover" />}
       </div>
       {!hideLabel && (
@@ -47,6 +48,7 @@ const reveal = "opacity-0 group-hover:opacity-100 group-focus-within:opacity-100
 export function LiveCard({ item }: { item: ComponentItem }) {
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { amount: 0.3 });
+  const near = useInView(ref, { margin: "200px" }); // the demo is mounted only near the viewport
   const reduce = useReducedMotion();
   const [clip, setClip] = useState(false);
   return (
@@ -65,7 +67,7 @@ export function LiveCard({ item }: { item: ComponentItem }) {
       style={{ aspectRatio: `${item.nat[0]} / ${item.nat[1]}` }}
       className="group relative mb-3 cursor-pointer min-h-[240px] max-h-[484px] w-full break-inside-avoid overflow-hidden rounded-[28px] bg-card focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
     >
-      <Preview item={item} pad={0} cover playing={inView && !reduce && !clip} />
+      <Preview item={item} pad={0} cover live={near} playing={inView && !reduce && !clip} />
       {clip && item.clip && <SiteClip slug={item.slug} className="absolute inset-0 size-full object-cover" />}
       <span className={`pointer-events-none absolute bottom-3.5 left-3.5 max-w-[60%] truncate rounded-full bg-background/80 px-3 py-1.5 text-sm text-foreground backdrop-blur transition-opacity duration-200 ease-snappy motion-reduce:transition-none ${reveal}`}>{item.name}</span>
       <div className={`absolute right-3 bottom-3 flex gap-2 transition-opacity duration-200 ease-snappy motion-reduce:transition-none ${reveal}`}>
