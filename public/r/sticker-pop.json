@@ -1,0 +1,25 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "sticker-pop",
+  "title": "Sticker pop",
+  "description": "A sticker image that pops in with a springy overshoot into its own tilt once it has loaded, and shrinks, tilts and fades on exit.",
+  "dependencies": [
+    "motion@^14.6.0"
+  ],
+  "registryDependencies": [
+    "utils"
+  ],
+  "files": [
+    {
+      "path": "registry/sticker-pop/sticker-pop.tsx",
+      "content": "\"use client\";\n\nimport { motion, useReducedMotion } from \"motion/react\";\nimport { useCallback, useState, type ComponentProps } from \"react\";\nimport { cn } from \"@/lib/utils\";\n\nexport interface StickerPopProps extends Omit<ComponentProps<\"img\">, \"ref\" | \"src\" | \"style\" | \"onDrag\" | \"onDragStart\" | \"onDragEnd\" | \"onAnimationStart\"> {\n  src: string;\n  /** The tilt, in degrees, the sticker settles into. */\n  rotate?: number;\n  /** Seconds to wait after the image has loaded before popping: stagger a pile with it. */\n  delay?: number;\n  /** Play the exit: shrink, tilt on and fade. */\n  out?: boolean;\n  /** Seconds before the exit starts: stagger a pile leaving in reverse. */\n  outDelay?: number;\n  style?: ComponentProps<typeof motion.img>[\"style\"];\n}\n\n// check-ignore: duration a springy pop for a rare, playful moment, not a control responding\nconst POP = { duration: 0.55, ease: [0.34, 1.56, 0.64, 1] as const };\nconst EXIT = { duration: 0.3, ease: [0.23, 1, 0.32, 1] as const };\nconst FADE = { duration: 0.2, ease: [0.23, 1, 0.32, 1] as const };\n\n/**\n * A sticker image that pops in with a small springy overshoot and settles into its own tilt, only once it has actually\n * loaded (never an empty flash, cached images included). `out` plays the exit: it shrinks, tilts on and fades. Use\n * `delay` / `outDelay` to stagger a pile. Reduced motion: a plain fade at the final tilt, no scale or swing.\n */\nexport function StickerPop({ src, rotate = 0, delay = 0, out = false, outDelay = 0, alt = \"\", className, onLoad, ...rest }: StickerPopProps) {\n  const reduce = useReducedMotion();\n  const [loaded, setLoaded] = useState<string | null>(null);\n  const ready = loaded === src;\n  // a cached image can finish before React attaches onLoad\n  const check = useCallback((el: HTMLImageElement | null) => {\n    if (el?.complete && el.naturalWidth) setLoaded(src);\n  }, [src]);\n\n  const hidden = { opacity: 0, scale: 0.85, rotate: rotate - 10 };\n  const shown = { opacity: 1, scale: 1, rotate };\n  const gone = reduce ? { opacity: 0, scale: 1, rotate } : { opacity: 0, scale: 0.8, rotate: rotate + 10 };\n  const transition = reduce\n    ? { ...FADE, delay: out ? outDelay : delay, scale: { duration: 0 }, rotate: { duration: 0 } }\n    : { ...(out ? EXIT : POP), delay: out ? outDelay : delay };\n\n  return (\n    <motion.img\n      ref={check}\n      src={src}\n      alt={alt}\n      decoding=\"async\"\n      onLoad={(e) => {\n        setLoaded(src);\n        onLoad?.(e);\n      }}\n      initial={hidden}\n      animate={out ? gone : ready ? shown : hidden}\n      transition={transition}\n      className={cn(\"select-none\", className)}\n      {...rest}\n    />\n  );\n}\n",
+      "type": "registry:ui"
+    }
+  ],
+  "meta": {
+    "react": ">=19",
+    "tailwindcss": ">=4",
+    "tokens": "shadcn (background, foreground, muted, border, ...): run shadcn init first"
+  },
+  "type": "registry:ui"
+}

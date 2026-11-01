@@ -818,6 +818,172 @@
         "tailwindcss": ">=4",
         "tokens": "shadcn (background, foreground, muted, border, ...): run shadcn init first"
       }
+    },
+    {
+      "name": "sticker-pop",
+      "type": "registry:ui",
+      "title": "Sticker pop",
+      "description": "A sticker image that pops in with a springy overshoot into its own tilt once it has loaded, and shrinks, tilts and fades on exit.",
+      "dependencies": [
+        "motion@^14.6.0"
+      ],
+      "registryDependencies": [
+        "utils"
+      ],
+      "files": [
+        {
+          "path": "registry/sticker-pop/sticker-pop.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "meta": {
+        "react": ">=19",
+        "tailwindcss": ">=4",
+        "tokens": "shadcn (background, foreground, muted, border, ...): run shadcn init first"
+      }
+    },
+    {
+      "name": "swap-card",
+      "type": "registry:ui",
+      "title": "Swap card",
+      "description": "A product card whose photo crossfades and zooms to a second one on hover, with a wobbly badge that turns.",
+      "registryDependencies": [
+        "utils"
+      ],
+      "files": [
+        {
+          "path": "registry/swap-card/swap-card.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "meta": {
+        "react": ">=19",
+        "tailwindcss": ">=4",
+        "tokens": "shadcn (background, foreground, muted, border, ...): run shadcn init first"
+      }
+    },
+    {
+      "name": "sticky-crossfade",
+      "type": "registry:ui",
+      "title": "Sticky crossfade",
+      "description": "A sticky picture beside a column of text that crossfades to the next picture as each block passes the middle of the screen.",
+      "registryDependencies": [
+        "utils"
+      ],
+      "files": [
+        {
+          "path": "registry/sticky-crossfade/sticky-crossfade.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "meta": {
+        "react": ">=19",
+        "tailwindcss": ">=4",
+        "tokens": "shadcn (background, foreground, muted, border, ...): run shadcn init first"
+      }
+    },
+    {
+      "name": "stroke-replay",
+      "type": "registry:ui",
+      "title": "Stroke replay",
+      "description": "Replays an SVG painting shape by shape, like a drawing-app timelapse, with play, pause and a scrubber.",
+      "registryDependencies": [
+        "utils"
+      ],
+      "files": [
+        {
+          "path": "registry/stroke-replay/stroke-replay.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "meta": {
+        "react": ">=19",
+        "tailwindcss": ">=4",
+        "tokens": "shadcn (background, foreground, muted, border, ...): run shadcn init first"
+      }
+    },
+    {
+      "name": "spring-chips",
+      "type": "registry:ui",
+      "title": "Spring chips",
+      "description": "Pill labels with icon tiles that spring in around a centrepiece, one after another, when scrolled into view.",
+      "dependencies": [
+        "motion@^14.6.0"
+      ],
+      "registryDependencies": [
+        "utils"
+      ],
+      "files": [
+        {
+          "path": "registry/spring-chips/spring-chips.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "meta": {
+        "react": ">=19",
+        "tailwindcss": ">=4",
+        "tokens": "shadcn (background, foreground, muted, border, ...): run shadcn init first"
+      }
+    },
+    {
+      "name": "voice-bars",
+      "type": "registry:ui",
+      "title": "Voice bars",
+      "description": "Thin bars jumping between heights on a staggered loop, for a mic that is listening.",
+      "registryDependencies": [
+        "utils"
+      ],
+      "files": [
+        {
+          "path": "registry/voice-bars/voice-bars.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "meta": {
+        "react": ">=19",
+        "tailwindcss": ">=4",
+        "tokens": "shadcn (background, foreground, muted, border, ...): run shadcn init first"
+      }
+    },
+    {
+      "name": "announce-strip",
+      "type": "registry:ui",
+      "title": "Announce strip",
+      "description": "A thin announcement strip whose line loops seamlessly; it slides away as you scroll down or dismiss it.",
+      "registryDependencies": [
+        "utils"
+      ],
+      "files": [
+        {
+          "path": "registry/announce-strip/announce-strip.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "meta": {
+        "react": ">=19",
+        "tailwindcss": ">=4",
+        "tokens": "shadcn (background, foreground, muted, border, ...): run shadcn init first"
+      }
+    },
+    {
+      "name": "grid-disclosure",
+      "type": "registry:ui",
+      "title": "Grid disclosure",
+      "description": "A one-open-at-a-time list whose panels open to their own height through grid rows, with no measuring.",
+      "registryDependencies": [
+        "utils"
+      ],
+      "files": [
+        {
+          "path": "registry/grid-disclosure/grid-disclosure.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "meta": {
+        "react": ">=19",
+        "tailwindcss": ">=4",
+        "tokens": "shadcn (background, foreground, muted, border, ...): run shadcn init first"
+      }
     }
   ]
 }

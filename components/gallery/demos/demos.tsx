@@ -42,6 +42,14 @@ import FlipTextDemo from "@/registry/flip-text/demo";
 import SpinMarkDemo from "@/registry/spin-mark/demo";
 import ArrowLinkDemo from "@/registry/arrow-link/demo";
 import RollLinkDemo from "@/registry/roll-link/demo";
+import StickerPopDemo from "@/registry/sticker-pop/demo";
+import SwapCardDemo from "@/registry/swap-card/demo";
+import StrokeReplayDemo from "@/registry/stroke-replay/demo";
+import SpringChipsDemo from "@/registry/spring-chips/demo";
+import VoiceBarsDemo from "@/registry/voice-bars/demo";
+import AnnounceStripDemo from "@/registry/announce-strip/demo";
+import GridDisclosureDemo from "@/registry/grid-disclosure/demo";
+import { StickyCrossfadeScene } from "@/registry/sticky-crossfade/demo";
 import { useTick } from "./use-tick";
 
 /** What the dialog hands every demo: the Loop switch, the Speed slider and the component's own extras. `playing` undefined = a still card. */
@@ -379,6 +387,20 @@ function LineRiseLoop({ playing, speed }: DemoProps) {
   );
 }
 
+// the box scrolls the about page, so the sticky picture crossfades as each block passes its middle
+function StickyCrossfadeLoop({ playing, speed }: DemoProps) {
+  const box = useRef<HTMLDivElement>(null);
+  return (
+    <div className="relative h-full w-full overflow-hidden rounded-3xl">
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src="/demo/dunes.jpg" alt="" className="absolute inset-0 size-full object-cover" />
+      <ScrollBox playing={playing} speed={speed} boxRef={box} className="absolute inset-x-4 top-20 bottom-4 h-auto max-w-none rounded-2xl bg-background text-foreground">
+        <StickyCrossfadeScene container={box} />
+      </ScrollBox>
+    </div>
+  );
+}
+
 export const DEMOS: Record<string, (p: DemoProps) => ReactNode> = {
   "roll-button": ButtonLoop,
   magnetic: MagneticLoop,
@@ -412,6 +434,14 @@ export const DEMOS: Record<string, (p: DemoProps) => ReactNode> = {
   "quote-cycle": QuoteCycleDemo,
   "column-hop": ColumnHopDemo,
   "line-rise": LineRiseLoop,
+  "sticker-pop": StickerPopDemo,
+  "swap-card": SwapCardDemo,
+  "sticky-crossfade": StickyCrossfadeLoop,
+  "stroke-replay": StrokeReplayDemo,
+  "spring-chips": SpringChipsDemo,
+  "voice-bars": VoiceBarsDemo,
+  "announce-strip": AnnounceStripDemo,
+  "grid-disclosure": GridDisclosureDemo,
   "flip-text": FlipTextDemo,
   "spin-mark": SpinMarkDemo,
   "arrow-link": ArrowLinkDemo,

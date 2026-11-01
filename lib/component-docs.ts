@@ -829,4 +829,205 @@ const box = useRef<HTMLDivElement>(null);
       "Reduced motion: it fades in instead of rising, the arrow stays put and the label faces cross-fade.",
     ],
   },
+  "grid-disclosure": {
+    usage: `import { GridDisclosure } from "@/components/ui/grid-disclosure";
+
+<GridDisclosure
+  items={[
+    { title: "What exactly am I approving?", content: "The precise bytes of the outbound comment." },
+    { title: "How is scope enforced?", content: "At the capability boundary." },
+  ]}
+/>`,
+    props: [
+      { name: "items", type: "{ title: ReactNode; content: ReactNode }[]", description: "The rows, in order. Only one is open at a time." },
+      { name: "value", type: "number | null", description: "Controlled open row (index), or null for all closed. Leave it out and the list keeps its own state." },
+      { name: "defaultValue", type: "number | null", default: "0", description: "Starting open row when uncontrolled; null starts all closed." },
+      { name: "onValueChange", type: "(value: number | null) => void", description: "Called with the newly open row, or null when the open one closes." },
+      { name: "icon", type: "ReactNode", description: "Replaces the built-in caret. It still turns half a circle when its row opens." },
+      { name: "className", type: "string", description: "Merged onto the <ul> with cn()." },
+    ],
+    behaviors: [
+      "Each panel animates its grid row between 0fr and 1fr, so it opens to whatever its content measures without anyone measuring it.",
+      "Opening a row closes the one that was open; clicking the open row closes it.",
+      "Rows are real buttons with aria-expanded and aria-controls; closed panels are inert, so Tab never lands inside a hidden answer.",
+      "Reduced motion: panels only fade and the caret flips without turning.",
+    ],
+  },
+  "voice-bars": {
+    usage: `import { VoiceBars } from "@/components/ui/voice-bars";
+
+<VoiceBars className="text-foreground" />
+<VoiceBars bars={20} className="h-5 text-primary" aria-label="Listening" />`,
+    props: [
+      { name: "bars", type: "number", default: "12", description: "How many bars." },
+      { name: "duration", type: "number", default: "1", description: "Seconds for one loop of a bar through its four heights." },
+      { name: "stagger", type: "number", default: "0.08", description: "Seconds between one bar starting and the next." },
+      { name: "className", type: "string", description: "Merged onto the root; set the height (h-8 by default), gap and colour (text-*) here." },
+    ],
+    behaviors: [
+      "Bars are currentColor, so they follow the text colour and the theme.",
+      "Each bar has a fixed sequence of heights (no Math.random), so the server HTML matches the client.",
+      "One CSS keyframe scales each bar from its bottom: transform only, no JavaScript per frame. It pauses while off screen.",
+      "Decorative and hidden from screen readers, unless you pass aria-label (then it is an img).",
+      "Reduced motion: the bars hold still at their first height and only pulse in opacity.",
+    ],
+  },
+  "sticker-pop": {
+    usage: `import { StickerPop } from "@/components/ui/sticker-pop";
+
+<StickerPop src="/sticker.webp" rotate={-8} className="size-40" />
+
+// a pile: stagger the pops, then leave in reverse
+{stickers.map((src, i) => (
+  <StickerPop key={src} src={src} rotate={tilts[i]} delay={0.1 + i * 0.2} out={leaving} outDelay={(stickers.length - 1 - i) * 0.05} />
+))}`,
+    props: [
+      { name: "src", type: "string", description: "The sticker image. Nothing shows until it has loaded." },
+      { name: "rotate", type: "number", default: "0", description: "The tilt in degrees the sticker settles into." },
+      { name: "delay", type: "number", default: "0", description: "Seconds after load before it pops; stagger a pile with it." },
+      { name: "out", type: "boolean", default: "false", description: "Plays the exit: shrink to 0.8, tilt 10deg further and fade." },
+      { name: "outDelay", type: "number", default: "0", description: "Seconds before the exit starts; stagger a pile leaving." },
+      { name: "alt", type: "string", default: '""', description: "Decorative by default; pass alt text when the sticker carries meaning." },
+    ],
+    behaviors: [
+      "Pops only once the image has loaded (cached images included), so it never flashes an empty box; a broken image stays hidden.",
+      "The pop is 0.55s from scale 0.85 and 10deg back to its tilt on an overshooting curve; the exit is a quicker 0.3s ease-out.",
+      "Transform and opacity only, animated by motion; the only re-render is the one load.",
+      "Reduced motion: a 0.2s fade at the final tilt and size, no scale or swing.",
+    ],
+  },
+  "spring-chips": {
+    usage: `import { SpringChips } from "@/components/ui/spring-chips";
+import { Mic, Banknote } from "lucide-react";
+
+<SpringChips
+  className="grid h-[480px] w-[400px] place-items-center"
+  chips={[
+    { label: "Talk to your finances.", icon: <Mic className="text-white" />, iconBackground: "linear-gradient(135deg, #fb7185, #f97316)", className: "-left-8 top-36" },
+    { label: "Wealth that grows with you.", icon: <Banknote className="text-white" />, iconBackground: "linear-gradient(135deg, #22c55e, #14b8a6)", className: "-right-8 bottom-28" },
+  ]}
+>
+  <img src="/phone.png" alt="" className="h-96 -rotate-6" />
+</SpringChips>`,
+    props: [
+      { name: "chips", type: "{ label, icon?, iconBackground?, className? }[]", description: "Each chip's label, an optional icon in a tile (iconBackground is any CSS background, e.g. a gradient), and position classes for where it sits (\"-left-8 top-36\")." },
+      { name: "children", type: "ReactNode", description: "The centrepiece the chips gather around: a phone, a photo." },
+      { name: "stagger", type: "number", default: "0.08", description: "Seconds between one chip popping in and the next." },
+      { name: "chipClassName", type: "string", description: "Classes for every chip." },
+    ],
+    behaviors: [
+      "Plays once, when 45% of the group is in view.",
+      "Each chip springs up from 22px below and 82% scale (stiffness 220, damping 18), one after another.",
+      "Chips are absolutely placed, so give the root a size and each chip position classes.",
+      "Reduced motion: the chips are already in place and only fade in.",
+    ],
+  },
+  "swap-card": {
+    usage: `import { SwapCard } from "@/components/ui/swap-card";
+
+<SwapCard
+  image={<img src="/low-tide.jpg" alt="Low tide" className="size-full object-cover" />}
+  hoverImage={<img src="/low-tide-detail.jpg" alt="" className="size-full object-cover" />}
+  title="Low tide"
+  subtitle="Giclée print"
+  onClick={() => openProduct("low-tide")}
+/>`,
+    props: [
+      { name: "image", type: "ReactNode", description: "What the card shows at rest, filling a 448:598 frame." },
+      { name: "hoverImage", type: "ReactNode", description: "What it crossfades to on hover, keyboard focus or press." },
+      { name: "title", type: "ReactNode", description: "The product name under the image." },
+      { name: "subtitle", type: "ReactNode", description: "The quieter second line (type, price)." },
+      { name: "badge", type: "boolean", default: "true", description: "The wobbly bag badge in the top-right corner." },
+      { name: "className", type: "string", description: "Extra classes on the root button; other button props pass through." },
+    ],
+    behaviors: [
+      "Hover crossfades to the second image (400ms) while the first zooms in and the second settles from 108% (900ms).",
+      "The badge ring turns 30 degrees and inverts its colours; the title nudges 6px right.",
+      "Keyboard focus shows the same state plus a focus ring; on touch the state shows while the finger is down, and hover never sticks after a tap.",
+      "Pure CSS: no JavaScript, nothing per frame, identical server HTML.",
+      "Reduced motion: the images still crossfade and the badge still inverts, but nothing zooms, turns or moves.",
+    ],
+  },
+  "stroke-replay": {
+    usage: `import { StrokeReplay } from "@/components/ui/stroke-replay";
+
+<StrokeReplay className="max-w-[520px]">
+  <svg viewBox="0 0 400 500">
+    <rect data-static width="400" height="500" fill="#efe6da" />
+    <circle cx="200" cy="220" r="90" fill="#d97a93" />
+    <ellipse cx="200" cy="240" rx="60" ry="76" fill="#f0c3a3" />
+  </svg>
+</StrokeReplay>`,
+    props: [
+      { name: "children", type: "ReactNode", description: "One inline <svg>. Its direct children are the shapes, replayed in order; mark a background or texture layer data-static to keep it always shown." },
+      { name: "duration", type: "number", default: "12000", description: "Milliseconds one replay takes, start to finished painting. The readout counts this time." },
+      { name: "hold", type: "number", default: "1600", description: "Milliseconds the finished painting holds before the replay loops." },
+      { name: "label", type: "ReactNode", default: '"Timelapse"', description: "Badge in the top-left corner; null hides it." },
+      { name: "className", type: "string", description: "Size it here; the box keeps a 4:5 aspect ratio." },
+    ],
+    behaviors: [
+      "Each shape scales up from 60% and fades in over 0.7s as the replay reaches it.",
+      "It starts the first time 40% of it is on screen, pauses when it leaves, and loops after the hold.",
+      "Play/pause button and a range scrubber (arrow keys work); scrubbing or pausing stops autoplay.",
+      "Progress is written straight to the DOM, so playback never re-renders React.",
+      "Reduced motion: it shows the finished painting and does not autoplay; shapes fade without scaling when you play or scrub.",
+    ],
+  },
+  "sticky-crossfade": {
+    usage: `import { StickyCrossfade } from "@/components/ui/sticky-crossfade";
+
+<StickyCrossfade pictures={[<img key="a" src="/a.jpg" alt="" />, <img key="b" src="/b.jpg" alt="" />]}>
+  <p data-pic-block>First block: the first picture.</p>
+  <p data-pic-block>Second block: the picture changes as this passes the middle of the screen.</p>
+</StickyCrossfade>
+
+// inside a scrolling box: switch as blocks pass the middle of that box
+const box = useRef<HTMLDivElement>(null);
+<div ref={box} className="h-[600px] overflow-y-auto">
+  <StickyCrossfade container={box} pictures={pictures}>{blocks}</StickyCrossfade>
+</div>`,
+    props: [
+      { name: "pictures", type: "ReactNode[]", description: "One picture per block, in order; with fewer pictures than blocks they repeat. Each fills the picture box (object-cover)." },
+      { name: "children", type: "ReactNode", description: "The text column. Mark each block that should switch the picture with data-pic-block." },
+      { name: "pictureClassName", type: "string", description: "Size of the picture box: width, aspect ratio (3/4 by default), radius." },
+      { name: "container", type: "RefObject<Element | null>", description: "Watch a scrolling box instead of the page: the picture switches as blocks pass the middle of that box." },
+      { name: "className", type: "string", description: "Spacing around the whole two-column layout." },
+    ],
+    behaviors: [
+      "The picture sticks at the vertical middle of the scroll area beside the text.",
+      "Each time a data-pic-block's top crosses the middle, the next picture fades in over 800ms while settling from 1.02 to 1 scale.",
+      "One IntersectionObserver watches the top half of the scroll root, so nothing runs per scroll event.",
+      "Narrower than 48rem (a container query, not the viewport) it stacks and shows the first picture only, in flow.",
+      "Reduced motion: a shorter 300ms plain crossfade with no scale.",
+    ],
+  },
+  "announce-strip": {
+    usage: `import { AnnounceStrip } from "@/components/ui/announce-strip";
+
+const [open, setOpen] = useState(true);
+
+<header className="sticky top-0 z-50">
+  <AnnounceStrip open={open} onDismiss={() => setOpen(false)}>
+    <span className="px-4 py-1.5">Built for the Agent Harness Hackathon</span>
+  </AnnounceStrip>
+  <nav>...</nav>
+</header>`,
+    props: [
+      { name: "children", type: "ReactNode", description: "One copy of the line. It is repeated to fill the width, so put the gap (padding) inside." },
+      { name: "duration", type: "number", default: "40", description: "Seconds for one copy of the line to pass." },
+      { name: "open", type: "boolean", default: "true", description: "Shown or put away by the parent; closing slides it up and closes its row." },
+      { name: "onDismiss", type: "() => void", description: "Adds a close button on the right that calls this." },
+      { name: "hideOnScroll", type: "boolean", default: "true", description: "Put the strip away while scrolling down and bring it back on the way up." },
+      { name: "container", type: "RefObject<HTMLElement | null>", default: "the page", description: "Follow a scrolling box instead of the page." },
+      { name: "className", type: "string", description: "Extra classes on the root (default bg-primary text-primary-foreground)." },
+    ],
+    behaviors: [
+      "Two identical halves of the track move by exactly -50% with the Web Animations API: transform only, seamless, no layout reads per frame.",
+      "Copies are added to fill the width (ResizeObserver), so a short line never leaves a gap.",
+      "Pauses off screen, under the mouse and while the close button has focus; a tap never leaves it stuck paused.",
+      "Scrolling down 48px past the top slides it up and closes its row so the header takes its place; scrolling up 48px brings it back.",
+      "Screen readers and Tab get the line once; the repeats are inert, and a closed strip is inert.",
+      "Reduced motion: the line stands still and the strip fades instead of sliding while its row closes.",
+    ],
+  },
 };
