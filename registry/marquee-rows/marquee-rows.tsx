@@ -120,18 +120,23 @@ function Row({ item, open, setOpen, speed, separator, indent, bandClassName }: R
     <>
       <span className={cn("block truncate py-2", indent, SLIDE, open && "-translate-y-full motion-reduce:translate-y-0 motion-reduce:opacity-0")}>{item.label}</span>
       {/* the band repeats the label for the eye only: the text above is the row's name */}
+      {/* dir="ltr" on the band, not the strip: an RTL page would pin the strip to the band's right edge and the run left
+          would open a gap there. The label keeps dir="auto" so Arabic still shapes */}
       <span
         ref={band}
         aria-hidden
         inert
+        dir="ltr"
         className={cn(
           "absolute inset-0 flex items-center overflow-hidden bg-primary text-primary-foreground",
           SLIDE,
           !open && "translate-y-full motion-reduce:translate-y-0 motion-reduce:opacity-0",
+          // a closed band is out of sight: pause the spinning separators in it too, not just the marquee
+          !open && "[&_*]:[animation-play-state:paused]",
           bandClassName,
         )}
       >
-        <motion.span dir="ltr" style={{ x }} className="flex w-max will-change-transform">
+        <motion.span style={{ x }} className="flex w-max will-change-transform">
           {Array.from({ length: count }, (_, i) => (
             <span key={i} ref={i === 0 ? first : undefined} className="flex shrink-0 items-center gap-[0.4em] pe-[0.4em] whitespace-nowrap">
               <span dir="auto">{item.label}</span>

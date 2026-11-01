@@ -36,17 +36,18 @@ export interface LayeredMenuProps extends Omit<ComponentProps<"div">, "children"
 
 const OUT = [0.22, 1, 0.36, 1] as const;
 const COLORS: [string, string, string, string] = ["#D94A3A", "#D9C8A4", "#4FA06B", "#0E7DDA"];
-// per panel, back to front: seconds in (duration, delay) and out (duration, delay). The front panel leaves first.
+// per panel, back to front: seconds in (duration, delay) and out (duration, delay). The front panel leaves first, and
+// the exit (~0.4s) is quicker than the entrance: by then the user has already decided
 const TIMING = [
-  { in: [0.56, 0.02], out: [0.5, 0.15] },
-  { in: [0.62, 0.07], out: [0.54, 0.1] },
-  { in: [0.68, 0.12], out: [0.58, 0.05] },
-  { in: [0.74, 0.18], out: [0.62, 0] },
+  { in: [0.56, 0.02], out: [0.34, 0.09] },
+  { in: [0.62, 0.07], out: [0.36, 0.06] },
+  { in: [0.68, 0.12], out: [0.38, 0.03] },
+  { in: [0.74, 0.18], out: [0.4, 0] },
 ] as const;
 const REVEAL = 0.44; // links start fading in once the panels are mostly down
 const FOCUSABLE = 'a[href],button:not([disabled]),[tabindex]:not([tabindex="-1"])';
 
-/** The menu's layer. While it plays its exit it is inert and click-through, so a link can't be hit or tabbed to during the ~0.6s it takes to leave. */
+/** The menu's layer. While it plays its exit it is inert and click-through, so a link can't be hit or tabbed to during the ~0.4s it takes to leave. */
 function Layer({ pos, children }: { pos: string; children: ReactNode }) {
   const present = useIsPresent();
   return (
@@ -146,7 +147,7 @@ export function LayeredMenu({ primary, secondary = [], legal = [], colors = COLO
   const pos = contained ? "absolute" : "fixed";
   const tall = contained ? ["h-[90%]", "h-[85%]"] : ["h-[90dvh]", "h-[85dvh]"];
   const close = () => set(false);
-  const line = "absolute left-0 top-1/2 block h-[2px] w-(--menu-line-width) transition-transform duration-300 ease-out motion-reduce:transition-none";
+  const line = "absolute left-0 top-1/2 block h-[2px] w-(--menu-line-width) transition-transform duration-300 ease-[cubic-bezier(0.77,0,0.175,1)] motion-reduce:transition-none";
   // reduced motion keeps only the fade: the line class drops the transform in CSS, so the server HTML and the first client render agree
   const draw = (extra: number) => ({
     initial: { transform: "scaleX(0)", opacity: 0 },
@@ -175,7 +176,7 @@ export function LayeredMenu({ primary, secondary = [], legal = [], colors = COLO
           </span>
         </span>
         {/* the label's width opens with it, as on Armour: shut, the button is just the burger (60px), not a wider invisible target. check-ignore: gpu-props a one-word label, and Armour's own motion */}
-        <span aria-hidden className={`hidden overflow-hidden text-sm tracking-tight transition-[max-width,opacity] duration-300 ease-out motion-reduce:transition-none sm:block ${isOpen ? "max-w-20 opacity-100" : "max-w-0 opacity-0"}`}>Close</span>
+        <span aria-hidden className={`hidden overflow-hidden text-sm tracking-tight transition-[max-width,opacity] duration-300 ease-[cubic-bezier(0.77,0,0.175,1)] motion-reduce:transition-none sm:block ${isOpen ? "max-w-20 opacity-100" : "max-w-0 opacity-0"}`}>Close</span>
       </button>
 
       {/* a menu that starts open (defaultOpen) is drawn open, without the entrance: nothing to replay on page load, and the server HTML matches */}
@@ -204,18 +205,20 @@ export function LayeredMenu({ primary, secondary = [], legal = [], colors = COLO
                   {front && (
                     <div className="flex h-full flex-col px-6 pt-6 pb-8 @2xl:px-10 @2xl:pt-7 @2xl:pb-10" style={{ color: activeColor }}>
                       <div className="mt-2 flex min-h-8 justify-center text-2xl @2xl:text-3xl">{logo}</div>
-                      <div className="mt-10 grid min-h-0 flex-1 grid-cols-1 gap-10 overflow-y-auto @3xl:grid-cols-[220px_minmax(0,1fr)] @3xl:gap-14 @5xl:mt-12">
-                        <div className="order-2 flex min-w-0 flex-col justify-between gap-8 @3xl:order-1 @3xl:pt-8">
-                          <div className="flex flex-col items-start gap-1 text-left">
-                            <Links links={secondary} size="text-[1.15rem] leading-tight tracking-tight @2xl:text-[1.35rem]" blur={8} y={14} dur={0.45} base={REVEAL + 0.08} step={0.06} onPick={close} reduce={reduce} />
-                          </div>
-                          <div className="hidden flex-col items-start gap-0.5 text-left @3xl:flex">
-                            <Links links={legal} size="text-[11px] leading-snug opacity-90 @2xl:text-xs" blur={6} y={10} dur={0.4} base={REVEAL + 0.18} step={0.04} onPick={close} reduce={reduce} />
+                      {/* the bottom fade shows there is more below when the lists overflow */}
+                      <div className="mt-10 grid min-h-0 flex-1 grid-cols-1 gap-10 overflow-y-auto [mask-image:linear-gradient(to_bottom,#000_calc(100%-2rem),transparent)] @3xl:grid-cols-[220px_minmax(0,1fr)] @3xl:gap-14 @5xl:mt-12">
+                        {/* primary first in the DOM, so focus and Tab start at the big links; the wide layout puts it on the right */}
+                        <div className="flex min-w-0 items-center justify-center @3xl:order-2">
+                          <div className="flex w-fit max-w-full flex-col items-start text-start">
+                            <Links links={primary} size="text-[clamp(2.25rem,11cqw,5rem)] font-medium leading-[0.92] tracking-tight" blur={10} y={18} dur={0.5} base={REVEAL + 0.08} step={0.06} onPick={close} reduce={reduce} />
                           </div>
                         </div>
-                        <div className="order-1 flex min-w-0 items-center justify-center @3xl:order-2">
-                          <div className="flex w-fit max-w-full flex-col items-start text-left">
-                            <Links links={primary} size="text-[clamp(3rem,7cqw,5rem)] font-medium leading-[0.92] tracking-tight" blur={10} y={18} dur={0.5} base={REVEAL + 0.08} step={0.06} onPick={close} reduce={reduce} />
+                        <div className="flex min-w-0 flex-col justify-between gap-8 @3xl:order-1 @3xl:pt-8">
+                          <div className="flex flex-col items-start gap-1 text-start">
+                            <Links links={secondary} size="text-[1.15rem] leading-tight tracking-tight @2xl:text-[1.35rem]" blur={8} y={14} dur={0.45} base={REVEAL + 0.08} step={0.06} onPick={close} reduce={reduce} />
+                          </div>
+                          <div className="hidden flex-col items-start gap-0.5 text-start @3xl:flex">
+                            <Links links={legal} size="text-[11px] leading-snug opacity-90 @2xl:text-xs" blur={6} y={10} dur={0.4} base={REVEAL + 0.18} step={0.04} onPick={close} reduce={reduce} />
                           </div>
                         </div>
                       </div>

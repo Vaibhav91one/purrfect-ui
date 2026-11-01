@@ -9,9 +9,9 @@ export interface FlipTextProps extends Omit<ComponentProps<"p">, "children" | "r
 }
 
 const EASE = "cubic-bezier(0.23, 1, 0.32, 1)";
-// letters that only look right joined to their neighbours (Arabic, Indic marks, emoji sequences): those words flip as one piece
+// letters that only look right joined to their neighbours (Arabic, Indic marks, emoji sequences and tag flags): those words flip as one piece
 // ponytail: a short list of joining scripts; add one here if a script shows up broken apart
-const JOINED = /[\p{M}\p{Emoji_Modifier}\p{Regional_Indicator}‍️\p{Script=Arabic}\p{Script=Syriac}\p{Script=Nko}\p{Script=Mongolian}]/u;
+const JOINED = /[\p{M}\p{Emoji_Modifier}\p{Regional_Indicator}\u{E0020}-\u{E007F}‍️\p{Script=Arabic}\p{Script=Syriac}\p{Script=Nko}\p{Script=Mongolian}]/u;
 
 /**
  * Text whose lines fade in one after another as it scrolls into view, and whose letters flip over on the X axis when
@@ -50,7 +50,7 @@ export function FlipText({ text, className, ...rest }: FlipTextProps) {
     const onFocus = (e: FocusEvent) => {
       if (!(e.target as Element).matches(":focus-visible")) return;
       const ls = root.querySelectorAll("[data-l]");
-      const step = Math.min(30, 600 / ls.length);
+      const step = Math.min(20, 200 / ls.length); // keyboard motion stays short: the whole wave is done in about 600ms
       ls.forEach((l, i) => flip(l, i * step));
     };
     // lines are only known once laid out: group the words by their top edge, then let each line fade in after the last
@@ -69,7 +69,8 @@ export function FlipText({ text, className, ...rest }: FlipTextProps) {
         });
         root.dataset.shown = "";
       },
-      { rootMargin: "0px 0px -10% 0px" },
+      // no inset margin: text in the bottom strip of a page that cannot scroll further would never be revealed
+      { rootMargin: "0px" },
     );
     io.observe(root);
     root.addEventListener("pointerover", onOver);
@@ -81,17 +82,19 @@ export function FlipText({ text, className, ...rest }: FlipTextProps) {
     };
   }, []);
 
-  const words = text.trim().split(/\s+/).filter(Boolean);
+  // split on breaking whitespace only: a no-break space keeps "10 kg" together
+  const words = text.trim().split(/[^\S\u00A0\u202F]+/).filter(Boolean);
   return (
     <p ref={ref} className={cn("group/flip relative", className)} {...rest}>
-      <span className="sr-only">{text}</span>
+      {/* unselectable so a copy takes the visible words once, not twice */}
+      <span className="sr-only select-none">{text}</span>
       <span aria-hidden>
         {words.map((w, i) => (
           <Fragment key={i}>
             {i > 0 && " "}
             {/* hidden only where scripts run, so the server HTML reads without JS; a long word wraps inside its own box */}
             {/* check-ignore: duration a once-per-page entrance, lines fading in as they arrive */}
-            <span data-w className="inline-flex max-w-full flex-wrap transition-opacity duration-700 ease-out [@media(scripting:enabled)]:opacity-0 group-data-shown/flip:opacity-100">
+            <span data-w className="inline-block max-w-full transition-opacity duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] [@media(scripting:enabled)]:opacity-0 group-data-shown/flip:opacity-100">
               {(JOINED.test(w) ? [w] : Array.from(w)).map((c, j) => (
                 <span key={j} data-l className="inline-block">
                   {c}

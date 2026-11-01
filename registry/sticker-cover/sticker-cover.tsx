@@ -47,6 +47,8 @@ const FADE = { duration: 0.2, ease: OUT_EASE }; // reduced motion: a quick cross
  * content swap), two frames paint, a sticker pops in at the centre, then the sheet lifts away. It knows nothing about
  * routing: wrap the page in it and call `ref.current.play(() => router.push(href))`. While covered the page is `inert`
  * and focus comes back to where it was (or to the page box if that element is gone); the sheet is `aria-hidden`.
+ * The page box is `isolate`, so a sticky header inside it never paints over the sheet. A change that has not settled after
+ * 8s is given up on and the cover lifts. A play during the lift reverses the sheet from where it is.
  * Everything is imperative motion on refs, so React never re-renders while it plays. Reduced motion: a quick crossfade
  * and no sticker.
  */
@@ -63,6 +65,7 @@ export function StickerCover({ ref, sticker, duration = 0.5, contained = false, 
   const busy = useRef<Promise<void> | null>(null);
   const covered = useRef(false); // true until the lift starts: new changes join this run instead of starting another
   const turn = useRef(0);
+  const lift = useRef<(() => void) | null>(null); // set while the sheet lifts: stops the lift so a new play reverses it in place
   const cancels = useRef(new Set<() => void>());
 
   useEffect(() => {
@@ -86,7 +89,7 @@ export function StickerCover({ ref, sticker, duration = 0.5, contained = false, 
       let id = requestAnimationFrame(() => (id = requestAnimationFrame(() => (drop(), r()))));
     });
 
-    const run = async (instant: boolean) => {
+    const run = async (instant: boolean, resume: boolean) => {
       const p = page.current, s = sheet.current, st = pop.current;
       if (!p || !s) return;
       const { duration: d, reduce: still } = live.current;
@@ -100,11 +103,12 @@ export function StickerCover({ ref, sticker, duration = 0.5, contained = false, 
       let risen: Promise<unknown> = Promise.resolve();
       if (still || instant) {
         s.style.transform = "none";
-        if (still && !instant) risen = track(animate(s, { opacity: [0, 1] }, FADE));
+        if (still && !instant) risen = track(animate(s, { opacity: resume ? 1 : [0, 1] }, FADE));
         else s.style.opacity = "1";
       } else {
         s.style.opacity = "1";
-        risen = Promise.all([track(animate(s, { y: ["102%", "0%"] }, rise)), track(animate(p, { y: ["0rem", DRIFT] }, rise))]);
+        // resuming an interrupted lift: rise from wherever the sheet is, so it reverses instead of leaving and coming back
+        risen = Promise.all([track(animate(s, { y: resume ? "0%" : ["102%", "0%"] }, rise)), track(animate(p, { y: ["0rem", DRIFT] }, rise))]);
       }
       const showSticker = !!st && !still;
       const popDelay = instant ? 0 : POP.delay;
@@ -118,7 +122,7 @@ export function StickerCover({ ref, sticker, duration = 0.5, contained = false, 
           const change = queue.current;
           queue.current = null;
           try {
-            await change();
+            await Promise.race([change(), wait(8000)]); // a change that never settles still lifts the cover
           } catch (e) {
             reportError(e); // a failed change still lifts the cover
           }
@@ -133,8 +137,17 @@ export function StickerCover({ ref, sticker, duration = 0.5, contained = false, 
       p.inert = false;
       if (hadFocus) (focused.isConnected && p.contains(focused) ? focused : p).focus({ preventScroll: true });
       // check-ignore: duration the lift is the second half of a page change, the source's 0.6s
-      await (still ? track(animate(s, { opacity: 0 }, FADE)) : track(animate(s, { y: "-102%" }, { duration: d * 1.2, ease: EASE })));
-      s.style.visibility = "hidden";
+      const a = still ? animate(s, { opacity: 0 }, FADE) : animate(s, { y: "-102%" }, { duration: d * 1.2, ease: EASE });
+      let stopped = false;
+      await new Promise<void>((done) => {
+        // a stopped animation never settles, so the cancel is dropped on both paths
+        const drop = keep(() => a.stop());
+        const end = () => (drop(), done());
+        lift.current = () => ((stopped = true), a.stop(), end());
+        a.then(end);
+      });
+      lift.current = null;
+      if (!stopped) s.style.visibility = "hidden";
     };
 
     const play = (change?: CoverChange, options?: { instant?: boolean }): Promise<void> => {
@@ -142,10 +155,13 @@ export function StickerCover({ ref, sticker, duration = 0.5, contained = false, 
         if (change) queue.current = change;
         return busy.current;
       }
-      if (busy.current) return busy.current.then(() => play(change, options)); // lifting: cover again once it is gone
+      const back = lift.current; // lifting: stop the lift and cover again from where the sheet is
+      if (back) back();
+      else if (busy.current) return busy.current.then(() => play(change, options)); // sticker leaving: cover again once gone
       queue.current = change ?? null;
       covered.current = true;
-      const b = run(!!options?.instant).finally(() => {
+      const b = run(!!options?.instant, !!back).finally(() => {
+        if (busy.current !== b) return; // an interrupted run must not clear the run that replaced it
         busy.current = null;
         covered.current = false;
       });
@@ -158,7 +174,7 @@ export function StickerCover({ ref, sticker, duration = 0.5, contained = false, 
   const at = contained ? "absolute" : "fixed";
   return (
     <>
-      <div ref={page} tabIndex={-1} className={cn("outline-none", pageClassName)} {...rest}>
+      <div ref={page} tabIndex={-1} className={cn("isolate outline-none", pageClassName)} {...rest}>
         {children}
       </div>
       <div

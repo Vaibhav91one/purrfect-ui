@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, useInView, useScroll, useSpring, useTransform } from "motion/react";
+import { motion, useInView, useReducedMotion, useScroll, useSpring, useTransform } from "motion/react";
 import { useRef, type ComponentProps, type ReactNode, type RefObject } from "react";
 import { cn } from "@/lib/utils";
 
@@ -32,21 +32,24 @@ export interface LocationPillProps extends Omit<ComponentProps<"div">, "ref" | "
  * A "Located in …" pill meant to sit on the left edge of a hero: square on the left, round on the right, with an icon
  * turning slowly in a grey circle (a CSS animation, paused while off screen). Once its bottom passes the middle of the
  * viewport (or of `container`) it drifts up by `drift` of its height as you scroll, smoothed like a scrubbed timeline.
- * Reduced motion: the icon turns four times slower; the drift (small, and only ever moved by your own scrolling) stays.
+ * Reduced motion: the icon turns four times slower and the drift is off (scroll-linked movement is a vestibular trigger).
+ * The corners are logical, so in a right-to-left page it mirrors: round on the left, flush on the right.
  */
 export function LocationPill({ label = "Located in India", icon, duration = 10, drift = 0.2, container, className, ...rest }: LocationPillProps) {
   const ref = useRef<HTMLDivElement>(null);
   const visible = useInView(ref);
+  const reduce = useReducedMotion();
   // bottom edge at the middle of the view → bottom edge at the top: the source's ScrollTrigger("bottom center") range
   const { scrollYProgress } = useScroll({ target: ref, container, offset: ["end center", "end start"] });
   const smooth = useSpring(scrollYProgress, { stiffness: 120, damping: 30, restDelta: 0.001 });
-  const y = useTransform(smooth, (p) => `${-p * drift * 100}%`);
+  // safe for the server HTML: y is "-0%" at progress 0 whatever reduce is
+  const y = useTransform(smooth, (p) => `${-p * (reduce ? 0 : drift) * 100}%`);
   return (
     <motion.div
       ref={ref}
       style={{ y }}
       className={cn(
-        "inline-flex max-w-full items-center gap-12 rounded-l-md rounded-r-full bg-foreground p-5 text-2xl text-background",
+        "inline-flex max-w-full items-center gap-6 rounded-s-md rounded-e-full bg-foreground p-5 sm:gap-12 text-2xl text-background",
         className,
       )}
       {...rest}

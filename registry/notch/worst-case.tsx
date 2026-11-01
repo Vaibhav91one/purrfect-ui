@@ -21,9 +21,9 @@ export const states: Record<string, ReactNode> = {
     <Notch delay={0} radius={8}>{word("Tiny radius")}</Notch>,
     <Notch delay={0} radius={64}>{word("Big radius")}</Notch>,
     <Notch delay={0}>
-      <nav className="flex gap-6 text-sm whitespace-nowrap text-neutral-900">
+      <nav className="flex flex-wrap justify-center gap-x-6 gap-y-1 text-sm text-foreground">
         {["Home", "Pricing", "Docs", "Changelog", "Careers", "Contact"].map((l) => (
-          <a key={l} href="#x">{l}</a>
+          <a key={l} href="#x" className="whitespace-nowrap">{l}</a>
         ))}
       </nav>
     </Notch>,

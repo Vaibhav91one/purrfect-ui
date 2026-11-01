@@ -27,6 +27,9 @@ export const states: Record<string, ReactNode> = {
     <PixelWave duration={0.1} stagger={0} />,
     // check-ignore: duration a deliberately slow loop to check the long end
     <PixelWave duration={10} stagger={2} />,
+    <p className="block">
+      Inline in running text, it should sit centred on the line: Saving draft <PixelWave /> and syncing <PixelWave aria-labelledby="pw-sync" /> <span id="pw-sync">sync</span>
+    </p>,
     <>
       <PixelWave className="text-destructive" />
       <span className="min-w-0 break-words">

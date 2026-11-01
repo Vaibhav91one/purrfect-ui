@@ -23,8 +23,9 @@ export interface SpringChipsProps extends Omit<ComponentProps<"div">, "ref" | "o
 }
 
 const chip: Variants = {
-  hidden: { opacity: 0, scale: 0.82, y: 22 },
-  shown: (delay: number) => ({ opacity: 1, scale: 1, y: 0, transition: { type: "spring", stiffness: 220, damping: 18, mass: 0.7, delay } }),
+  // full transform strings, not the y/scale shorthands, so motion can run them off the main thread while the page loads
+  hidden: { opacity: 0, transform: "translateY(22px) scale(0.82)" },
+  shown: (delay: number) => ({ opacity: 1, transform: "translateY(0px) scale(1)", transition: { type: "spring", stiffness: 220, damping: 18, mass: 0.7, delay } }),
 };
 
 /**
@@ -36,29 +37,34 @@ export function SpringChips({ chips, stagger = 0.08, chipClassName, className, c
   return (
     <motion.div initial="hidden" whileInView="shown" viewport={{ once: true, amount: 0.45 }} className={cn("relative", className)} {...rest}>
       {children}
-      {chips.map((c, i) => (
-        <motion.div
-          key={i}
-          custom={i * stagger}
-          variants={chip}
-          className={cn(
-            "absolute z-20 flex max-w-64 items-center gap-2 rounded-full border border-border bg-card py-1.5 pr-4 pl-1.5 text-sm font-medium text-card-foreground shadow-lg motion-reduce:![transform:none]",
-            !c.icon && "pl-4",
-            chipClassName,
-            c.className,
-          )}
-        >
-          {c.icon != null && (
-            <span
-              style={{ background: c.iconBackground }}
-              className="grid size-8 shrink-0 place-items-center overflow-hidden rounded-lg [&_svg]:size-4"
-            >
-              {c.icon}
-            </span>
-          )}
-          <span className="min-w-0 break-words">{c.label}</span>
-        </motion.div>
-      ))}
+      {chips.map((c, i) => {
+        const hasIcon = c.icon != null && c.icon !== false; // one check for the tile and the padding, so `cond && <Icon />` leaves no gap
+        const hasLabel = c.label != null && c.label !== false && c.label !== "";
+        return (
+          <motion.div
+            key={i}
+            custom={i * stagger}
+            variants={chip}
+            className={cn(
+              "absolute z-20 flex max-w-64 items-center gap-2 rounded-full border border-border bg-card py-1.5 ps-1.5 pe-4 text-sm font-medium text-card-foreground shadow-lg motion-reduce:![transform:none]",
+              !hasIcon && "ps-4",
+              !hasLabel && "pe-1.5",
+              chipClassName,
+              c.className,
+            )}
+          >
+            {hasIcon && (
+              <span
+                style={{ background: c.iconBackground }}
+                className="grid size-8 shrink-0 place-items-center overflow-hidden rounded-lg [&_svg]:size-4"
+              >
+                {c.icon}
+              </span>
+            )}
+            {hasLabel && <span className="min-w-0 break-words">{c.label}</span>}
+          </motion.div>
+        );
+      })}
     </motion.div>
   );
 }

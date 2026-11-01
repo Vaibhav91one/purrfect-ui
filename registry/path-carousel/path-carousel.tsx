@@ -4,7 +4,7 @@ import { useEffect, useRef, type ComponentProps, type ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
 const SCALE = [1, 0.78, 0.6, 0.45, 0.3]; // size by distance from the centre
-const K = 150; // spring stiffness; damping is critical, so there is no overshoot
+const K = 250; // spring stiffness (~250ms to 90% of a step); damping is critical, so there is no overshoot
 const sclAt = (scl: number[], ad: number) => {
   const k = Math.min(3, Math.floor(ad));
   return scl[k] + (scl[k + 1] - scl[k]) * Math.min(1, ad - k);
@@ -29,9 +29,9 @@ export interface PathCarouselProps extends Omit<ComponentProps<"div">, "children
 /**
  * Items ride a curved path, the centre one biggest. Scroll over it, swipe, use the arrow keys while focus is in it, or
  * click a neighbour to rotate; a spring moves the rotation and every frame writes position, size and fade straight to the
- * nodes, so React never re-renders while it moves. With 3+ items it loops. It fills its parent, so give the parent a height.
- * Every listener is on the carousel itself: the page scrolls and keys work as usual everywhere else. Reduced motion jumps
- * instead of gliding.
+ * nodes, so React never re-renders while it moves. With 3+ items it loops (the wheel still hands back to the page at the
+ * first and last item). It fills its parent, so give the parent a height. Every listener is on the carousel itself: the page
+ * scrolls and keys work as usual everywhere else. Reduced motion jumps instead of gliding, with a 200ms fade-in.
  */
 export function PathCarousel({ items, active, onActive, itemWidth = 300, itemHeight = 220, label = "Carousel", className, ...rest }: PathCarouselProps) {
   const box = useRef<HTMLDivElement>(null);
@@ -100,7 +100,12 @@ export function PathCarousel({ items, active, onActive, itemWidth = 300, itemHei
     const frame = (now: number) => {
       const dt = Math.min(0.05, last ? (now - last) / 1000 : 1 / 60);
       last = now;
-      if (reduce) { rot = target; vel = 0; } else { vel += ((target - rot) * K - vel * 2 * Math.sqrt(K)) * dt; rot += vel * dt; }
+      if (reduce) {
+        const jumped = rot !== target;
+        rot = target; vel = 0; render();
+        // a jump, softened: every visible item fades in at its new place
+        if (jumped) L.forEach((el) => { if (!el.style.visibility) el.animate({ opacity: ["0", el.style.opacity] }, { duration: 200, easing: "ease-out" }); });
+      } else { vel += ((target - rot) * K - vel * 2 * Math.sqrt(K)) * dt; rot += vel * dt; }
       render();
       raf = Math.abs(target - rot) > 0.0008 || Math.abs(vel) > 0.0008 ? requestAnimationFrame(frame) : 0;
       if (!raf) { rot = target; last = 0; render(); }
@@ -117,7 +122,7 @@ export function PathCarousel({ items, active, onActive, itemWidth = 300, itemHei
         if (i === a) el.setAttribute("aria-current", "true");
         else el.removeAttribute("aria-current");
       });
-      if (had) { L[a].style.visibility = ""; L[a].focus({ preventScroll: true }); } // a hidden slide can't take focus
+      if (had && !L[a].contains(document.activeElement)) { L[a].style.visibility = ""; L[a].focus({ preventScroll: true }); } // a hidden slide can't take focus
       if (live.current) live.current.textContent = `${a + 1} of ${n}`;
       emitRef.current?.(a);
     };
@@ -136,7 +141,8 @@ export function PathCarousel({ items, active, onActive, itemWidth = 300, itemHei
       const narrow = w < 600;
       scl[1] = narrow ? 0.62 : 0.78;
       gap = narrow ? 14 : 36;
-      base = Math.max(0.4, Math.min(1.3, h / (itemHeight * 1.15), w / (itemWidth * (1 + 2 * scl[1]) + 2 * gap + 48)));
+      // the 0.4 floor is for narrow boxes only: a short box still shrinks the items to fit its height
+      base = Math.min(1.3, h / (itemHeight * 1.15), Math.max(0.4, w / (itemWidth * (1 + 2 * scl[1]) + 2 * gap + 48)));
       L.forEach((el) => { el.style.offsetPath = `path('${d}')`; });
       render();
     };
@@ -151,8 +157,9 @@ export function PathCarousel({ items, active, onActive, itemWidth = 300, itemHei
     const onWheel = (e: WheelEvent) => {
       if (e.ctrlKey) return;
       const dv = Math.abs(e.deltaY) >= Math.abs(e.deltaX) ? e.deltaY : e.deltaX;
-      // without the loop, the first and last item hand the wheel back to the page instead of trapping it
-      if (!inf && (Math.round(target) + Math.sign(dv) < 0 || Math.round(target) + Math.sign(dv) > n - 1)) return;
+      // the first and last item hand the wheel back to the page instead of trapping it (arrows, swipes and clicks still loop)
+      const at = norm(target) + Math.sign(dv);
+      if (at < 0 || at > n - 1) return;
       e.preventDefault();
       if (performance.now() < lock) { acc = 0; return; }
       acc += dv; // trackpads fire many small deltas: one step per ~60px, then a short lock so inertia doesn't skip items
@@ -194,7 +201,7 @@ export function PathCarousel({ items, active, onActive, itemWidth = 300, itemHei
   }, [active]);
 
   return (
-    <div ref={box} role="region" aria-roledescription="carousel" aria-label={label} className={cn("relative size-full touch-pan-y", className)} {...rest}>
+    <div ref={box} role="region" aria-roledescription="carousel" aria-label={label} className={cn("relative size-full touch-pan-y overflow-x-clip", className)} {...rest}>
       <svg aria-hidden className="pointer-events-none absolute inset-0 size-full overflow-visible">
         <path ref={path} fill="none" stroke="var(--border)" strokeWidth="1.5" strokeDasharray="2 7" strokeLinecap="round" />
       </svg>
@@ -208,6 +215,8 @@ export function PathCarousel({ items, active, onActive, itemWidth = 300, itemHei
           aria-label={`${i + 1} of ${n}`}
           tabIndex={i === 0 ? 0 : -1}
           onClick={() => api.current.select(i)}
+          // tabbing into a link on a side slide centres that slide
+          onFocus={() => api.current.select(i)}
           onKeyDown={(e) => {
             if (e.target === e.currentTarget && (e.key === "Enter" || e.key === " ")) {
               e.preventDefault();

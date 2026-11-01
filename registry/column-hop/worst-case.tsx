@@ -5,7 +5,8 @@ import Demo from "./demo";
 import { ColumnHop } from "./column-hop";
 
 const page = (node: ReactNode) => <div className="mx-auto w-full max-w-4xl px-6 pt-[60svh] pb-[60svh]">{node}</div>;
-const t = (s: string) => <p className="break-words">{s}</p>;
+// plain strings, so the card box itself has to wrap them
+const t = (s: string) => s;
 
 export const states: Record<string, ReactNode> = {
   Demo: page(<Demo />),

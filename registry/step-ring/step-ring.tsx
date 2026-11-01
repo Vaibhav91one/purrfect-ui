@@ -10,14 +10,15 @@ export type StepState = "pending" | "current" | "done" | "skipped";
 export interface StepRingProps extends Omit<ComponentProps<"span">, "children"> {
   /** `current` spins a quarter-arc on the ring, `done` fills it with a tick, `skipped` shows a dash, `pending` shows the number. */
   state: StepState;
-  /** The number drawn inside the ring for `pending` and `current`. */
+  /** The number drawn inside the ring for `pending` and `current`. Fits 1-99 at the default size. */
   index: number;
 }
 
 /**
  * A numbered circular badge for one step of a pipeline. The current step's ring has a quarter-arc turning on it, a finished step
  * is a filled tick, a skipped one a dash. Opaque on purpose (`bg-background`), so a connector line running behind it never
- * crosses the number. Size it with `className` (`size-7` by default); the arc and the tick take the text colour.
+ * crosses the number. Size it with `className` (`size-7 text-xs` by default, so `size-40 text-4xl` scales the number too); the arc and the tick
+ * take the text colour. Screen readers hear "Step 3, current" from a hidden label.
  * Reduced motion: the arc turns at a third of the speed.
  */
 export function StepRing({ state, index, className, ...rest }: StepRingProps) {
@@ -27,19 +28,20 @@ export function StepRing({ state, index, className, ...rest }: StepRingProps) {
   if (state === "done") {
     return (
       <span
-        className={cn("relative z-10 flex size-7 shrink-0 items-center justify-center rounded-full bg-foreground text-background", className)}
+        className={cn("relative z-10 flex size-7 shrink-0 items-center justify-center rounded-full bg-foreground text-xs text-background", className)}
         {...rest}
       >
         <svg viewBox="0 0 256 256" aria-hidden className="size-1/2">
           <path d="M40 144l56 56L216 80" fill="none" stroke="currentColor" strokeWidth="28" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
+        <span className="sr-only">{`Step ${index}, ${state}`}</span>
       </span>
     );
   }
 
   return (
     <span
-      className={cn("relative z-10 flex size-7 shrink-0 items-center justify-center rounded-full bg-background text-foreground", className)}
+      className={cn("relative z-10 flex size-7 shrink-0 items-center justify-center rounded-full bg-background text-xs text-foreground", className)}
       {...rest}
     >
       <svg ref={ref} viewBox="0 0 28 28" aria-hidden className="absolute inset-0 size-full">
@@ -62,7 +64,7 @@ export function StepRing({ state, index, className, ...rest }: StepRingProps) {
           />
         ) : null}
       </svg>
-      <span className={cn("relative text-xs tabular-nums", state === "current" ? "text-foreground" : "text-muted-foreground")}>
+      <span aria-hidden className={cn("relative tabular-nums", state === "current" ? "text-foreground" : "text-muted-foreground")}>
         {state === "skipped" ? (
           <svg viewBox="0 0 256 256" aria-hidden className="size-3">
             <path d="M40 128h176" stroke="currentColor" strokeWidth="16" strokeLinecap="round" />
@@ -71,6 +73,7 @@ export function StepRing({ state, index, className, ...rest }: StepRingProps) {
           index
         )}
       </span>
+      <span className="sr-only">{`Step ${index}, ${state}`}</span>
     </span>
   );
 }
@@ -83,14 +86,14 @@ export interface StepRiseProps extends Omit<ComponentProps<"li">, "ref" | "onDra
 }
 
 /**
- * A list row that rises 6px into place with a fade, `order × stagger` after mount, so a pipeline reads top to bottom instead
+ * A list row that rises 6px into place with a fade, `order × stagger` after mount (capped at the 6th row), so a pipeline reads top to bottom instead
  * of arriving all at once. Replay it by changing the list's `key`.
  * Reduced motion: it fades in without moving.
  */
 export function StepRise({ order, stagger = 0.07, className, ...rest }: StepRiseProps) {
   const reduce = useReducedMotion();
   // check-ignore: duration the source's 450ms rise, staggered so the eye follows the pipeline; each row is short
-  const rise = { delay: order * stagger, duration: 0.45, ease: [0.23, 1, 0.32, 1] as const };
+  const rise = { delay: Math.min(order, 6) * stagger, duration: 0.45, ease: [0.23, 1, 0.32, 1] as const };
   return (
     <motion.li
       className={cn(className)}

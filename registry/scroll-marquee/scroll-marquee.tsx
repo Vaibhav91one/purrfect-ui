@@ -18,17 +18,21 @@ export interface ScrollMarqueeProps extends Omit<ComponentProps<"div">, "ref" | 
 /**
  * A marquee that flips direction with the page's scroll: scroll down and it runs left, scroll back up and it runs right.
  * It moves at a fixed speed per second whatever the frame rate, renders as many copies as the width needs and wraps by
- * exactly one copy, so it never runs out. It only runs while on screen. Screen readers and Tab get the first copy only (the
+ * exactly one copy, so it never runs out. It only runs while on screen, and pauses while hovered or while focus is inside. A
+ * scroll flip eases the speed through zero instead of snapping. Screen readers and Tab get the first copy only (the
  * repeats are inert, so links inside are not doubled).
  * Reduced motion: it stands still.
  */
-export function ScrollMarquee({ children, speed = 80, direction = "left", container, className, ...rest }: ScrollMarqueeProps) {
+export function ScrollMarquee({ children, speed = 80, direction = "left", container, className, onPointerEnter, onPointerLeave, onFocus, onBlur, ...rest }: ScrollMarqueeProps) {
   const root = useRef<HTMLDivElement>(null);
   const first = useRef<HTMLDivElement>(null);
   const reduce = useReducedMotion();
   const visible = useInView(root);
   const x = useMotionValue(0);
   const dir = useRef(direction === "left" ? -1 : 1);
+  const v = useRef(direction === "left" ? -1 : 1); // the eased sign, so a flip slows through zero instead of snapping
+  const rtl = useRef(false);
+  const paused = useRef(false);
   const copy = useRef(0);
   const [count, setCount] = useState(2);
 
@@ -43,6 +47,7 @@ export function ScrollMarquee({ children, speed = 80, direction = "left", contai
     if (!box || !one) return;
     const ro = new ResizeObserver(() => {
       copy.current = one.offsetWidth;
+      rtl.current = getComputedStyle(box).direction === "rtl"; // RTL copies stack leftwards from the right edge
       if (copy.current) setCount(Math.max(2, Math.ceil(box.clientWidth / copy.current) + 1));
     });
     ro.observe(box);
@@ -52,15 +57,28 @@ export function ScrollMarquee({ children, speed = 80, direction = "left", contai
 
   useAnimationFrame((_, delta) => {
     const w = copy.current;
-    if (reduce || !visible || !w) return;
-    let next = x.get() + (dir.current * speed * Math.min(delta, 100)) / 1000; // a backgrounded tab must not jump on return
-    if (next <= -w) next += w;
+    if (reduce || !visible || !w || paused.current) return;
+    const dt = Math.min(delta, 100); // a backgrounded tab must not jump on return
+    v.current += (dir.current - v.current) * (1 - Math.exp(-dt / 80));
+    let next = x.get() + (v.current * speed * dt) / 1000;
+    if (rtl.current) {
+      if (next >= w) next -= w;
+      else if (next < 0) next += w;
+    } else if (next <= -w) next += w;
     else if (next > 0) next -= w;
     x.set(next);
   });
 
   return (
-    <div ref={root} className={cn("overflow-hidden", className)} {...rest}>
+    <div
+      ref={root}
+      className={cn("overflow-hidden", className)}
+      onPointerEnter={(e) => ((paused.current = true), onPointerEnter?.(e))}
+      onPointerLeave={(e) => ((paused.current = e.currentTarget.contains(document.activeElement)), onPointerLeave?.(e))}
+      onFocus={(e) => ((paused.current = true), onFocus?.(e))}
+      onBlur={(e) => ((paused.current = e.currentTarget.contains(e.relatedTarget) || e.currentTarget.matches(":hover")), onBlur?.(e))}
+      {...rest}
+    >
       <motion.div style={{ x }} className="flex w-max will-change-transform">
         {Array.from({ length: count }, (_, i) => (
           <div key={i} ref={i === 0 ? first : undefined} aria-hidden={i > 0 || undefined} inert={i > 0 || undefined} className="shrink-0">

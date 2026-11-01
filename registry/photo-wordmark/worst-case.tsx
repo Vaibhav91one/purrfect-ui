@@ -6,7 +6,7 @@ import { PhotoWordmark } from "./photo-wordmark";
 const page = (...kids: ReactNode[]) => (
   <div className="flex flex-col gap-24 py-[60svh] pb-[20svh]">
     {kids.map((k, i) => (
-      <footer key={i} className="overflow-hidden rounded-3xl border bg-card px-6 pt-6">
+      <footer key={i} className="overflow-clip rounded-3xl border bg-card px-6 pt-6">
         {k}
       </footer>
     ))}
@@ -22,6 +22,9 @@ export const states: Record<string, ReactNode> = {
     <PhotoWordmark text="مرحبا بالعالم" dir="rtl" src="/demo/dunes.jpg" className="font-black [--advance:0.55]" />,
     <PhotoWordmark text="NO GLOW, NO CROP" src="/demo/city.jpg" glow={false} crop={0} className="font-black" />,
     <PhotoWordmark text="DEEP CROP" src="/demo/jellyfish.jpg" crop={0.9} as="h2" className="font-serif" />,
+    <PhotoWordmark text="BROKEN PHOTO" src='/demo/missing "quoted".jpg' className="font-black" />,
+    <PhotoWordmark text="👩‍👩‍👧‍👦🇮🇳 FAMILY" src="/demo/field.jpg" className="font-black" />,
+    <PhotoWordmark text="WWMMWWMM" src="/demo/storm.jpg" className="font-black" />,
   ),
   Empty: page(<PhotoWordmark text="" src="/demo/field.jpg" className="font-black" />),
 };

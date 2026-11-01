@@ -17,7 +17,10 @@ const LONG = Array.from({ length: 12 }, (_, i) => `Paragraph ${i + 1} keeps goin
 export const states: Record<string, ReactNode> = {
   Demo: frame(<WordStream text="The export endpoint returns another workspace's invoices when you swap the account id in the URL." />),
   "Worst case": frame(
-    <WordStream className="break-all" text="Donaudampfschifffahrtsgesellschaftskapitänswitwe an_unbreakable_email@example-very-long-domain.com https://example.com/a/very/long/path?with=query&and=more" />,
+    <WordStream text="Donaudampfschifffahrtsgesellschaftskapitänswitwe an_unbreakable_email@example-very-long-domain.com https://example.com/a/very/long/path?with=query&and=more" />,
+    <div className="max-w-80">
+      <WordStream text="Bisected to commit 9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08 in the export job." />
+    </div>,
     <WordStream text={"Line one\nLine two after a newline\n\n   indented after a blank line\tand a tab"} />,
     <WordStream text={LONG} interval={10} />,
     <WordStream text="思考中… 考えています、少々お待ちください。" />,

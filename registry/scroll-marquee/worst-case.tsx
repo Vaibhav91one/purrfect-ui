@@ -20,5 +20,17 @@ export const states: Record<string, ReactNode> = {
       </div>
     </ScrollMarquee>,
   ),
+  RTL: page(
+    <ScrollMarquee dir="rtl">{line("إرسال الرسالة الآن —", "text-xl")}</ScrollMarquee>,
+    <ScrollMarquee dir="rtl" speed={400}>{line("Fast and very long marquee text that is wider than most screens on its own —")}</ScrollMarquee>,
+  ),
+  // hover or Tab to the link: it stops so the focus ring stays put
+  Link: page(
+    <ScrollMarquee>
+      <p className="pr-12 text-5xl font-medium whitespace-nowrap">
+        Read the <a href="#case" className="underline">case study</a> —
+      </p>
+    </ScrollMarquee>,
+  ),
   Empty: page(<ScrollMarquee>{null}</ScrollMarquee>),
 };

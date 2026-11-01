@@ -23,5 +23,7 @@ export const states: Record<string, ReactNode> = {
     <GlideTabs tabs={[{ value: "a", label: "All", disabled: true }, { value: "b", label: "disabled", disabled: true }]} />,
     <GlideTabs orientation="vertical" tabs={["Account", "Billing and invoices", "Notifications"]} />,
     <GlideTabs tabs={["Preview", "Code"]} value="Missing" />,
+    <GlideTabs dir="rtl" tabs={["معاينة", "الكود", "المستندات"]} />,
+    <GlideTabs idPrefix="wc" tabs={["Overview", "Billing and invoices"]} />,
   ),
 };

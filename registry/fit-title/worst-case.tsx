@@ -18,6 +18,7 @@ export const states: Record<string, ReactNode> = {
     <FitTitle key="j" as="p">日本語のタイトル</FitTitle>,
     <FitTitle key="a" as="p" dir="rtl">عنوان عربي</FitTitle>,
     <FitTitle key="e" as="p">🐈‍⬛ cats 🐈</FitTitle>,
+    <FitTitle key="d" as="p">Ångström Ỗ Épée</FitTitle>,
     <FitTitle key="n" as="p" min={12} max={48}>Capped at 48px</FitTitle>,
     <FitTitle key="r" as="p" rise={false}>No rise</FitTitle>,
   ),

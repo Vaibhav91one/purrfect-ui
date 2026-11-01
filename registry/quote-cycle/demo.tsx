@@ -20,8 +20,10 @@ export default function QuoteCycleDemo() {
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img src="/demo/field.jpg" alt="" className="absolute inset-0 size-full object-cover" />
       <div className="relative grid h-[200px] w-[400px] place-items-center rounded-2xl bg-background px-12">
-        <button type="button" onClick={() => setI((n) => n + 1)} aria-label="Next quote" className="w-full">
-          <QuoteCycle index={i} lines={QUOTES} className="text-xl leading-snug" />
+        <button type="button" onClick={() => setI((n) => n + 1)} className="w-full">
+          {/* visually hidden, so the button's name is "Next quote" plus the quote itself */}
+          <span className="sr-only">Next quote: </span>
+          <QuoteCycle index={i} lines={QUOTES} className="text-2xl leading-snug" />
         </button>
       </div>
     </div>

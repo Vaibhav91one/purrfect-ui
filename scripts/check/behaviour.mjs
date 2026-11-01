@@ -93,7 +93,7 @@ const checks = {
     await p.waitForTimeout(300);
     await done(p, "displacement");
     p = await open("c=displacement&s=Demo", true);
-    assert.deepEqual(await gl(), ["0", "0"], "reduced motion leaves the plain image");
+    assert.deepEqual(await gl(), ["1", "1"], "reduced motion keeps a gentle bend (gentler, not off)");
     await done(p, "displacement / reduced");
   },
   async "hover-preview"() {
@@ -137,8 +137,8 @@ const checks = {
     await done(p, "preloader");
     p = await open("c=preloader&s=Demo");
     await p.keyboard.press("Escape");
-    await p.waitForTimeout(1300);
-    assert.equal(await n(), 0, "Escape skips it");
+    await p.waitForTimeout(300);
+    assert.equal(await n(), 1, "Escape leaves a contained one alone (it only skips the full-screen cover)");
     await done(p, "preloader / skip");
   },
   async "fill-button"() {

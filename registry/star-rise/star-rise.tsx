@@ -1,7 +1,7 @@
 "use client";
 
 import { LiquidMetal } from "@paper-design/shaders-react";
-import { motion, useInView, useReducedMotion, useScroll, useTransform } from "motion/react";
+import { motion, useInView, useMotionValueEvent, useReducedMotion, useScroll, useTransform } from "motion/react";
 import { Suspense, useEffect, useRef, useState, type ComponentProps, type ReactNode, type RefObject } from "react";
 import { cn } from "@/lib/utils";
 
@@ -36,11 +36,18 @@ function hasWebGL() {
  * The default mark: a liquid-metal asterisk. WebGL starts only on the client (the server HTML is the plain SVG), the canvas is
  * the element's own size, and the shader stops its frame loop while off screen or under reduced motion.
  */
-/** A CSS colour (oklch tokens included) as rgb the shader can parse: drawn into a 1px canvas and read back. */
-function toRgb(css: string) {
+/**
+ * Any CSS colour (oklch, var(--token), a name, shadcn v3's bare HSL channels "0 0% 100%") as rgb the shader can parse: resolved
+ * on `el` (so var() works), drawn into a 1px canvas and read back.
+ */
+function toRgb(css: string, el: HTMLElement) {
   const g = document.createElement("canvas").getContext("2d", { willReadFrequently: true });
   if (!g) return "#ffffff"; // check-ignore: hardcoded-color fallback when there is no 2D canvas
-  g.fillStyle = css;
+  if (!CSS.supports("color", css)) css = `hsl(${css})`; // bare channels are not a colour on their own
+  el.style.color = css;
+  const resolved = getComputedStyle(el).color;
+  el.style.color = "";
+  g.fillStyle = resolved;
   g.fillRect(0, 0, 1, 1);
   const [r, gr, b] = g.getImageData(0, 0, 1, 1).data;
   return `rgb(${r}, ${gr}, ${b})`;
@@ -59,11 +66,13 @@ function MetalAsterisk({ colorBack, colorTint }: { colorBack?: string; colorTint
   // would vanish on a light page; an opaque back that matches the page keeps it readable in both themes.
   useEffect(() => {
     const read = () => {
-      if (!ref.current) return;
-      const bg = getComputedStyle(document.documentElement).getPropertyValue("--background").trim();
+      const el = ref.current;
+      if (!el) return;
+      const bg = colorBack ?? getComputedStyle(document.documentElement).getPropertyValue("--background").trim();
+      // caller colours go through toRgb too: the shader only parses hex, comma rgb() and hsl(), anything else turns black
       const next = {
-        text: toRgb(getComputedStyle(ref.current).color),
-        back: bg ? toRgb(bg) : "rgba(0, 0, 0, 0)",
+        text: toRgb(colorTint ?? getComputedStyle(el).color, el),
+        back: bg ? toRgb(bg, el) : "rgba(0, 0, 0, 0)",
       };
       // only a real change re-renders: the shader re-processes its image on new colours, and other code toggles <html> classes too
       setTheme((t) => (t && t.text === next.text && t.back === next.back ? t : next));
@@ -78,7 +87,7 @@ function MetalAsterisk({ colorBack, colorTint }: { colorBack?: string; colorTint
   }, [colorTint, colorBack]);
   return (
     <div ref={ref} className="size-full">
-      {gl && (theme || (colorTint && colorBack)) ? (
+      {gl && theme ? (
         // the shader pre-processes its image on the CPU (a heavy pass); suspend mode caches it by URL, so every star on the
         // page shares one pass instead of one each. The plain asterisk shows meanwhile.
         <Suspense fallback={<Asterisk />}>
@@ -87,8 +96,8 @@ function MetalAsterisk({ colorBack, colorTint }: { colorBack?: string; colorTint
             width="100%"
             height="100%"
             image={ASTERISK_URL}
-            colorBack={colorBack ?? theme!.back}
-            colorTint={colorTint ?? theme!.text}
+            colorBack={theme.back}
+            colorTint={theme.text}
             repetition={2}
             softness={0.1}
             shiftRed={0.3}
@@ -123,7 +132,7 @@ export interface StarRiseProps extends Omit<ComponentProps<"div">, "ref" | "chil
   container?: RefObject<HTMLElement | null>;
   /** The default asterisk only: `false` draws the plain SVG asterisk in the text colour, no WebGL. */
   shader?: boolean;
-  /** The default asterisk only: shader background. The page's `--background` by default; set it when the mark sits on another surface. */
+  /** The default asterisk only: shader background. The page's `--background` by default; set it when the mark sits on another surface (any CSS colour, `var(--muted)` included). */
   colorBack?: string;
   /** The default asterisk only: the metal's tint. The text colour by default, so it reads on light and dark themes. */
   colorTint?: string;
@@ -160,7 +169,11 @@ export function StarRise({
     container,
     offset: ["start end", "end start"],
   });
-  const rotate = useTransform(scrollYProgress, [0, 1], [0, turns * 360]);
+  // relative to where the pass stood at load, so a mark already partway through (a hero) still lands upright after the rise.
+  // The progress reads 0 until the first measurement, so the start is that first change, not the initial value.
+  const start = useRef<number | null>(null);
+  useMotionValueEvent(scrollYProgress, "change", (v) => void (start.current ??= v));
+  const rotate = useTransform(scrollYProgress, (v) => (start.current === null ? 0 : (v - start.current) * turns * 360));
 
   return (
     <div ref={root} className={cn("relative shrink-0", className)} style={{ width: size, height: size, ...style }} {...rest}>
@@ -178,7 +191,7 @@ export function StarRise({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           // check-ignore: duration a one-off entrance fade, half the rise so it dissolves in instead of popping
-          transition={reduce ? { duration: 0.4, delay } : { duration: duration / 2, delay, ease: "easeOut" }}
+          transition={reduce ? { duration: 0.4, delay } : { duration: duration / 2, delay, ease: OUT }}
           onAnimationComplete={reduce ? onRiseComplete : undefined}
         >
           <motion.div className="size-full origin-center motion-reduce:!transform-none" style={{ rotate }}>

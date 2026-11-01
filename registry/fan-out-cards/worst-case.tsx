@@ -5,7 +5,7 @@ import type { ReactNode } from "react";
 import Demo from "./demo";
 import { FanOutCards, type FanOutCard } from "./fan-out-cards";
 
-const page = (node: ReactNode) => <div className="mx-auto w-full max-w-4xl px-6 pt-[60svh] pb-[60svh]">{node}</div>;
+const page = (node: ReactNode, cls = "") => <div className={`mx-auto w-full max-w-4xl px-6 pt-[60svh] pb-[60svh] ${cls}`}>{node}</div>;
 const text = (t: string) => <p className="text-xs leading-snug break-words">{t}</p>;
 const ring = (n: number, r = 38): FanOutCard[] =>
   Array.from({ length: n }, (_, i) => {
@@ -28,6 +28,8 @@ export const states: Record<string, ReactNode> = {
         { x: 60, y: 0, content: text("Off the edge (60%)") },
       ]}
     />,
+    // past |x| 30 a card leaves the box: the documented fix is clipping a parent
+    "overflow-x-clip",
   ),
   "Many (24)": page(<FanOutCards className="h-[480px]" cardClassName="w-28 p-2" stagger={0.02} cards={ring(24)} />),
   One: page(<FanOutCards cards={[{ x: 25, y: 0, rotate: 6, content: text("Only one") }]} center={<span className="text-sm text-muted-foreground">centre</span>} />),

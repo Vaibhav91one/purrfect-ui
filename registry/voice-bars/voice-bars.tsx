@@ -17,14 +17,16 @@ const KEYFRAMES =
   "@keyframes voice-bars-fade{50%{opacity:.45}}";
 
 // Heights as a fraction of the box, 0.38-1 (Armour's 10-26px in a 26px bar). Integer hash, so server and client agree.
-const height = (i: number, k: number) => (0.38 + (((i * 7 + k * 13 + i * k * 5 + 3) % 17) / 16) * 0.62).toFixed(2);
+// The step between a bar's heights is 5-12, never a multiple of 17, so every bar moves and no keyframe is shared by all bars.
+const height = (i: number, k: number) => (0.38 + (((i * 7 + k * (5 + (i % 8)) + 3) % 17) / 16) * 0.62).toFixed(2);
 
 /**
  * A voice level meter: thin bars jump between heights on a loop, each one a beat behind the last, like a mic that is listening.
  * Each bar has its own fixed sequence of four heights (no Math.random, so the server HTML matches), drawn with CSS `scale` from the bottom:
  * transform only, one keyframe shared by every bar, no JavaScript per frame. Bars are `currentColor`, so set the colour with `text-*`.
  * The loop pauses while the meter is off screen. It is decorative (hidden from screen readers) unless you give it an `aria-label`.
- * Reduced motion: the bars hold still at their first height and only pulse in opacity.
+ * Reduced motion: the bars hold still at their first height and only pulse in opacity. `scale` squashes the round caps of
+ * wide bars (`[&>span]:w-2` and up) at their short heights; at the default 2px width it does not show.
  */
 export function VoiceBars({ bars = 12, duration = 1, stagger = 0.08, className, style, ...rest }: VoiceBarsProps) {
   const ref = useRef<HTMLDivElement>(null);
@@ -66,7 +68,8 @@ export function VoiceBars({ bars = 12, duration = 1, stagger = 0.08, className, 
               "--h1": height(i, 1),
               "--h2": height(i, 2),
               "--h3": height(i, 3),
-              animationDelay: `${i * stagger}s`,
+              // negative: every bar is already mid-loop on the first paint instead of waking up left to right
+              animationDelay: `${-i * stagger}s`,
             } as CSSProperties
           }
         />

@@ -27,6 +27,8 @@ export const states: Record<string, ReactNode> = {
       {frame({ links: l(long, "Anmeldung-abschließen-und-bestätigen", "メールアドレスを確認して登録を完了する", "🚀 Launch 🎉"), heading: long, footer: <span>{long}</span> })}
       {frame({ links: l(...Array.from({ length: 30 }, (_, i) => `Section ${i + 1}`)), active: "#29" })}
       <div dir="rtl">{frame({ links: l("الصفحة الرئيسية", "المنتجات", "من نحن") })}</div>
+      {/* two links to one href: only the hovered one lights */}
+      {frame({ links: [{ label: "Work", href: "#work" }, { label: "Contact", href: "#contact" }, { label: "Hire me", href: "#contact" }], active: "#work" })}
     </div>
   ),
   Closed: frame({ defaultOpen: false }),

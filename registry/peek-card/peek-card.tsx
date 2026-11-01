@@ -96,15 +96,19 @@ export function PeekCard({ image, imgProps, title, description, meta, index, hre
       <article
         ref={root}
         className={cn(
-          "group/peek relative flex w-full flex-col overflow-hidden bg-muted/60 text-foreground transition-[background-color,opacity,translate] sm:flex-row",
+          // a container, so the layout follows the row's own width (a sidebar on a wide screen stacks like a phone)
+          "group/peek @container/peek relative w-full overflow-hidden bg-muted/60 text-foreground",
           appear,
+          // after appear, so tailwind-merge keeps the background in the list; 200ms for the hover background
+          "transition-[background-color,opacity,translate] [transition-duration:200ms,500ms,500ms]",
           muted ? "data-[shown]:opacity-60" : "hover:bg-muted",
           className,
         )}
         {...rest}
       >
+        <div className="flex flex-col @md/peek:flex-row">
         {image != null && (
-          <div className="relative h-48 w-full shrink-0 overflow-hidden bg-muted sm:h-auto sm:min-h-56 sm:w-56 lg:w-64">
+          <div className="relative h-48 w-full shrink-0 overflow-hidden bg-muted @md/peek:h-auto @md/peek:min-h-56 @md/peek:w-56 @4xl/peek:w-64">
             <div className="absolute inset-0">
               <Media image={image} imgProps={imgProps} />
             </div>
@@ -115,25 +119,29 @@ export function PeekCard({ image, imgProps, title, description, meta, index, hre
             )}
           </div>
         )}
-        <div className="flex min-w-0 flex-1 flex-col gap-4 p-4 sm:p-6">
+        <div className="flex min-w-0 flex-1 flex-col gap-4 p-4 @md/peek:p-6">
           {meta && <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">{meta}</div>}
           <div className="mt-auto flex items-end justify-between gap-4">
             <div className="min-w-0 flex-1">
-              <Title href={href} className="text-xl leading-tight tracking-tight break-words md:text-4xl">
+              <Title href={href} className="text-xl leading-tight tracking-tight break-words @2xl/peek:text-4xl">
                 {title}
               </Title>
               {description && <p className="mt-2 line-clamp-2 leading-tight text-muted-foreground">{description}</p>}
             </div>
-            <Arrow
-              className={cn(
-                // check-ignore: duration the arrow is a slow reveal on a big card, as on the original site
-                `size-12 shrink-0 transition-[opacity,scale] duration-500 ${EASE} md:size-20 motion-reduce:scale-100`,
-                muted
-                  ? "opacity-70"
-                  : "scale-80 opacity-0 group-hover/peek:scale-100 group-has-[:focus-visible]/peek:scale-100 [@media(hover:none)]:scale-100 group-hover/peek:opacity-100 group-has-[:focus-visible]/peek:opacity-100 [@media(hover:none)]:opacity-100",
-              )}
-            />
+            {/* a link affordance, so only when there is a link */}
+            {href && (
+              <Arrow
+                className={cn(
+                  // check-ignore: duration the arrow is a slow reveal on a big card, as on the original site
+                  `size-12 shrink-0 transition-[opacity,scale] duration-500 ${EASE} @2xl/peek:size-20 motion-reduce:scale-100`,
+                  muted
+                    ? "opacity-70"
+                    : "scale-80 opacity-0 group-hover/peek:scale-100 group-has-[:focus-visible]/peek:scale-100 [@media(hover:none)]:scale-100 group-hover/peek:opacity-100 group-has-[:focus-visible]/peek:opacity-100 [@media(hover:none)]:opacity-100",
+                )}
+              />
+            )}
           </div>
+        </div>
         </div>
       </article>
     );
@@ -141,7 +149,7 @@ export function PeekCard({ image, imgProps, title, description, meta, index, hre
   return (
     <article
       ref={root}
-      className={cn("group/peek relative aspect-[4/5] w-full overflow-hidden bg-muted text-card-foreground", appear, muted && "data-[shown]:opacity-60", className)}
+      className={cn("group/peek @container/peek relative aspect-[4/5] w-full overflow-hidden bg-muted text-card-foreground", appear, muted && "data-[shown]:opacity-60", className)}
       {...rest}
     >
       <div className="absolute inset-0 overflow-hidden">
@@ -156,7 +164,8 @@ export function PeekCard({ image, imgProps, title, description, meta, index, hre
         </div>
       </div>
       {index != null && (
-        <span aria-hidden className={cn(NUMBER, "start-4 top-4 max-w-[calc(100%-2rem)] truncate text-6xl")}>
+        // no photo behind it: a token colour, since white would vanish on bg-muted in the light theme
+        <span aria-hidden className={cn(NUMBER, "start-4 top-4 max-w-[calc(100%-2rem)] truncate text-6xl", image == null && "text-muted-foreground [text-shadow:none]")}>
           {index}
         </span>
       )}
@@ -165,15 +174,16 @@ export function PeekCard({ image, imgProps, title, description, meta, index, hre
 
             <div
         className={cn(
+          // full width with no asterisk and no min height in a narrow card; max-h-full clips a tiny card's panel at its foot, so the title stays in view
           // check-ignore: duration the panel slide is the card's one big move, as on the original site
-          `absolute end-0 bottom-0 z-10 flex min-h-[180px] w-[85%] max-w-sm translate-y-[52%] bg-card transition-[translate] duration-500 ${EASE} motion-reduce:!translate-y-0`,
+          `absolute end-0 bottom-0 z-10 flex max-h-full w-full max-w-sm translate-y-[52%] overflow-hidden @[18rem]/peek:min-h-[180px] @[18rem]/peek:w-[85%] bg-card transition-[translate] duration-500 ${EASE} motion-reduce:!translate-y-0`,
           "group-hover/peek:translate-y-0 group-has-[:focus-visible]/peek:translate-y-0 [@media(hover:none)]:translate-y-0",
         )}
       >
-        <div className="shrink-0 p-6 sm:p-8">
+        <div className="hidden shrink-0 p-6 @[16rem]/peek:block @[22rem]/peek:p-8">
           <Asterisk />
         </div>
-        <div className="flex min-w-0 flex-1 flex-col gap-2 py-4 pe-6 sm:pe-8">
+        <div className="flex min-w-0 flex-1 flex-col gap-2 py-4 ps-4 pe-4 @[16rem]/peek:ps-0 @[16rem]/peek:pe-6 @[22rem]/peek:pe-8">
           <Title href={href} className="line-clamp-3 text-lg leading-tight tracking-tight break-words md:text-2xl">
             {title}
           </Title>

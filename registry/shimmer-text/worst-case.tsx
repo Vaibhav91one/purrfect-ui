@@ -1,4 +1,5 @@
 // Dev-only fixture (not in registry.json, never installed): the realistic worst props for ShimmerText, shown at /dev?c=shimmer-text.
+import { LoaderCircle } from "lucide-react";
 import type { ReactNode } from "react";
 import { ShimmerText } from "./shimmer-text";
 
@@ -30,5 +31,15 @@ export const states: Record<string, ReactNode> = {
     // check-ignore: duration a deliberately slow sweep to check the long end
     <ShimmerText duration={12}>Slow: 12s</ShimmerText>,
     <ShimmerText>{""}</ShimmerText>,
+    <ShimmerText className="inline-flex items-center gap-2">
+      <LoaderCircle className="size-4 animate-spin" /> Thinking…
+    </ShimmerText>,
+    <div>
+      <ShimmerText as="p">Step 1</ShimmerText>
+      <ShimmerText as="p">Step 2</ShimmerText>
+    </div>,
+    <ShimmerText as="h2" className="text-4xl leading-none font-bold italic">
+      ỖẪ Tiếng Việt gjƒ
+    </ShimmerText>,
   ),
 };

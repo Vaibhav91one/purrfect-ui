@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, type Variants } from "motion/react";
+import { motion } from "motion/react";
 import { useLayoutEffect, useRef, type ComponentProps } from "react";
 import { cn } from "@/lib/utils";
 
@@ -15,20 +15,15 @@ export interface FitTitleProps extends Omit<ComponentProps<"h1">, "children" | "
   rise?: boolean;
 }
 
-// one 0 to 1 progress; CSS turns it into the rise, or under reduced motion into a fade done in the first third
-const variants: Variants = {
-  // check-ignore: duration the display-type rise is a slow 1.2s on purpose, like the source
-  in: { "--rise": [0, 1], transition: { duration: 1.2, ease: [0.18, 0.66, 0.18, 1] } },
-};
-
 /**
  * One line of display type sized to exactly fill its container's width. Very short titles stop at half the width, and
  * a title that would fit smaller than `min` wraps instead. The size is CSS: `container-type: inline-size` on the root and
  * a `cqi` clamp on the text, so the server HTML is already close (about half an em per character). One measurement of the
  * text's real width in em (on mount, text change and font load) swaps the estimate for the exact ratio; resizing after
  * that is pure CSS, and the ResizeObserver only decides whether to wrap, from the width it is handed (no layout reads).
- * The rise is hidden only under `@media (scripting: enabled)`, so with no JS the title is simply visible. Motion animates one
- * `--rise` variable; CSS turns it into the rise, and under reduced motion into a short fade, so nothing branches in JS.
+ * The rise is hidden only under `@media (scripting: enabled)`, so with no JS the title is simply visible. Motion only spots
+ * the title entering view and sets `data-in`; a CSS transition (on the compositor, not a per-frame JS write) plays the rise,
+ * and under reduced motion a short fade, so nothing branches in JS. An empty title renders nothing.
  */
 export function FitTitle({ as = "h1", children, min = 28, max, rise = true, className, ...rest }: FitTitleProps) {
   const ref = useRef<HTMLHeadingElement>(null);
@@ -75,6 +70,7 @@ export function FitTitle({ as = "h1", children, min = 28, max, rise = true, clas
     };
   }, [children, min]);
 
+  if (!children.trim()) return null; // an empty heading is blank space and an unnamed heading for screen readers
   const est = Math.max(children.length, 1) * 0.5;
   const size = `min(calc(99.5cqi / var(--fit-k, ${est})), 50cqi)`;
 
@@ -82,27 +78,28 @@ export function FitTitle({ as = "h1", children, min = 28, max, rise = true, clas
     <Tag
       ref={ref}
       initial={false}
-      whileInView={rise ? "in" : undefined}
+      onViewportEnter={rise ? (e) => e?.target.setAttribute("data-in", "") : undefined}
       viewport={{ once: true, amount: 0.12 }}
       className={cn("@container m-0 font-normal whitespace-nowrap [overflow-wrap:anywhere] data-[wrap]:whitespace-normal", className)}
       {...rest}
     >
-      {/* the mask: line height .75 with padding below for descenders, pulled back with a negative margin */}
+      {/* the mask: line height .75 with padding above for accents and emoji and below for descenders, pulled back with negative margins */}
       <span
-        className="-mb-[.24em] block overflow-clip pt-[.04em] pb-[.24em] leading-[.75] [[data-wrap]>&]:leading-[1.1]"
+        className="-mt-[.35em] -mb-[.24em] block overflow-clip pt-[.39em] pb-[.24em] leading-[.75] [[data-wrap]>&]:leading-[1.1]"
         style={{ fontSize: max ? `clamp(${min}px, ${size}, ${max}px)` : `max(${min}px, ${size})` }}
       >
-        <motion.span
+        <span
           ref={text}
-          variants={variants}
           className={cn(
             "inline-block tracking-[-.05em]",
+            // hidden a full line plus .8em down, past the mask's padding, so no cap or accent peeks over its edge
+            // check-ignore: duration the display-type rise is a slow 1.2s on purpose, like the source
             rise &&
-              "motion-safe:[@media(scripting:enabled)]:[transform:translateY(calc(105%-var(--rise,0)*105%))] motion-reduce:[@media(scripting:enabled)]:[opacity:min(1,calc(var(--rise,0)*3))]",
+              "motion-safe:[@media(scripting:enabled)]:translate-y-[calc(100%+.8em)] motion-safe:transition-[translate] motion-safe:duration-[1.2s] motion-safe:ease-[cubic-bezier(.18,.66,.18,1)] motion-reduce:[@media(scripting:enabled)]:opacity-0 motion-reduce:transition-opacity motion-reduce:duration-[400ms] [[data-in]_&]:translate-y-0 [[data-in]_&]:opacity-100",
           )}
         >
           {children}
-        </motion.span>
+        </span>
       </span>
     </Tag>
   );

@@ -15,6 +15,7 @@ export const states: Record<string, ReactNode> = {
         description: "Armour is the AI finance app that tracks your spending, grows your portfolio, and tells you exactly what to do next, whether you are saving for a first home, paying down a loan or planning retirement — all from your iPhone, with no hidden fees and no spreadsheets.",
         action: cta,
       })}
+      {hero({ title: "Pneumonoultramicroscopicsilicovolcanoconiosis", description: "https://example.com/an/unbreakable/path/that/keeps/going/and/going/without/any/spaces", action: cta })}
       {hero({ title: "ثروتك أخيراً تعمل", description: "تطبيق التمويل الذكي", action: cta })}
       {hero({ src: "/missing.jpg", title: "The photo failed to load", description: "A dark frame opens in its place and the text stays readable.", action: cta })}
     </div>

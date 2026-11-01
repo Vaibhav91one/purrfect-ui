@@ -13,13 +13,13 @@ const frame = (...kids: ReactNode[]) => (
 );
 
 export const states: Record<string, ReactNode> = {
-  Demo: frame(<StarRise size={200} />),
+  Demo: frame(<StarRise size={200} colorBack="var(--muted)" />),
   "Worst case": frame(
-    <StarRise size={12} />,
-    <StarRise size={1200} />,
+    <StarRise size={12} colorBack="var(--muted)" />,
+    <StarRise size={1200} colorBack="var(--muted)" />,
     <StarRise size={160} shader={false} />,
-    <StarRise size={160} duration={0.2} turns={0} />,
-    <StarRise size={160} duration={10} delay={2} turns={40} />,
+    <StarRise size={160} duration={0.2} turns={0} colorBack="var(--muted)" />,
+    <StarRise size={160} duration={10} delay={2} turns={40} colorBack="var(--muted)" />,
     <StarRise size={160}>
       {/* eslint-disable-next-line @next/next/no-img-element -- fixture: any image works as the mark */}
       <img alt="" src="/favicon.ico" className="size-full object-contain" />

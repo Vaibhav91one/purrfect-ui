@@ -49,6 +49,7 @@ const wrap = (x: number, n: number) => x - n * Math.floor((x + n / 2) / n); // i
 const mod = (x: number, n: number) => ((x % n) + n) % n;
 const pad = (n: number) => String(n).padStart(2, "0");
 const out2 = (t: number) => 1 - (1 - t) ** 3; // gsap power2.out
+const out4 = (t: number) => 1 - (1 - t) ** 5; // gsap power4.out, for key presses
 const inOut3 = (t: number) => (t < 0.5 ? 8 * t ** 4 : 1 - (-2 * t + 2) ** 4 / 2); // gsap power3.inOut
 
 /**
@@ -209,10 +210,11 @@ export function InertiaGallery({
     };
     function kick() { if (!G.raf && G.visible) G.raf = requestAnimationFrame(tick); }
 
-    const snapTo = (k: number) => {
+    // a key press answers at once (0.25s strong ease-out); drags and clicks keep the source's 0.8s glide
+    const snapTo = (k: number, key = false) => {
       killSnap(); clearTimeout(G.snapT); G.vel = 0; G.g0 = null;
       if (reduce) { G.off = k; kick(); }
-      else tween(G, { off: k }, 0.8, out2);
+      else tween(G, { off: k }, key ? 0.25 : 0.8, key ? out4 : out2);
     };
     // settle by intent: a nudge (< 15% of a frame) goes back, anything more moves at least one frame that way
     const scheduleSnap = (ms: number) => {
@@ -277,9 +279,9 @@ export function InertiaGallery({
       const k = Math.round(snapping() ? tws.find((t) => t.k === "off")!.b : G.off);
       const to = (j: number) => k + wrap(j - mod(k, n), n); // nearest copy of item j
       const m = ({ ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 } as Record<string, number>)[e.key];
-      if (m) snapTo(k + m);
-      else if (e.key === "Home") snapTo(to(0));
-      else if (e.key === "End") snapTo(to(n - 1));
+      if (m) snapTo(k + m, true);
+      else if (e.key === "Home") snapTo(to(0), true);
+      else if (e.key === "End") snapTo(to(n - 1), true);
       else if (e.key === "Enter") { F[mod(k, M)]?.el.click(); return; }
       else return;
       e.preventDefault();
@@ -297,10 +299,11 @@ export function InertiaGallery({
       };
       G.trans = true;
       if (reduce) {
-        // crossfade instead of moving
+        // crossfade instead of moving; the fade-in is queued before finish(), so a switch queued in the meantime fades
+        // out after it (and wins) instead of being cancelled by it, which would leave G.trans stuck
         F.forEach((f, i) => tween(f.st, { op: 0 }, 0.15, out2, 0, i ? undefined : () => {
-          finish();
           F.forEach((g) => tween(g.st, { op: 1 }, 0.2, out2));
+          finish();
         }));
         return;
       }
@@ -308,7 +311,8 @@ export function InertiaGallery({
       F.forEach((f, i) => {
         const d = wrap(i - ia, M);
         // check-ignore: duration the layout switch is a page-level move, kept at the source's 1.5s
-        tween(f.st, place(m, d * unitOf(m)), 1.5, inOut3, 0.06 * (h - Math.abs(d)), () => { if (!--left) finish(); });
+        // the outer-first stagger covers the five frames either side of the centre, so many copies don't add idle time
+        tween(f.st, place(m, d * unitOf(m)), 1.5, inOut3, 0.06 * Math.max(0, Math.min(h, 5) - Math.abs(d)), () => { if (!--left) finish(); });
       });
     };
     api.current = { setMode };
@@ -420,11 +424,11 @@ export function InertiaGallery({
             <div data-im className="absolute inset-0 origin-center">
               {/* hover zoom on its own layer: the engine writes the parent's transform */}
               {/* check-ignore: duration a slow hover drift on artwork, the source's 0.9s */}
-              <div className="size-full transition-[scale] duration-900 ease-out group-hover/fr:scale-[1.06] motion-reduce:transition-none">
+              <div className="size-full transition-[scale] duration-900 ease-out group-hover/fr:scale-[1.06] motion-reduce:transition-none motion-reduce:group-hover/fr:scale-100">
                 {it.node ??
                   (it.src ? (
                     // eslint-disable-next-line @next/next/no-img-element -- a registry file cannot assume next/image
-                    <img src={it.src} alt={clone ? "" : (it.alt ?? "")} draggable={false} className="block size-full object-cover" />
+                    <img src={it.src} alt={clone ? "" : (it.alt ?? "")} draggable={false} loading="lazy" decoding="async" onError={(e) => { e.currentTarget.style.visibility = "hidden"; }} className="block size-full object-cover" />
                   ) : null)}
               </div>
             </div>
@@ -452,9 +456,9 @@ export function InertiaGallery({
 
       {bar && n > 0 && (
         <div data-bar className="absolute inset-x-3 bottom-3 flex items-center justify-between gap-3 text-xs">
-          <span className="min-w-0 truncate rounded-full bg-background/80 px-3 py-1.5 text-foreground">
-            <span className="tabular-nums">{pad(active + 1)} / {pad(n)}</span>
-            {cur?.title ? <span className="text-muted-foreground"> · {cur.title}</span> : null}
+          <span className="flex min-w-0 gap-1 rounded-full bg-background/80 px-3 py-1.5 text-foreground">
+            <span className="shrink-0 tabular-nums">{pad(active + 1)} / {pad(n)}</span>
+            {cur?.title ? <span title={typeof cur.title === "string" ? cur.title : undefined} className="min-w-0 truncate text-muted-foreground">· {cur.title}</span> : null}
           </span>
           <div role="group" aria-label="Layout" className="flex shrink-0 gap-1 rounded-full bg-background/80 p-1">
             {(["list", "slider"] as const).map((m) => (

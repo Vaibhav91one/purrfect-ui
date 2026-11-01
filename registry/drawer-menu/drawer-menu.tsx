@@ -26,7 +26,7 @@ export interface DrawerMenuProps extends Omit<ComponentProps<"div">, "children">
   className?: string;
 }
 
-const EASE = [0.76, 0, 0.24, 1] as const;
+const EASE = [0.32, 0.72, 0, 1] as const; // drawer curve: moving from the first frame, so the click never reads as lag
 const FOCUSABLE = 'a[href],button:not([disabled]),[tabindex]:not([tabindex="-1"])';
 
 /** The panel. While it plays its exit it is inert, so a link can't be hit or tabbed to while it slides away. */
@@ -40,13 +40,13 @@ function Panel({ id, pos, reduce, ref, children }: { id: string; pos: string; re
       role="dialog"
       aria-modal
       aria-label="Menu"
-      className={`${pos} top-0 right-0 z-40 h-full w-full max-w-md overflow-y-auto bg-foreground text-background`}
+      className={`${pos} top-0 right-0 z-40 h-full w-full max-w-md overflow-y-auto overscroll-contain bg-foreground text-background`}
       initial={reduce ? { opacity: 0 } : { transform: "translateX(100%)" }}
       // the reduced-motion target still names the resting transform: useReducedMotion settles after the first render, so the panel can mount with the slide's start state
       animate={{ opacity: 1, transform: "translateX(0%)" }}
-      exit={reduce ? { opacity: 0 } : { transform: "translateX(100%)" }}
+      exit={reduce ? { opacity: 0, transition: { duration: 0.2, ease: EASE } } : { transform: "translateX(100%)", transition: { duration: 0.3, ease: EASE } }}
       // check-ignore: duration a full-height panel crossing the frame; shorter reads as a jump
-      transition={{ duration: reduce ? 0.2 : 0.6, ease: EASE }}
+      transition={{ duration: reduce ? 0.2 : 0.5, ease: EASE }}
     >
       {children}
     </motion.div>
@@ -64,7 +64,7 @@ export function DrawerMenu({ links, active, heading = "Navigation", footer, cont
   const id = useId();
   const [inner, setInner] = useState(defaultOpen);
   const isOpen = open ?? inner;
-  const [hot, setHot] = useState<string | null>(null); // the hovered or focused link
+  const [hot, setHot] = useState<number | null>(null); // index of the hovered or focused link (two links may share an href)
   // the window listeners outlive the render that added them: read the latest callback, not the one they closed over
   const change = useRef(onOpenChange);
   useEffect(() => {
@@ -122,8 +122,7 @@ export function DrawerMenu({ links, active, heading = "Navigation", footer, cont
   };
 
   const pos = contained ? "absolute" : "fixed";
-  const dot = hot ?? active;
-  const line = "absolute h-px w-2/5 bg-current transition-transform duration-300 ease-out motion-reduce:transition-none";
+  const line = "absolute h-px w-2/5 bg-current transition-transform duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] motion-reduce:duration-100";
 
   return (
     <div onKeyDown={trap} {...rest}>
@@ -154,19 +153,20 @@ export function DrawerMenu({ links, active, heading = "Navigation", footer, cont
                       className="relative flex items-center"
                       initial={{ opacity: 0, transform: `translateX(${reduce ? 0 : 60}px)` }}
                       animate={{ opacity: 1, transform: "translateX(0px)" }}
-                      exit={{ opacity: 0, transform: `translateX(${reduce ? 0 : 60}px)` }}
+                      // out together with no stagger: a delayed link would still be fading after the panel has gone
+                      exit={{ opacity: 0, transform: `translateX(${reduce ? 0 : 60}px)`, transition: { duration: reduce ? 0.2 : 0.3, ease: EASE } }}
                       // check-ignore: duration the links ride in with the panel; the stagger is what makes them read as following it
-                      transition={{ duration: reduce ? 0.2 : 0.6, delay: reduce ? 0 : Math.min(i, 10) * 0.03, ease: EASE }}
+                      transition={{ duration: reduce ? 0.2 : 0.5, delay: reduce ? 0 : Math.min(i, 10) * 0.03, ease: EASE }}
                     >
-                      <span aria-hidden className={`absolute -start-7 size-2.5 rounded-full bg-current transition-transform duration-300 ease-out motion-reduce:transition-opacity ${dot === l.href ? "scale-100 opacity-100" : "scale-25 opacity-0"}`} />
+                      <span aria-hidden className={`absolute top-5 -start-7 size-2.5 rounded-full bg-current transition-[scale,opacity] duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] motion-reduce:transition-opacity ${(hot === null ? active === l.href : hot === i) ? "scale-100 opacity-100" : "scale-25 opacity-0"}`} />
                       <a
                         href={l.href}
                         aria-current={active === l.href ? "page" : undefined}
                         onClick={() => set(false)}
                         // mouse only: a tap would leave the dot stuck on the link it touched
-                        onPointerEnter={(e) => e.pointerType === "mouse" && setHot(l.href)}
-                        onFocus={() => setHot(l.href)}
-                        className="min-w-0 rounded-sm [overflow-wrap:anywhere] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-background"
+                        onPointerEnter={(e) => e.pointerType === "mouse" && setHot(i)}
+                        onFocus={() => setHot(i)}
+                        className="min-w-0 rounded-sm hyphens-auto [overflow-wrap:anywhere] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-background"
                       >
                         {l.label}
                       </a>

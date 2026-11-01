@@ -41,6 +41,19 @@ export const states: Record<string, ReactNode> = {
       <PeekCard variant="row" title="No href, no meta" />
     </div>
   ),
+  // narrow cards on a wide screen: a 5-up grid and a row in a 320px sidebar (layout must follow the card, not the viewport)
+  Narrow: (
+    <div className="mx-auto flex max-w-5xl flex-col gap-6 p-6">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
+        {[1, 2, 3, 4, 5].map((n) => (
+          <PeekCard key={n} index={n} image={n === 5 ? undefined : "/demo/scenery.jpg"} title="Mapping the old town" description="A walk through the lanes." meta="Sat, 12 Oct" href={`#n${n}`} />
+        ))}
+      </div>
+      <div className="w-80">
+        <PeekCard variant="row" image="/demo/scenery.jpg" title="Night ride through the city" description="Ten kilometres of lit streets." href="#side" />
+      </div>
+    </div>
+  ),
   RTL: (
     <div dir="rtl" className="mx-auto grid max-w-5xl gap-6 p-6 sm:grid-cols-3">
       <PeekCard index="١" image="/demo/scenery.jpg" title="رسم خريطة المدينة القديمة" description="جولة في الأزقة التي لم يرسمها أحد بعد." meta="السبت ١٢ أكتوبر" href="#rtl" />

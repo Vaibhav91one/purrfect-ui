@@ -117,9 +117,6 @@
       "type": "registry:ui",
       "title": "Notch",
       "description": "A tab that hangs from the top edge with inverse-rounded shoulders, dropping in once on mount.",
-      "dependencies": [
-        "motion@^14.6.0"
-      ],
       "registryDependencies": [
         "utils"
       ],

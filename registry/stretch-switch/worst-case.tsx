@@ -19,6 +19,10 @@ export const states: Record<string, ReactNode> = {
     <StretchSwitch label="Small" defaultChecked className="[--switch-w:3rem] [--switch-h:1.75rem]" />,
     <StretchSwitch label="Large" className="[--switch-w:10rem] [--switch-h:5rem]" />,
     <form key="f"><StretchSwitch label="In a form" name="opt-in" defaultChecked /></form>,
+    // disabled + on is left out of the submission, like a disabled checkbox
+    <form key="fd"><StretchSwitch label="Disabled in a form" name="locked" defaultChecked disabled /></form>,
+    // RTL: the knob starts on the right and must stay inside the track when on
+    <div key="rtl" dir="rtl"><StretchSwitch label="RTL" defaultChecked /></div>,
     // a 112px switch in a flex row with a long sibling: it must not shrink into an oval
     <div className="flex w-64 items-center gap-4">
       <StretchSwitch label="Beside a long label" />
