@@ -32,7 +32,7 @@ export type ComponentItem = {
 };
 
 const REPLAY = new Set(["notch", "hero-reveal", "inertia-gallery", "arrow-link", "flip-text"]);
-const FILL = new Set(["scroll-marquee", "photo-wordmark", "line-rise"]);
+const FILL = new Set(["scroll-marquee", "photo-wordmark", "line-rise", "sticky-crossfade"]);
 
 const item = (slug: string, name: string, category: string, description: string, nat: [number, number] = [420, 300], extras?: Extra[]): ComponentItem => ({
   slug,
@@ -83,6 +83,14 @@ export const COMPONENTS: ComponentItem[] = [
   item("quote-cycle", "Quote cycle", "Text", "Lines that pop up, hold, then shrink away as the next one drops in.", [480, 320]),
   item("column-hop", "Column hop", "Layout", "A small board whose card hops between columns on a loop: its row collapses, the next one opens and it rises in.", [800, 560]),
   item("line-rise", "Line rise", "Text", "Lines of text that slide up one after another from behind a clipping edge when the block comes into view.", [1000, 420]),
+  item("sticker-pop", "Sticker pop", "Display", "A sticker image that pops in with a springy overshoot into its own tilt once it has loaded, and shrinks, tilts and fades on exit.", [800, 560]),
+  item("swap-card", "Swap card", "Display", "A product card whose photo crossfades and zooms to a second one on hover, with a wobbly badge that turns.", [800, 680]),
+  item("sticky-crossfade", "Sticky crossfade", "Layout", "A sticky picture beside a column of text that crossfades to the next picture as each block passes the middle of the screen.", [1000, 600]),
+  item("stroke-replay", "Stroke replay", "Display", "Replays an SVG painting shape by shape, like a drawing-app timelapse, with play, pause and a scrubber.", [720, 760]),
+  item("spring-chips", "Spring chips", "Layout", "Pill labels with icon tiles that spring in around a centrepiece, one after another, when scrolled into view.", [1000, 600]),
+  item("voice-bars", "Voice bars", "Text", "Thin bars jumping between heights on a staggered loop, for a mic that is listening.", [600, 640]),
+  item("announce-strip", "Announce strip", "Navigation", "A thin announcement strip whose line loops seamlessly; it slides away as you scroll down or dismiss it.", [800, 560]),
+  item("grid-disclosure", "Grid disclosure", "Layout", "A one-open-at-a-time list whose panels open to their own height through grid rows, with no measuring.", [880, 680]),
   item("flip-text", "Flip text", "Text", "Text whose lines fade in on scroll and whose letters flip over under the pointer.", [560, 300]),
   item("spin-mark", "Spin mark", "Display", "A mark that pops in with a spring, then spins forever or turns as you scroll.", [448, 320]),
   item("arrow-link", "Arrow link", "Navigation", "A big arrow link that rises from a mask on first view; on hover or focus the arrow slides and the label rolls over.", [480, 180]),
