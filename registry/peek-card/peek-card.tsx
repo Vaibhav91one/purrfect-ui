@@ -160,6 +160,8 @@ export function PeekCard({ image, imgProps, title, description, meta, index, hre
           {index}
         </span>
       )}
+      {/* the panel's translate traps the title's stretched ::after, so this covers the rest of the card; the title link keeps focus and name */}
+      {href && <a href={href} tabIndex={-1} aria-hidden className="absolute inset-0" />}
 
             <div
         className={cn(

@@ -71,14 +71,19 @@ export function StickerCover({ ref, sticker, duration = 0.5, contained = false, 
   }, []);
 
   useImperativeHandle(ref, () => {
-    const track = (a: { stop: () => void; then: (r: () => void) => unknown }) => (cancels.current.add(() => a.stop()), new Promise<void>((r) => a.then(r)));
+    // each cancel leaves the set once its animation, timer or frame settles, so the set stays small across plays
+    const keep = (stop: () => void) => (cancels.current.add(stop), () => cancels.current.delete(stop));
+    const track = (a: { stop: () => void; then: (r: () => void) => unknown }) => {
+      const drop = keep(() => a.stop());
+      return new Promise<void>((r) => a.then(() => (drop(), r())));
+    };
     const wait = (ms: number) => new Promise<void>((r) => {
-      const t = setTimeout(r, ms);
-      cancels.current.add(() => clearTimeout(t));
+      const drop = keep(() => clearTimeout(t));
+      const t = setTimeout(() => (drop(), r()), ms);
     });
     const frames = () => new Promise<void>((r) => {
-      let id = requestAnimationFrame(() => (id = requestAnimationFrame(() => r())));
-      cancels.current.add(() => cancelAnimationFrame(id));
+      const drop = keep(() => cancelAnimationFrame(id));
+      let id = requestAnimationFrame(() => (id = requestAnimationFrame(() => (drop(), r()))));
     });
 
     const run = async (instant: boolean) => {

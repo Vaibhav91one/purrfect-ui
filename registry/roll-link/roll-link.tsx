@@ -18,7 +18,7 @@ const EASE = "ease-[cubic-bezier(0.23,1,0.32,1)]";
 export function RollLink({ children, asChild, className, ...rest }: RollLinkProps) {
   const child = asChild && isValidElement(children) ? (children as ReactElement<{ className?: string; children?: ReactNode }>) : null;
   const label = child ? child.props.children : children;
-  const face = `block transition-[transform,opacity] duration-300 ${EASE} [backface-visibility:hidden] motion-reduce:transition-opacity`;
+  const face = `block truncate transition-[transform,opacity] duration-300 ${EASE} [backface-visibility:hidden] motion-reduce:transition-opacity`;
   const content = (
     <>
       <span className="sr-only">{label}</span>
@@ -28,7 +28,7 @@ export function RollLink({ children, asChild, className, ...rest }: RollLinkProp
       </span>
     </>
   );
-  const cls = cn("group/roll relative inline-block whitespace-nowrap focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-current", child?.props.className, className);
+  const cls = cn("group/roll relative inline-block max-w-full whitespace-nowrap focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-current", child?.props.className, className);
   if (child) return cloneElement(child, { ...rest, className: cls }, content);
   return (
     <a className={cls} {...rest}>

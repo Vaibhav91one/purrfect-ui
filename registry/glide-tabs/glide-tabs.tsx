@@ -29,8 +29,8 @@ const norm = (t: GlideTab) => (typeof t === "string" ? { value: t, label: t, dis
 
 /**
  * Tabs with a pill that glides under the active label. One spring moves the pill, so picking another tab mid-glide carries
- * on from where it is. Arrow keys, Home and End move between enabled tabs (roving tabindex); the pill is instant under
- * `prefers-reduced-motion`. It renders the tab bar only: show your own panel for the selected value.
+ * on from where it is. Arrow keys, Home and End move between enabled tabs (roving tabindex); under `prefers-reduced-motion`
+ * the pill takes a short ease-out instead. It renders the tab bar only: show your own panel for the selected value.
  */
 export function GlideTabs({ tabs, value, defaultValue, onValueChange, label = "Tabs", orientation = "horizontal", idPrefix, className, onKeyDown, ...rest }: GlideTabsProps) {
   const reduce = useReducedMotion() ?? false;
@@ -89,7 +89,7 @@ export function GlideTabs({ tabs, value, defaultValue, onValueChange, label = "T
               selected ? "text-background" : "text-muted-foreground hover:text-foreground",
             )}
           >
-            {selected && <motion.span layoutId={id} transition={reduce ? { duration: 0 } : SPRING} className="absolute inset-0 rounded-full bg-foreground" />}
+            {selected && <motion.span layoutId={id} transition={reduce ? { duration: 0.15, ease: "easeOut" } : SPRING} className="absolute inset-0 rounded-full bg-foreground" />}
             <span className="relative">{t.label}</span>
           </button>
         );

@@ -81,7 +81,7 @@ function MetalAsterisk({ colorBack, colorTint }: { colorBack?: string; colorTint
       {gl && (theme || (colorTint && colorBack)) ? (
         // the shader pre-processes its image on the CPU (a heavy pass); suspend mode caches it by URL, so every star on the
         // page shares one pass instead of one each. The plain asterisk shows meanwhile.
-        <Suspense fallback={<Asterisk className="text-foreground" />}>
+        <Suspense fallback={<Asterisk />}>
           <LiquidMetal
             suspendWhenProcessingImage
             width="100%"
@@ -102,7 +102,7 @@ function MetalAsterisk({ colorBack, colorTint }: { colorBack?: string; colorTint
           />
         </Suspense>
       ) : (
-        <Asterisk className="text-foreground" />
+        <Asterisk />
       )}
     </div>
   );
@@ -182,7 +182,7 @@ export function StarRise({
           onAnimationComplete={reduce ? onRiseComplete : undefined}
         >
           <motion.div className="size-full origin-center motion-reduce:!transform-none" style={{ rotate }}>
-            {children ?? (shader ? <MetalAsterisk colorBack={colorBack} colorTint={colorTint} /> : <Asterisk className="text-foreground" />)}
+            {children ?? (shader ? <MetalAsterisk colorBack={colorBack} colorTint={colorTint} /> : <Asterisk />)}
           </motion.div>
         </motion.div>
       </motion.div>

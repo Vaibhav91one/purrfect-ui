@@ -35,7 +35,8 @@ export function AnnounceStrip({ children, duration = 40, open = true, onDismiss,
   const root = useRef<HTMLDivElement>(null);
   const track = useRef<HTMLDivElement>(null);
   const first = useRef<HTMLDivElement>(null);
-  const held = useRef(false);
+  // hover and focus hold the loop separately: the mouse leaving must not resume it while the close button has focus
+  const held = useRef({ hover: false, focus: false });
   const sync = useRef(() => {});
   const awayRef = useRef(false);
   const [count, setCount] = useState(3);
@@ -63,7 +64,7 @@ export function AnnounceStrip({ children, duration = 40, open = true, onDismiss,
     let seen = false;
     const update = () => {
       if (mq.matches) anim.cancel();
-      else if (seen && !held.current && !awayRef.current) anim.play();
+      else if (seen && !held.current.hover && !held.current.focus && !awayRef.current) anim.play();
       else anim.pause();
     };
     sync.current = update;
@@ -105,8 +106,8 @@ export function AnnounceStrip({ children, duration = 40, open = true, onDismiss,
     return () => target.removeEventListener("scroll", onScroll);
   }, [hideOnScroll, container]);
 
-  const hold = (on: boolean) => {
-    held.current = on;
+  const hold = (by: "hover" | "focus", on: boolean) => {
+    held.current[by] = on;
     sync.current();
   };
 
@@ -116,10 +117,10 @@ export function AnnounceStrip({ children, duration = 40, open = true, onDismiss,
       // the row closes as the strip slides, so the header below takes the space instead of leaving a gap
       className={cn("grid bg-primary text-sm font-medium text-primary-foreground transition-[grid-template-rows] duration-300 ease-[cubic-bezier(0.23,1,0.32,1)]", className)}
       style={{ gridTemplateRows: away ? "0fr" : "1fr" }}
-      onPointerEnter={(e) => e.pointerType === "mouse" && hold(true)}
-      onPointerLeave={() => hold(false)}
-      onFocus={() => hold(true)}
-      onBlur={() => hold(false)}
+      onPointerEnter={(e) => e.pointerType === "mouse" && hold("hover", true)}
+      onPointerLeave={() => hold("hover", false)}
+      onFocus={() => hold("focus", true)}
+      onBlur={() => hold("focus", false)}
       {...rest}
     >
       <div className="min-h-0 overflow-hidden bg-inherit">

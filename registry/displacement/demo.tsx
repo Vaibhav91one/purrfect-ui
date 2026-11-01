@@ -1,10 +1,20 @@
 "use client";
 
-import type { ComponentProps } from "react";
+import { useEffect, useState, type ComponentProps } from "react";
 import { Displacement } from "./displacement";
 
 /** Displacement over a painted word. A client component, because `paint` is a function and cannot cross from the server. */
 export function Painted({ word, fill, ...props }: { word: string; fill?: string } & Omit<ComponentProps<typeof Displacement>, "paint">) {
+  // Displacement paints once per mount and resize: remount it when the notch flips the `dark` class, so the colours follow
+  const [dark, setDark] = useState(false);
+  useEffect(() => {
+    const html = document.documentElement;
+    const read = () => setDark(html.classList.contains("dark"));
+    read();
+    const mo = new MutationObserver(read);
+    mo.observe(html, { attributes: true, attributeFilter: ["class"] });
+    return () => mo.disconnect();
+  }, []);
   const paint = (ctx: CanvasRenderingContext2D, w: number, h: number) => {
     // read the theme's colours, so it follows light and dark
     const css = getComputedStyle(document.documentElement);
@@ -16,7 +26,7 @@ export function Painted({ word, fill, ...props }: { word: string; fill?: string 
     ctx.textBaseline = "middle";
     ctx.fillText(word, w / 2, h / 2);
   };
-  return <Displacement paint={paint} alt={word} {...props} />;
+  return <Displacement key={dark ? "dark" : "light"} paint={paint} alt={word} {...props} />;
 }
 
 // the portfolio's hero: the photo bends under the pointer, with the role list resting on top

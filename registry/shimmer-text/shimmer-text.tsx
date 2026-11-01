@@ -10,7 +10,7 @@ export interface ShimmerTextProps extends Omit<ComponentProps<"span">, "ref"> {
   duration?: number;
 }
 
-const KEYFRAMES = "@keyframes shimmer-text{from{background-position:200% 0}to{background-position:-200% 0}}";
+const KEYFRAMES = "@keyframes shimmer-text{from{background-position:100% 0}to{background-position:-100% 0}}";
 
 /**
  * Text that reads as busy: a bright band sweeps across the glyphs, which are clipped to a gradient (`bg-clip-text`).

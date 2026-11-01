@@ -123,7 +123,7 @@ export function LayeredMenu({ primary, secondary = [], legal = [], colors = COLO
     };
     // check-ignore: global-keys only while the menu is open: it is modal, so Escape closes it wherever focus is
     window.addEventListener("keydown", esc);
-    const id = !changed ? 0 : setTimeout(() => menu.current?.querySelector<HTMLElement>(FOCUSABLE)?.focus({ preventScroll: true }), 120);
+    const id = !changed ? 0 : setTimeout(() => [...(menu.current?.querySelectorAll<HTMLElement>(FOCUSABLE) ?? [])].find((el) => el.checkVisibility())?.focus({ preventScroll: true }), 120);
     return () => {
       clearTimeout(id);
       window.removeEventListener("keydown", esc);
@@ -135,7 +135,8 @@ export function LayeredMenu({ primary, secondary = [], legal = [], colors = COLO
   const trap = (e: KeyboardEvent<HTMLDivElement>) => {
     onKeyDown?.(e);
     if (!isOpen || e.key !== "Tab") return;
-    const all = [...(menu.current?.querySelectorAll<HTMLElement>(FOCUSABLE) ?? []), burger.current!];
+    // display:none links (the legal row below 48rem) can't take focus: leave them out or Tab sticks on them
+    const all = [...(menu.current?.querySelectorAll<HTMLElement>(FOCUSABLE) ?? [])].filter((el) => el.checkVisibility()).concat(burger.current!);
     const at = all.indexOf(document.activeElement as HTMLElement);
     const next = all[(at + (e.shiftKey ? -1 : 1) + all.length) % all.length];
     e.preventDefault();

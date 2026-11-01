@@ -40,8 +40,11 @@ export function PathCarousel({ items, active, onActive, itemWidth = 300, itemHei
   const api = useRef<{ select: (i: number) => void; step: (m: number) => void }>({ select() {}, step() {} });
   // the frame loop outlives renders: it calls the latest onActive through this ref
   const emitRef = useRef(onActive);
+  // a rebuild (items.length changed) starts from the controlled index, not from 0
+  const activeRef = useRef(active);
   useEffect(() => {
     emitRef.current = onActive;
+    activeRef.current = active;
   });
   const n = items.length;
 
@@ -91,7 +94,7 @@ export function PathCarousel({ items, active, onActive, itemWidth = 300, itemHei
         el.style.transform = `scale(${(sclAt(scl, ad) * base).toFixed(3)})`;
         el.style.opacity = op.toFixed(3);
         el.style.zIndex = String(Math.round(100 - ad * 10));
-        el.style.visibility = op < 0.02 ? "hidden" : "";
+        el.style.visibility = op < 0.02 && i !== act ? "hidden" : ""; // the tab stop stays focusable mid-glide
       });
     };
     const frame = (now: number) => {
@@ -114,7 +117,7 @@ export function PathCarousel({ items, active, onActive, itemWidth = 300, itemHei
         if (i === a) el.setAttribute("aria-current", "true");
         else el.removeAttribute("aria-current");
       });
-      if (had) L[a].focus({ preventScroll: true });
+      if (had) { L[a].style.visibility = ""; L[a].focus({ preventScroll: true }); } // a hidden slide can't take focus
       if (live.current) live.current.textContent = `${a + 1} of ${n}`;
       emitRef.current?.(a);
     };
@@ -137,6 +140,7 @@ export function PathCarousel({ items, active, onActive, itemWidth = 300, itemHei
       L.forEach((el) => { el.style.offsetPath = `path('${d}')`; });
       render();
     };
+    if (activeRef.current !== undefined) target = rot = norm(activeRef.current);
     layout();
     announce();
     const ro = new ResizeObserver(layout);
