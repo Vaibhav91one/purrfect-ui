@@ -1,0 +1,22 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "pixel-wave",
+  "title": "Pixel wave",
+  "description": "A 3x3 pixel loader whose cells fade on staggered delays, so a wavefront sweeps across the grid.",
+  "registryDependencies": [
+    "utils"
+  ],
+  "files": [
+    {
+      "path": "registry/pixel-wave/pixel-wave.tsx",
+      "content": "\"use client\";\n// Adapted from Beautiful UI's loading-state (https://www.beautifului.dev). MIT License, Copyright (c) 2026 Shane Levine.\n\nimport { useEffect, useRef, type ComponentProps, type CSSProperties } from \"react\";\nimport { cn } from \"@/lib/utils\";\n\nexport interface PixelWaveProps extends Omit<ComponentProps<\"span\">, \"ref\" | \"children\"> {\n  /** Side of one cell, in px. */\n  size?: number;\n  /** Space between cells, in px. */\n  gap?: number;\n  /** Seconds for one cell to fade up and back. */\n  duration?: number;\n  /** Seconds between one diagonal of cells and the next. */\n  stagger?: number;\n}\n\nconst KEYFRAMES =\n  \"@keyframes pixel-wave{0%,100%{opacity:.15}40%{opacity:1}}\" + \"@keyframes pixel-wave-soft{0%,100%{opacity:.25}40%{opacity:.6}}\";\n\n// Steps from the left-middle cell, so the front fans out right and to both corners: 0 1 2 / 0 1 2 shifted by the row's distance from the middle\nconst STEPS = Array.from({ length: 9 }, (_, i) => (i % 3) + Math.abs(Math.floor(i / 3) - 1));\n\n/**\n * A 3x3 pixel loader: nine square cells run one opacity fade on staggered delays, so a wavefront sweeps across the grid.\n * The fade is shorter than a full sweep plus its tail, which keeps two fronts in flight so it never reads as a metronome.\n * Opacity only, one shared keyframe, no JavaScript per frame. Cells are `currentColor`, so set the colour with `text-*`.\n * The loop pauses while the grid is off screen. It is decorative (hidden from screen readers) unless you give it an `aria-label`.\n * Reduced motion: the wave runs at half speed with a smaller opacity swing.\n */\nexport function PixelWave({ size = 4, gap = 1.5, duration = 0.65, stagger = 0.09, className, style, ...rest }: PixelWaveProps) {\n  const ref = useRef<HTMLSpanElement>(null);\n\n  useEffect(() => {\n    const el = ref.current;\n    if (!el) return;\n    const io = new IntersectionObserver(([e]) => el.toggleAttribute(\"data-paused\", !e.isIntersecting));\n    io.observe(el);\n    return () => io.disconnect();\n  }, []);\n\n  const labelled = rest[\"aria-label\"] != null;\n\n  return (\n    <span\n      ref={ref}\n      role={labelled ? \"img\" : undefined}\n      aria-hidden={labelled ? undefined : true}\n      className={cn(\"group inline-grid shrink-0 grid-cols-[repeat(3,var(--pw-size))] gap-(--pw-gap)\", className)}\n      style={{ \"--pw-size\": `${size}px`, \"--pw-gap\": `${gap}px`, \"--pw-duration\": `${duration}s`, ...style } as CSSProperties}\n      {...rest}\n    >\n      {/* React 19 hoists this into <head> once, however many instances render */}\n      <style href=\"pixel-wave\" precedence=\"default\">\n        {KEYFRAMES}\n      </style>\n      {STEPS.map((step, i) => (\n        <span\n          key={i}\n          className={cn(\n            \"size-(--pw-size) rounded-[1px] bg-current opacity-15\",\n            \"animate-[pixel-wave_var(--pw-duration)_ease-in-out_infinite] group-data-paused:[animation-play-state:paused]\",\n            \"motion-reduce:animate-[pixel-wave-soft_calc(var(--pw-duration)*2)_ease-in-out_infinite] motion-reduce:[--pw-slow:2]\",\n          )}\n          // reduced motion doubles the duration, so the delay doubles with it to keep the same wavefront\n          style={{ animationDelay: `calc(${step * stagger}s * var(--pw-slow, 1))` }}\n        />\n      ))}\n    </span>\n  );\n}\n",
+      "type": "registry:ui"
+    }
+  ],
+  "meta": {
+    "react": ">=19",
+    "tailwindcss": ">=4",
+    "tokens": "shadcn (background, foreground, muted, border, ...): run shadcn init first"
+  },
+  "type": "registry:ui"
+}

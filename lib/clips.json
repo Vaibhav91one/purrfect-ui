@@ -166,5 +166,23 @@
     "href": "https://poinu.vercel.app/work/31",
     "w": 960,
     "h": 704
+  },
+  "grid-disclosure": {
+    "label": "bountydesk.vaibhav.quest",
+    "href": "https://bountydesk.vaibhav.quest",
+    "w": 960,
+    "h": 704
+  },
+  "announce-strip": {
+    "label": "bountydesk.vaibhav.quest",
+    "href": "https://bountydesk.vaibhav.quest",
+    "w": 960,
+    "h": 704
+  },
+  "location-pill": {
+    "label": "vaibhavtomar.com",
+    "href": "https://vaibhavtomar.com",
+    "w": 960,
+    "h": 704
   }
 }
