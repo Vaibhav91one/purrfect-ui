@@ -438,7 +438,8 @@ export const DEMOS: Record<string, (p: DemoProps) => ReactNode> = {
   "curtain-reveal": CurtainLoop,
   preloader: PreloaderDemo,
   "load-preloader": LoadPreloaderDemo,
-  "star-rise": StarRiseDemo,
+  // a grid card draws the plain mark: the shader's one-off image pass is ~0.5s of main thread, so it runs only in the dialog
+  "star-rise": ({ opts }: DemoProps) => <StarRiseDemo shader={!opts.card} />,
   "marquee-rows": MarqueeRowsDemo,
   "peek-card": PeekCardDemo,
   "counter-loader": CounterLoaderDemo,
