@@ -1,0 +1,25 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "line-rise",
+  "title": "Line rise",
+  "description": "Lines of text that slide up one after another from behind a clipping edge when the block comes into view.",
+  "dependencies": [
+    "motion@^14.6.0"
+  ],
+  "registryDependencies": [
+    "utils"
+  ],
+  "files": [
+    {
+      "path": "registry/line-rise/line-rise.tsx",
+      "content": "// check-ignore: use-client-unneeded the `in` variant is a function, which cannot cross from a server component into motion\n\"use client\";\n\nimport { motion, type Variants } from \"motion/react\";\nimport type { ComponentProps, ReactNode, RefObject } from \"react\";\nimport { cn } from \"@/lib/utils\";\n\nexport interface LineRiseProps extends Omit<ComponentProps<\"p\">, \"children\" | \"ref\" | \"onDrag\" | \"onDragStart\" | \"onDragEnd\" | \"onAnimationStart\"> {\n  as?: \"p\" | \"h1\" | \"h2\" | \"h3\" | \"div\";\n  /** One entry per line; each rises out of its own mask. */\n  lines: ReactNode[];\n  /** Seconds between one line and the next. */\n  stagger?: number;\n  /** Seconds each line takes to rise. */\n  duration?: number;\n  /** How much of the block (0 to 1) must be on screen before it plays. Lower it for blocks taller than the screen. */\n  amount?: number;\n  /** Play the first time only. With `false` the lines drop back when the block leaves the screen and rise again on return. */\n  once?: boolean;\n  /** Watch a scrolling box instead of the page: the lines rise as the block scrolls into view inside it. */\n  container?: RefObject<Element | null>;\n}\n\ntype Custom = { i: number; stagger: number; duration: number };\n\n// one 0 to 1 progress per line; CSS turns it into the rise, or under reduced motion into a fade done in the first third\nconst variants: Variants = {\n  out: { \"--rise\": 0, transition: { duration: 0.2 } },\n  in: ({ i, stagger, duration }: Custom) => ({ \"--rise\": 1, transition: { delay: i * stagger, duration, ease: [0.33, 1, 0.68, 1] } }),\n};\n\n/**\n * A block of text whose lines slide up one after another from behind a clipping edge, once `amount` of the block is on\n * screen. You choose the line breaks (`lines`), so nothing is measured or re-split on resize, and the lines keep their\n * place in the layout the whole time: only a transform moves inside each line's mask. The lines are hidden only under\n * `@media (scripting: enabled)`, so with no JS the text is simply visible. Motion animates one `--rise` variable per line;\n * CSS turns it into the rise, and under reduced motion into a short fade, so nothing branches in JS.\n */\nexport function LineRise({\n  as = \"p\",\n  lines,\n  stagger = 0.075,\n  // check-ignore: duration a 0.75s display-type rise, like the source; it plays once per block\n  duration = 0.75,\n  amount = 0.5,\n  once = true,\n  container,\n  className,\n  ...rest\n}: LineRiseProps) {\n  const Tag = motion[as] as typeof motion.p;\n  return (\n    <Tag initial=\"out\" whileInView=\"in\" viewport={{ once, amount, root: container }} className={cn(\"m-0 leading-tight\", className)} {...rest}>\n      {lines.map((line, i) => (\n        // the mask: padding below keeps descenders inside the clip, pulled back with a negative margin so the box does not grow\n        <span key={i} className=\"-mb-[.15em] block overflow-clip pb-[.15em]\">\n          <motion.span\n            custom={{ i, stagger, duration } satisfies Custom}\n            variants={variants}\n            className=\"block motion-safe:[@media(scripting:enabled)]:[transform:translateY(calc(105%-var(--rise,0)*105%))] motion-reduce:[@media(scripting:enabled)]:[opacity:min(1,calc(var(--rise,0)*3))]\"\n          >\n            {line}\n          </motion.span>\n        </span>\n      ))}\n    </Tag>\n  );\n}\n",
+      "type": "registry:ui"
+    }
+  ],
+  "meta": {
+    "react": ">=19",
+    "tailwindcss": ">=4",
+    "tokens": "shadcn (background, foreground, muted, border, ...): run shadcn init first"
+  },
+  "type": "registry:ui"
+}

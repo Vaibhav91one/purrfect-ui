@@ -7,11 +7,10 @@ import { LoadPreloader } from "./load-preloader";
 export default function LoadPreloaderDemo() {
   const [run, setRun] = useState(0);
   return (
-    <div className="relative grid h-72 w-full max-w-md place-items-center overflow-hidden rounded-3xl bg-muted">
-      <button type="button" onClick={() => setRun((r) => r + 1)} className="rounded-full border border-foreground px-5 py-2">
-        Replay
-      </button>
+    <button type="button" aria-label="Replay the preloader" onClick={() => setRun((r) => r + 1)} className="relative block h-80 w-[480px] overflow-hidden rounded-3xl">
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src="/demo/fjord.jpg" alt="" className="absolute inset-0 size-full object-cover" />
       <LoadPreloader key={run} contained storageKey={false} />
-    </div>
+    </button>
   );
 }

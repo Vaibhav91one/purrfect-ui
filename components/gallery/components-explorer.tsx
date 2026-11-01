@@ -4,10 +4,9 @@ import Link from "next/link";
 import { CATEGORIES, categorySlug, COMPONENTS } from "@/lib/components-data";
 import { ScrollReveal } from "@/registry/scroll-reveal/scroll-reveal";
 import { sectionBaseClasses } from "@/lib/layout-classes";
-import { cardBase } from "./card";
-import { CardFace } from "./component-card";
+import { LiveCard } from "./component-card";
 import { SleepingCat } from "./sleeping-cat";
-import { openSheet, SheetHost } from "./use-sheet";
+import { SheetHost } from "./use-sheet";
 
 const chip = "rounded-full bg-muted px-3 py-1 text-sm text-muted-foreground transition-colors hover:text-foreground aria-[current=page]:bg-foreground aria-[current=page]:text-background focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent";
 
@@ -36,22 +35,9 @@ export function ComponentsExplorer({ category }: { category?: string }) {
         </nav>
       </header>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="columns-1 gap-3 sm:columns-2 lg:columns-3">
         {items.map((c) => (
-          <div
-            key={c.slug}
-            data-slug={c.slug}
-            data-cuelume-open
-            role="button"
-            tabIndex={0}
-            onClick={(e) => openSheet(c.slug, e.currentTarget)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openSheet(c.slug, e.currentTarget); }
-            }}
-            className={`${cardBase} cursor-pointer`}
-          >
-            <CardFace item={c} />
-          </div>
+          <LiveCard key={c.slug} item={c} />
         ))}
       </div>
 

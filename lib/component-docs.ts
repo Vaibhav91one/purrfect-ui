@@ -148,8 +148,9 @@ import { RollButton } from "@/components/ui/roll-button";
       { name: "className", type: "string", default: "text-4xl … lg:text-7xl", description: "Size and weight of the text." },
       { name: "offset", type: "[string, string]", default: '["start 0.8", "start 0.15"]', description: "When the fill starts and ends, as scroll offsets." },
       { name: "container", type: "RefObject<HTMLElement>", description: "Follow a scrolling box instead of the page." },
+      { name: "mode", type: '"words" | "chars"', default: '"words"', description: "words fills in word by word; chars grows each letter from half size as it rises and fades in." },
     ],
-    behaviors: ["Every word starts faint and turns solid in reading order.", "Finishes when the text is centred on screen.", "One CSS variable carries the progress, so a long paragraph costs one style write per frame.", "Reduced motion: the whole text is solid."],
+    behaviors: ["Every word starts faint and turns solid in reading order.", "Finishes when the text is centred on screen.", "One CSS variable carries the progress, so a long paragraph costs one style write per frame.", "chars mode: letters grow, rise and fade in a staggered scrub; words never break mid-word.", "Reduced motion: words mode is solid; chars mode keeps only the fade."],
   },
   "parallax-columns": {
     usage: `import { ParallaxColumns } from "@/components/ui/parallax-columns";
@@ -633,30 +634,6 @@ const go = (href: string) => href !== path && cover.current?.play(() => new Prom
       "Reduced motion: the cards are already in place and tilted, and only fade in.",
     ],
   },
-  "stat-rotator": {
-    usage: `import { StatRotator } from "@/components/ui/stat-rotator";
-
-<StatRotator
-  stats={[
-    { value: "3.2x", label: "Faster savings growth" },
-    { value: "$1.2M", label: "Saved in year one" },
-    { value: "98%", label: "Hit their monthly goal" },
-  ]}
-/>`,
-    props: [
-      { name: "stats", type: "{ value: string; label: ReactNode; description?: ReactNode }[]", description: 'value holds one number ("3.2x", "$1.2M", "12,400"); the number counts up, the prefix and suffix stay put. A value with no number shows as text.' },
-      { name: "interval", type: "number", default: "3.6", description: "Seconds each stat stays up before the next rises in." },
-      { name: "className", type: "string", description: "Classes on the root (card plus dots)." },
-    ],
-    behaviors: [
-      "Every interval the card lifts out 38px and the next rises in from below (0.45s).",
-      "The number counts up from 0 over 2.2s on odometer digit columns, driven by one motion value (no re-render per frame).",
-      "Rotation pauses on mouse hover, while focus is inside, and while the card is off screen.",
-      "Pill dots are buttons that jump to a stat; the current one stretches and has aria-current.",
-      "Silent to screen readers while it rotates by itself; once a dot is used, each new stat is announced once, never the counting digits.",
-      "Reduced motion: cards cross-fade in place and the number shows its final value.",
-    ],
-  },
   "shimmer-text": {
     usage: `import { ShimmerText } from "@/components/ui/shimmer-text";
 
@@ -694,6 +671,162 @@ const go = (href: string) => href !== path && cover.current?.play(() => new Prom
       "Scrolling it into view raises the word a little out of the crop and drifts the photo inside the letters.",
       "The glow copy is aria-hidden, so the word is read once.",
       "Reduced motion: static, at its final crop with the photo still.",
+    ],
+  },
+  "drawer-menu": {
+    usage: `import { DrawerMenu } from "@/components/ui/drawer-menu";
+
+<DrawerMenu
+  active="#work"
+  links={[
+    { label: "Work", href: "#work" },
+    { label: "About", href: "#about" },
+    { label: "Contact", href: "#contact" },
+  ]}
+  footer={<a href="https://github.com/you">GitHub</a>}
+/>`,
+    props: [
+      { name: "links", type: "DrawerLink[]", description: "The links in the panel, top to bottom. A link is { label, href }." },
+      { name: "active", type: "string", description: "The href of the current page or section: its dot shows while nothing is hovered or focused." },
+      { name: "heading", type: "ReactNode", default: '"Navigation"', description: "The small heading over the links." },
+      { name: "footer", type: "ReactNode", description: "Pinned to the bottom of the panel: social links, an email, small print." },
+      { name: "contained", type: "boolean", default: "false", description: "Fill the nearest relative parent instead of the screen." },
+      { name: "defaultOpen", type: "boolean", default: "false", description: "Start open." },
+      { name: "open", type: "boolean", description: "Controlled state, with onOpenChange." },
+      { name: "className", type: "string", description: "Classes for the round button's position (top-right by default)." },
+    ],
+    behaviors: [
+      "The button's two lines cross into an X; a full-height panel slides in from the right and the links follow it in one after another.",
+      "A dot grows beside the hovered or keyboard-focused link, and rests on the `active` one otherwise. Touch never leaves it stuck.",
+      "Escape, a click outside, or picking a link closes it. Focus moves into the panel and returns to the button; Tab stays inside while it is open.",
+      "The panel inverts the theme (foreground background, background text), so it reads in light and dark.",
+      "Reduced motion: the panel and links fade, nothing slides.",
+    ],
+  },
+  "quote-cycle": {
+    usage: `import { QuoteCycle } from "@/components/ui/quote-cycle";
+
+<QuoteCycle lines={["Make it simple, but significant.", "Design is thinking made visual."]} />`,
+    props: [
+      { name: "lines", type: "ReactNode[]", description: "The lines to cycle through, in order: strings or inline content." },
+      { name: "index", type: "number", description: "Show this line and stop the timer, so you advance it yourself (a click, a key, a step)." },
+      { name: "interval", type: "number", default: "3.5", description: "Seconds from one line arriving to the next." },
+      { name: "announce", type: "boolean", default: "false", description: "Read each new line to screen readers (a polite live region)." },
+      { name: "className", type: "string", description: "Size, colour and width of the text." },
+    ],
+    behaviors: [
+      "The current line pops up to 1.2x and holds, then shrinks up and away while the next drops in from 1.5x.",
+      "Every line shares one grid cell, so the box keeps the height of the tallest line and nothing below moves.",
+      "Pauses on hover, on keyboard focus inside it and while off screen.",
+      "Hidden lines are inert; the live region stays off unless announce is set.",
+      "Reduced motion: the lines cross-fade in place.",
+    ],
+  },
+  "column-hop": {
+    usage: `import { ColumnHop } from "@/components/ui/column-hop";
+
+<ColumnHop
+  columns={[
+    { title: "Triage", items: [<p key="a">Open redirect on /logout</p>] },
+    { title: "Reproducing", items: [] },
+    { title: "Done", items: [<p key="b">Stored XSS in comments</p>] },
+  ]}
+  item={<p>Path traversal in upload</p>}
+  itemByColumn={[undefined, <p key="r">Path traversal in upload · running</p>]}
+  stops={[0, 1]}
+  interval={2.6}
+/>`,
+    props: [
+      { name: "columns", type: "{ title: ReactNode; items: ReactNode[] }[]", description: "The columns, left to right, with the cards that stay put." },
+      { name: "item", type: "ReactNode", description: "The card that hops." },
+      { name: "itemByColumn", type: "ReactNode[]", description: "Per-column versions of the card, by column index, so it wears the state of the column holding it. Falls back to item." },
+      { name: "stops", type: "number[]", default: "[0, 1]", description: "Column indices it visits in order, then loops. Fewer than two: it stays put." },
+      { name: "interval", type: "number", default: "2.6", description: "Seconds it rests in each column." },
+      { name: "itemClassName", type: "string", description: "Classes for every card box." },
+    ],
+    behaviors: [
+      "The card fades and sinks, its row collapses, then the next column's row opens first and the card rises into it, so nothing ever overlaps.",
+      "Rows animate grid-template-rows 1fr / 0fr with CSS transitions: no measuring, no dependencies. Column counts follow the card.",
+      "The loop pauses off screen and while the tab is hidden. The row it left is inert and hidden from screen readers.",
+      "Reduced motion: no sink, rise or collapse; the card fades out and back in quickly.",
+    ],
+  },
+  "line-rise": {
+    usage: `import { LineRise } from "@/components/ui/line-rise";
+
+<LineRise as="h2" className="text-6xl tracking-tight" lines={["Maps that", "move with", "the world."]} />
+
+// inside a scrolling box: rise as the block scrolls into view there, drop back as it leaves
+const box = useRef<HTMLDivElement>(null);
+<div ref={box} className="h-96 overflow-y-auto">
+  <LineRise container={box} once={false} lines={["Mapinly brings people together", "across languages and cultures."]} />
+</div>`,
+    props: [
+      { name: "lines", type: "ReactNode[]", description: "One entry per line; each rises out of its own mask." },
+      { name: "as", type: '"p" | "h1" | "h2" | "h3" | "div"', default: '"p"', description: "The element to render." },
+      { name: "stagger", type: "number", default: "0.075", description: "Seconds between one line and the next." },
+      { name: "duration", type: "number", default: "0.75", description: "Seconds each line takes to rise." },
+      { name: "amount", type: "number", default: "0.5", description: "How much of the block must be on screen before it plays; lower it for blocks taller than the screen." },
+      { name: "once", type: "boolean", default: "true", description: "Play the first time only; false drops the lines back when the block leaves and replays on return." },
+      { name: "container", type: "RefObject<Element | null>", description: "Watch a scrolling box instead of the page: the lines rise as the block scrolls into view inside it." },
+      { name: "className", type: "string", description: "Size, weight, colour and line height." },
+    ],
+    behaviors: [
+      "Each line slides up from behind its own clipping edge, one after another, once half the block is on screen.",
+      "You choose the line breaks, so nothing is measured or re-split on resize; a long line wraps inside its mask.",
+      "Only a transform moves inside each mask, so the layout never shifts; with JavaScript off the text is simply visible.",
+      "Reduced motion: no rise, each line fades in instead.",
+    ],
+  },
+  "flip-text": {
+    usage: `import { FlipText } from "@/components/ui/flip-text";
+
+<FlipText text="© Code By Vaibhav Tomar" className="text-xl uppercase" />`,
+    props: [
+      { name: "text", type: "string", description: "The text. Split into words and letters on screen; read whole by screen readers." },
+      { name: "className", type: "string", description: "Size, weight and colour of the text." },
+    ],
+    behaviors: [
+      "Lines fade in one after another the first time the text scrolls into view; the text is visible without JavaScript.",
+      "A letter flips over on the X axis when the pointer crosses it; a tap flips it on touch. A flip that is running finishes before the letter can flip again.",
+      "Keyboard focus on the text, or on the link or button around it, flips every letter in a quick wave.",
+      "Joined scripts (Arabic, Indic marks, emoji sequences) flip a word at a time so their letters keep their shapes.",
+      "Reduced motion: lines still fade in; letters blink their opacity instead of turning.",
+    ],
+  },
+  "spin-mark": {
+    usage: `import { SpinMark } from "@/components/ui/spin-mark";
+
+<SpinMark className="size-24 text-primary" />
+<SpinMark mode="scroll" turns={3} className="size-8" />`,
+    props: [
+      { name: "children", type: "ReactNode", description: "The mark: any SVG, image or text. Defaults to an asterisk in the current text colour. It fills the root, so size it with className." },
+      { name: "mode", type: '"spin" | "scroll"', default: '"spin"', description: "spin turns forever at a steady speed; scroll turns with the page's scroll position." },
+      { name: "duration", type: "number", default: "20", description: "spin only: seconds per full turn." },
+      { name: "turns", type: "number", default: "3", description: "scroll only: full turns from the top of the page to the bottom." },
+      { name: "container", type: "RefObject<HTMLElement | null>", description: "scroll only: follow a scrolling box instead of the page." },
+    ],
+    behaviors: [
+      "Pops in on a spring (scale 0 to 1, with a fade) the first time it enters the viewport.",
+      "spin: a linear CSS animation, paused with animation-play-state while off screen, so it costs no JavaScript per frame.",
+      "scroll: rotation follows the scroll progress of the page (or container), 0 to turns x 360 degrees, written straight to transform.",
+      "Reduced motion: it fades and scales in without the bounce, and does not turn.",
+    ],
+  },
+  "arrow-link": {
+    usage: `import { ArrowLink } from "@/components/ui/arrow-link";
+
+<ArrowLink href="mailto:hello@example.com">Get in touch</ArrowLink>`,
+    props: [
+      { name: "children", type: "string", description: "The label." },
+      { name: "href", type: "string", description: "Where it goes. Every other <a> prop is passed through too." },
+      { name: "className", type: "string", description: "Merged with cn(). Size (default text-5xl) and colour come from here." },
+    ],
+    behaviors: [
+      "Rises out of a mask the first time it scrolls into view. Without JavaScript it is simply visible.",
+      "On hover or keyboard focus the arrow slides 8px right and the label rolls up, a copy rising from below. The roll is a flat translate inside its own clip, so the hover area stays the link's box.",
+      "Hover only runs on devices that can hover, so a tap never leaves it stuck.",
+      "Reduced motion: it fades in instead of rising, the arrow stays put and the label faces cross-fade.",
     ],
   },
 };

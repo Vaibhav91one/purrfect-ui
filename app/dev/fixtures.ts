@@ -27,9 +27,15 @@ import { states as stickerCover } from "@/registry/sticker-cover/worst-case";
 import { states as inertiaGallery } from "@/registry/inertia-gallery/worst-case";
 import { states as fitTitle } from "@/registry/fit-title/worst-case";
 import { states as fanOutCards } from "@/registry/fan-out-cards/worst-case";
-import { states as statRotator } from "@/registry/stat-rotator/worst-case";
 import { states as shimmerText } from "@/registry/shimmer-text/worst-case";
 import { states as photoWordmark } from "@/registry/photo-wordmark/worst-case";
+import { states as drawerMenu } from "@/registry/drawer-menu/worst-case";
+import { states as quoteCycle } from "@/registry/quote-cycle/worst-case";
+import { states as columnHop } from "@/registry/column-hop/worst-case";
+import { states as lineRise } from "@/registry/line-rise/worst-case";
+import { states as flipText } from "@/registry/flip-text/worst-case";
+import { states as spinMark } from "@/registry/spin-mark/worst-case";
+import { states as arrowLink } from "@/registry/arrow-link/worst-case";
 
 /** Dev-only worst-case states per component (see /dev). Add a component's `registry/<slug>/worst-case.tsx` here when you port it. */
-export const FIXTURES: Record<string, Record<string, ReactNode>> = { "roll-button": button, magnetic, notch, "hero-reveal": heroReveal, "layered-menu": layeredMenu, "stretch-switch": toggle, counter, "glide-tabs": tabs, "scroll-reveal": scrollReveal, "parallax-columns": parallaxColumns, "path-carousel": pathCarousel, displacement, "hover-preview": hoverPreview, "scroll-marquee": scrollMarquee, "roll-link": rollLink, "curtain-reveal": curtainReveal, preloader, "cursor-follower": cursorFollower, "fill-button": fillButton, "load-preloader": loadPreloader, "star-rise": starRise, "marquee-rows": marqueeRows, "peek-card": peekCard, "counter-loader": counterLoader, "sticker-cover": stickerCover, "inertia-gallery": inertiaGallery, "fit-title": fitTitle, "fan-out-cards": fanOutCards, "stat-rotator": statRotator, "shimmer-text": shimmerText, "photo-wordmark": photoWordmark };
+export const FIXTURES: Record<string, Record<string, ReactNode>> = { "roll-button": button, magnetic, notch, "hero-reveal": heroReveal, "layered-menu": layeredMenu, "stretch-switch": toggle, counter, "glide-tabs": tabs, "scroll-reveal": scrollReveal, "parallax-columns": parallaxColumns, "path-carousel": pathCarousel, displacement, "hover-preview": hoverPreview, "scroll-marquee": scrollMarquee, "roll-link": rollLink, "curtain-reveal": curtainReveal, preloader, "cursor-follower": cursorFollower, "fill-button": fillButton, "load-preloader": loadPreloader, "star-rise": starRise, "marquee-rows": marqueeRows, "peek-card": peekCard, "counter-loader": counterLoader, "sticker-cover": stickerCover, "inertia-gallery": inertiaGallery, "fit-title": fitTitle, "fan-out-cards": fanOutCards,  "shimmer-text": shimmerText, "photo-wordmark": photoWordmark, "drawer-menu": drawerMenu, "quote-cycle": quoteCycle, "column-hop": columnHop, "line-rise": lineRise, "flip-text": flipText, "spin-mark": spinMark, "arrow-link": arrowLink };

@@ -625,29 +625,6 @@
       }
     },
     {
-      "name": "stat-rotator",
-      "type": "registry:ui",
-      "title": "Stat rotator",
-      "description": "A glass card that cycles through stats, each rising in while its number counts up on rolling digits.",
-      "dependencies": [
-        "motion@^14.6.0"
-      ],
-      "registryDependencies": [
-        "utils"
-      ],
-      "files": [
-        {
-          "path": "registry/stat-rotator/stat-rotator.tsx",
-          "type": "registry:ui"
-        }
-      ],
-      "meta": {
-        "react": ">=19",
-        "tailwindcss": ">=4",
-        "tokens": "shadcn (background, foreground, muted, border, ...): run shadcn init first"
-      }
-    },
-    {
       "name": "shimmer-text",
       "type": "registry:ui",
       "title": "Shimmer text",
@@ -681,6 +658,158 @@
       "files": [
         {
           "path": "registry/photo-wordmark/photo-wordmark.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "meta": {
+        "react": ">=19",
+        "tailwindcss": ">=4",
+        "tokens": "shadcn (background, foreground, muted, border, ...): run shadcn init first"
+      }
+    },
+    {
+      "name": "drawer-menu",
+      "type": "registry:ui",
+      "title": "Drawer menu",
+      "description": "A round burger that crosses into an X and slides a full-height link panel in from the right.",
+      "dependencies": [
+        "motion@^14.6.0"
+      ],
+      "registryDependencies": [
+        "utils"
+      ],
+      "files": [
+        {
+          "path": "registry/drawer-menu/drawer-menu.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "meta": {
+        "react": ">=19",
+        "tailwindcss": ">=4",
+        "tokens": "shadcn (background, foreground, muted, border, ...): run shadcn init first"
+      }
+    },
+    {
+      "name": "quote-cycle",
+      "type": "registry:ui",
+      "title": "Quote cycle",
+      "description": "Lines that pop up, hold, and shrink away as the next one drops in.",
+      "dependencies": [
+        "motion@^14.6.0"
+      ],
+      "registryDependencies": [
+        "utils"
+      ],
+      "files": [
+        {
+          "path": "registry/quote-cycle/quote-cycle.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "meta": {
+        "react": ">=19",
+        "tailwindcss": ">=4",
+        "tokens": "shadcn (background, foreground, muted, border, ...): run shadcn init first"
+      }
+    },
+    {
+      "name": "column-hop",
+      "type": "registry:ui",
+      "title": "Column hop",
+      "description": "A small board whose card hops between columns on a loop: its row collapses, the next one opens and it rises in.",
+      "registryDependencies": [
+        "utils"
+      ],
+      "files": [
+        {
+          "path": "registry/column-hop/column-hop.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "meta": {
+        "react": ">=19",
+        "tailwindcss": ">=4",
+        "tokens": "shadcn (background, foreground, muted, border, ...): run shadcn init first"
+      }
+    },
+    {
+      "name": "line-rise",
+      "type": "registry:ui",
+      "title": "Line rise",
+      "description": "Lines of text that slide up one after another from behind a clipping edge when the block comes into view.",
+      "dependencies": [
+        "motion@^14.6.0"
+      ],
+      "registryDependencies": [
+        "utils"
+      ],
+      "files": [
+        {
+          "path": "registry/line-rise/line-rise.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "meta": {
+        "react": ">=19",
+        "tailwindcss": ">=4",
+        "tokens": "shadcn (background, foreground, muted, border, ...): run shadcn init first"
+      }
+    },
+    {
+      "name": "flip-text",
+      "type": "registry:ui",
+      "title": "Flip text",
+      "description": "Text whose lines fade in on scroll and whose letters flip over on the X axis under the pointer.",
+      "registryDependencies": [
+        "utils"
+      ],
+      "files": [
+        {
+          "path": "registry/flip-text/flip-text.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "meta": {
+        "react": ">=19",
+        "tailwindcss": ">=4",
+        "tokens": "shadcn (background, foreground, muted, border, ...): run shadcn init first"
+      }
+    },
+    {
+      "name": "spin-mark",
+      "type": "registry:ui",
+      "title": "Spin mark",
+      "description": "A mark that pops in with a spring, then spins forever or turns as you scroll.",
+      "dependencies": [
+        "motion@^14.6.0"
+      ],
+      "registryDependencies": [
+        "utils"
+      ],
+      "files": [
+        {
+          "path": "registry/spin-mark/spin-mark.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "meta": {
+        "react": ">=19",
+        "tailwindcss": ">=4",
+        "tokens": "shadcn (background, foreground, muted, border, ...): run shadcn init first"
+      }
+    },
+    {
+      "name": "arrow-link",
+      "type": "registry:ui",
+      "title": "Arrow link",
+      "description": "A big arrow link that rises from a mask on first view; on hover or focus the arrow slides and the label rolls over.",
+      "registryDependencies": [
+        "utils"
+      ],
+      "files": [
+        {
+          "path": "registry/arrow-link/arrow-link.tsx",
           "type": "registry:ui"
         }
       ],

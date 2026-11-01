@@ -163,10 +163,10 @@ export function CounterLoader({ stickers = SHAPES, steps = STEPS, duration = 1.4
           ))}
         </div>
       </div>
-      {/* the block: same colour as the loader, it wipes up over the counter and the pile before the lift */}
+      {/* the block: inherits the loader colour (a className bg follows), it wipes up over the counter and the pile before the lift */}
       <motion.div
         aria-hidden
-        className="absolute inset-0 bg-foreground"
+        className="absolute inset-0 bg-inherit"
         initial={false}
         animate={{ transform: phase === "wipe" || (phase === "lift" && !reduce) ? "translateY(0%)" : "translateY(100%)" }}
         // check-ignore: duration a full-screen scene change, not a control responding (Poinu's own 0.8s wipe)

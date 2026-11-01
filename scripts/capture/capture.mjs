@@ -257,7 +257,14 @@ async function render(slug, clip, base, browser) {
     await cdp.send("Page.startScreencast", { format: "jpeg", quality: 90, maxWidth: W * DPR, maxHeight: H * DPR, everyNthFrame: 1 });
     let at = null;
     let held = false;
+    let sy = 0;
     for (let t = 0; t < rt.end; t = (Date.now() - t0) / 1000) {
+      // the same scroll to the target and back as the paused-time path (without it a target below the fold is never seen)
+      const y = mode === "load" ? 0 : rt.y(t);
+      if (Math.abs(y - sy) > 0.5) {
+        sy = y;
+        await evalIn(`scrollTo({ top: ${y}, behavior: "instant" })`);
+      }
       const cur = rt.cur(t);
       if (!at || Math.abs(cur[0] - at[0]) + Math.abs(cur[1] - at[1]) > 0.01) await cdp.send("Input.dispatchMouseEvent", { type: "mouseMoved", x: cur[0], y: cur[1] });
       at = cur;
