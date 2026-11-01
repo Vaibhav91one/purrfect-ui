@@ -1,0 +1,22 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "word-stream",
+  "title": "Word stream",
+  "description": "A chat reply that types in word by word behind a caret, then hands back when done.",
+  "registryDependencies": [
+    "utils"
+  ],
+  "files": [
+    {
+      "path": "registry/word-stream/word-stream.tsx",
+      "content": "\"use client\";\n// Adapted from Beautiful UI's streaming-text (https://www.beautifului.dev). MIT License, Copyright (c) 2026 Shane Levine.\n\nimport { useEffect, useRef, type ComponentProps } from \"react\";\nimport { cn } from \"@/lib/utils\";\n\nexport interface WordStreamProps extends Omit<ComponentProps<\"p\">, \"children\" | \"ref\"> {\n  /** The full text, already known. The reveal is presentation; spaces and newlines are kept. */\n  text: string;\n  /** Milliseconds between words. */\n  interval?: number;\n  /** Called once when the last word is shown (straight away under reduced motion). */\n  onDone?: () => void;\n}\n\nconst KEYFRAMES = \"@keyframes word-stream-caret{0%,to{opacity:1}50%{opacity:0}}\";\n\n/**\n * Known text revealed one word at a time, with a caret pill riding the last shown word, then `onDone`.\n * Every word is rendered up front with opacity 0, so the paragraph has its final size from the start (no reflow)\n * and the reveal is one attribute write per tick: no React render per word.\n * Spaces and newlines are kept as text (`whitespace-pre-wrap`).\n * The words are aria-hidden and the whole text sits once in an sr-only copy, so a live region announces it once, not per word.\n * The caret is a pseudo-element on the newest word; it blinks if the stream stalls, and goes when the text is complete.\n * Reduced motion: CSS shows the whole text at once with no caret (server HTML is the same either way), and `onDone` fires on mount.\n */\nexport function WordStream({ text, interval = 45, onDone, className, ...rest }: WordStreamProps) {\n  const ref = useRef<HTMLParagraphElement>(null);\n  const done = useRef(onDone);\n  useEffect(() => {\n    done.current = onDone;\n  });\n\n  useEffect(() => {\n    const words = ref.current?.querySelectorAll<HTMLElement>(\"[data-word]\");\n    if (!words) return;\n    words.forEach((w) => w.removeAttribute(\"data-on\"));\n    // check-ignore: reduced-motion-live only decides when onDone fires; the CSS (motion-reduce:opacity-100) shows every word live if the setting flips mid-stream\n    if (!words.length || matchMedia(\"(prefers-reduced-motion: reduce)\").matches) {\n      done.current?.();\n      return;\n    }\n    let i = 0;\n    const id = setInterval(() => {\n      words[i - 1]?.removeAttribute(\"data-caret\");\n      words[i].dataset.on = \"\";\n      if (++i < words.length) words[i - 1].dataset.caret = \"\";\n      else {\n        clearInterval(id);\n        done.current?.();\n      }\n    }, interval);\n    return () => clearInterval(id);\n  }, [text, interval]);\n\n  return (\n    <p\n      ref={ref}\n      className={cn(\n        \"whitespace-pre-wrap\",\n        \"[&_[data-caret]]:after:ml-0.5 [&_[data-caret]]:after:inline-block [&_[data-caret]]:after:h-[0.8em] [&_[data-caret]]:after:w-0.5 [&_[data-caret]]:after:rounded-full [&_[data-caret]]:after:bg-current [&_[data-caret]]:after:align-[-0.05em] [&_[data-caret]]:after:content-['']\",\n        \"[&_[data-caret]]:after:animate-[word-stream-caret_1s_step-end_infinite] motion-reduce:[&_[data-caret]]:after:hidden\",\n        className,\n      )}\n      {...rest}\n    >\n      <style href=\"word-stream\" precedence=\"default\">\n        {KEYFRAMES}\n      </style>\n      <span className=\"sr-only\">{text}</span>\n      <span aria-hidden=\"true\">\n        {text.split(/(\\s+)/).map((part, i) =>\n          i % 2 ? (\n            part\n          ) : part ? (\n            <span\n              key={i}\n              data-word=\"\"\n              className=\"opacity-0 data-on:opacity-100 motion-reduce:opacity-100\"\n            >\n              {part}\n            </span>\n          ) : null,\n        )}\n      </span>\n    </p>\n  );\n}\n",
+      "type": "registry:ui"
+    }
+  ],
+  "meta": {
+    "react": ">=19",
+    "tailwindcss": ">=4",
+    "tokens": "shadcn (background, foreground, muted, border, ...): run shadcn init first"
+  },
+  "type": "registry:ui"
+}

@@ -1030,4 +1030,89 @@ const [open, setOpen] = useState(true);
       "Reduced motion: the line stands still and the strip fades instead of sliding while its row closes.",
     ],
   },
+  "step-ring": {
+    usage: `import { StepRing, StepRise } from "@/components/ui/step-ring";
+
+<ol>
+  {steps.map((step, i) => (
+    <StepRise key={step.key} order={i} className="flex items-center gap-3 py-4">
+      <StepRing state={step.state} index={i + 1} />
+      {step.label}
+    </StepRise>
+  ))}
+</ol>`,
+    props: [
+      { name: "state", type: '"pending" | "current" | "done" | "skipped"', description: "StepRing: current spins a quarter-arc on the ring, done fills it with a tick, skipped shows a dash, pending shows the number." },
+      { name: "index", type: "number", description: "StepRing: the number drawn inside the ring for pending and current." },
+      { name: "order", type: "number", description: "StepRise: position in the list; the row starts order x stagger seconds after mount." },
+      { name: "stagger", type: "number", default: "0.07", description: "StepRise: seconds between one row and the next." },
+    ],
+    behaviors: [
+      "The arc is a CSS spin on a quarter-length dash, with transform-box: fill-box so it turns about the circle's own centre; it pauses with animation-play-state while off screen.",
+      "The badge is opaque (bg-background) so a connector line behind it never crosses the number; the arc and the tick take the text colour.",
+      "StepRise rows fade and rise 6px in 450ms, each 70ms after the last; change the list's key to replay.",
+      "Reduced motion: the arc turns at a third of the speed and rows fade in without rising.",
+    ],
+  },
+  "pixel-wave": {
+    usage: `import { PixelWave } from "@/components/ui/pixel-wave";
+
+<div role="status" className="flex items-center gap-2.5">
+  <PixelWave className="text-foreground" />
+  Agent is thinking
+</div>
+<PixelWave size={6} gap={2} className="text-primary" aria-label="Loading" />`,
+    props: [
+      { name: "size", type: "number", default: "4", description: "Side of one cell, in px." },
+      { name: "gap", type: "number", default: "1.5", description: "Space between cells, in px." },
+      { name: "duration", type: "number", default: "0.65", description: "Seconds for one cell to fade up and back." },
+      { name: "stagger", type: "number", default: "0.09", description: "Seconds between one diagonal of cells and the next." },
+      { name: "className", type: "string", description: "Merged onto the root; set the colour (text-*) here." },
+    ],
+    behaviors: [
+      "Cells are currentColor, so they follow the text colour and the theme.",
+      "Nine cells share one opacity keyframe on staggered delays, so a wavefront sweeps out from the left-middle cell; the fade outlasts a step, so two fronts are in flight.",
+      "Opacity only, no JavaScript per frame. It pauses while off screen.",
+      "Decorative and hidden from screen readers, unless you pass aria-label (then it is an img). Put role=\"status\" and the label text on the row around it.",
+      "Reduced motion: the wave runs at half speed with a smaller opacity swing.",
+    ],
+  },
+  "word-stream": {
+    usage: `import { WordStream } from "@/components/ui/word-stream";
+
+<WordStream text={reply.body} onDone={() => scrollToBottom()} />
+<WordStream text={summary} interval={30} className="text-sm leading-relaxed" />`,
+    props: [
+      { name: "text", type: "string", description: "The full text, already known. Spaces and newlines are kept." },
+      { name: "interval", type: "number", default: "45", description: "Milliseconds between words." },
+      { name: "onDone", type: "() => void", description: "Called once when the last word is shown (on mount under reduced motion)." },
+      { name: "className", type: "string", description: "Merged onto the root <p>; set size, leading and colour here." },
+    ],
+    behaviors: [
+      "Every word is rendered up front at opacity 0 and revealed by an attribute write per tick, so there is no React render per word and the paragraph never reflows.",
+      "Spaces, tabs and newlines are kept (whitespace-pre-wrap); the caret pill rides the newest word and blinks if the stream stalls.",
+      "The visible words are aria-hidden and the whole text sits once in an sr-only copy, so a live region announces the reply once.",
+      "Changing text or interval restarts the reveal; the interval is cleared on unmount.",
+      "Reduced motion: the whole text shows at once with no caret (CSS, so server HTML is unchanged) and onDone fires on mount.",
+    ],
+  },
+  "location-pill": {
+    usage: `import { LocationPill } from "@/components/ui/location-pill";
+
+<LocationPill className="absolute left-0 top-1/2" />
+<LocationPill label="Based in Berlin" icon={<Globe size={30} />} drift={0.3} />`,
+    props: [
+      { name: "label", type: "ReactNode", default: '"Located in India"', description: "The text before the icon. One line; a label wider than its parent truncates." },
+      { name: "icon", type: "ReactNode", description: "Spins inside the grey circle. Defaults to an inline globe SVG; size it like a 30px icon." },
+      { name: "duration", type: "number", default: "10", description: "Seconds per full turn of the icon." },
+      { name: "drift", type: "number", default: "0.2", description: "How far it drifts up as it scrolls out, as a fraction of its own height. 0 turns the drift off." },
+      { name: "container", type: "RefObject<HTMLElement | null>", description: "Follow a scrolling box instead of the page." },
+    ],
+    behaviors: [
+      "Square on the left, round on the right: made to sit flush against the left edge of a hero.",
+      "The icon turns with a linear CSS animation, paused with animation-play-state while off screen, so it costs no JavaScript per frame.",
+      "From the moment its bottom edge passes the middle of the viewport (or container) until it reaches the top, it moves up by drift x its height, through a spring so it trails the scroll slightly.",
+      "Reduced motion: the icon turns four times slower; the drift, small and only moved by your own scrolling, stays.",
+    ],
+  },
 };
