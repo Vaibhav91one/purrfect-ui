@@ -43,7 +43,7 @@ export function Preview({ item, inert = true, max = 1, pad, cover, live = true, 
   return (
     <Fit nat={item.nat} max={max} pad={pad} fill={item.fill} cover={cover}>
       <div inert={inert} aria-hidden={inert || undefined} className="grid size-full place-items-center">
-        <Demo slug={item.slug} playing={playing} speed={speed} opts={opts} />
+        <Demo slug={item.slug} playing={playing} speed={speed} opts={inert ? { ...opts, card: true } : opts} />
       </div>
     </Fit>
   );
