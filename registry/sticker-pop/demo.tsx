@@ -1,7 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
 
-import { motion } from "motion/react";
+import { motion, useReducedMotion } from "motion/react";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { cn } from "@/lib/utils";
 import { StickerPop } from "./sticker-pop";
@@ -20,6 +20,8 @@ export function LoaderBox({ stickers = PILE.map(([f]) => `/demo/${f}.jpg`), stic
   const [run, setRun] = useState(0);
   const [out, setOut] = useState(false);
   const timer = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const reduce = useReducedMotion();
+  const count = Math.min(stickers.length, PILE.length); // only the rendered stickers stagger out
   useEffect(() => () => clearTimeout(timer.current), []);
   // click: the pile leaves in reverse, then pops in again
   const replay = () => {
@@ -28,7 +30,7 @@ export function LoaderBox({ stickers = PILE.map(([f]) => `/demo/${f}.jpg`), stic
     timer.current = setTimeout(() => {
       setOut(false);
       setRun((n) => n + 1);
-    }, 450);
+    }, (count - 1) * 50 + 300); // the last sticker's outDelay plus its 0.3s exit
   };
   return (
     <div className="relative h-[560px] w-[800px] overflow-hidden rounded-2xl">
@@ -42,7 +44,7 @@ export function LoaderBox({ stickers = PILE.map(([f]) => `/demo/${f}.jpg`), stic
               rotate={PILE[i][3]}
               delay={0.1 + i * 0.2}
               out={out}
-              outDelay={(stickers.length - 1 - i) * 0.05}
+              outDelay={(count - 1 - i) * 0.05}
               className={cn("absolute inset-[14%] size-[72%] rounded-[28%] border-[6px] border-white object-cover shadow-[0_6px_18px_rgba(0,0,0,.18)]", stickerClassName)}
               style={{ x: `${PILE[i][1]}%`, y: `${PILE[i][2]}%` }}
             />
@@ -50,7 +52,7 @@ export function LoaderBox({ stickers = PILE.map(([f]) => `/demo/${f}.jpg`), stic
         </button>
         <div key={run} className="h-[1.2em] overflow-hidden text-[40px] leading-[1.2] tabular-nums">
           {/* check-ignore: duration the source counter rolls for 1.4s while the pile pops */}
-          <motion.div initial={{ y: "0%" }} animate={{ y: "-75%" }} transition={{ duration: 1.4, ease: [0.23, 1, 0.32, 1] }} className="flex flex-col">
+          <motion.div initial={{ y: "0%" }} animate={{ y: "-75%" }} transition={{ duration: reduce ? 0 : 1.4, ease: [0.23, 1, 0.32, 1] }} className="flex flex-col">
             {STEPS.map((s) => (
               <span key={s} className="h-[1.2em]">
                 {s}

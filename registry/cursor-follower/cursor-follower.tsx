@@ -10,13 +10,16 @@ export interface CursorFollowerProps extends Omit<ComponentProps<"div">, "childr
 }
 
 const FOLLOW = { stiffness: 900, damping: 50, mass: 0.4 }; // tight: it trails the pointer by a frame or two, never lags
-const GROW = { stiffness: 420, damping: 30 };
+const GROW = { stiffness: 420, damping: 40 }; // critically damped: shrinking back never dips below rest size
+/** Largest data-cursor-scale honoured, so a stray value cannot flood the page with inversion. */
+const MAX_GROW = 10;
 
 /**
  * A dot that follows the mouse and inverts what is under it (mix-blend-difference). Mount it once, near the root. Any
  * element with `data-cursor-scale="3"` grows it while hovered: no context, no hooks to wire. One passive pointer listener
  * on the document moves motion values, so React never re-renders while it moves. Mouse only: touch and pen never see it,
- * and it fades out when the pointer leaves the window. Reduced motion: it sits exactly on the pointer, no trail, no grow.
+ * and it fades out when the pointer leaves the window (or a touch or pen takes over). Scale values are read as positive and
+ * capped at 10. Reduced motion: it sits exactly on the pointer with no trail, and grows instantly instead of springing.
  */
 export function CursorFollower({ size = 20, className, style, ...rest }: CursorFollowerProps) {
   const reduce = useReducedMotion();
@@ -36,7 +39,11 @@ export function CursorFollower({ size = 20, className, style, ...rest }: CursorF
   useEffect(() => {
     let visible = false;
     const move = (e: PointerEvent) => {
-      if (e.pointerType !== "mouse") return;
+      // a hybrid device switching to touch or pen hides it instead of leaving it frozen
+      if (e.pointerType !== "mouse") {
+        if (visible) setShown((visible = false));
+        return;
+      }
       x.set(e.clientX);
       y.set(e.clientY);
       // the first move after it appears, and every move under reduced motion, lands on the pointer
@@ -48,8 +55,9 @@ export function CursorFollower({ size = 20, className, style, ...rest }: CursorF
     };
     const over = (e: PointerEvent) => {
       if (e.pointerType !== "mouse") return;
-      const n = Number((e.target as Element).closest?.("[data-cursor-scale]")?.getAttribute("data-cursor-scale"));
-      grow.set(still.current || !n ? 1 : n);
+      const n = Math.min(MAX_GROW, Math.abs(Number((e.target as Element).closest?.("[data-cursor-scale]")?.getAttribute("data-cursor-scale")))) || 1;
+      grow.set(n);
+      if (still.current) scale.jump(n);
     };
     const leave = () => setShown((visible = false));
     document.addEventListener("pointermove", move, { passive: true });
@@ -60,13 +68,13 @@ export function CursorFollower({ size = 20, className, style, ...rest }: CursorF
       document.removeEventListener("pointerover", over);
       document.documentElement.removeEventListener("pointerleave", leave);
     };
-  }, [x, y, sx, sy, grow]);
+  }, [x, y, sx, sy, grow, scale]);
 
   return (
     <motion.div
       aria-hidden
       // check-ignore: hardcoded-color white is what makes mix-blend-difference invert the page, in either theme
-      className={cn("pointer-events-none fixed top-0 left-0 z-[100] rounded-full bg-white mix-blend-difference transition-opacity duration-200", shown ? "opacity-100" : "opacity-0", className)}
+      className={cn("pointer-events-none fixed top-0 left-0 z-[100] rounded-full bg-white mix-blend-difference transition-opacity duration-200 ease-[cubic-bezier(0.23,1,0.32,1)]", shown ? "opacity-100" : "opacity-0", className)}
       style={{ x: sx, y: sy, scale, width: size, height: size, marginLeft: -size / 2, marginTop: -size / 2, ...style }}
       {...rest}
     />

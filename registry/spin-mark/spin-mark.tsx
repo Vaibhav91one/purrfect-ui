@@ -60,28 +60,35 @@ export interface SpinMarkProps extends Omit<ComponentProps<"div">, "ref" | "chil
  * A mark that pops in with a spring the first time it enters the viewport, then either spins forever (a CSS animation paused
  * while off screen) or turns with the scroll position of the page or of `container`. It fills its root, so size it with
  * `className` (`size-24` by default) and colour it with a text colour.
- * Reduced motion: it fades and scales in without the bounce, and does not turn.
+ * The in-view check watches the unscaled root, so a large mark pops in as soon as any of it is on screen. Without JavaScript
+ * it is simply visible. Reduced motion: it fades in (no scale, no bounce) and does not turn.
  */
 export function SpinMark({ children, mode = "spin", duration = 20, turns = 3, container, className, ...rest }: SpinMarkProps) {
   const reduce = useReducedMotion();
   const mark = children ?? <Asterisk />;
+  // watch the unscaled root: at scale(0) the inner box is a single point, so a big mark would wait for its centre
+  const ref = useRef<HTMLDivElement>(null);
+  const inView = useInView(ref, { once: true });
   return (
-    <motion.div
-      className={cn("size-24 shrink-0", className)}
-      // check-ignore: no-scale-zero a brand mark popping out of nothing on a spring is the whole effect (the source does it), and it fades in too
-      initial={{ transform: "scale(0)", opacity: 0 }}
-      whileInView={{ transform: "scale(1)", opacity: 1 }}
-      viewport={{ once: true }}
-      transition={reduce ? { duration: 0.3, ease: [0.23, 1, 0.32, 1] } : { type: "spring", stiffness: 300, damping: 20 }}
-      {...rest}
-    >
-      {mode === "scroll" ? (
-        <ScrollTurn turns={turns} container={container}>
-          {mark}
-        </ScrollTurn>
-      ) : (
-        <Spin duration={duration}>{mark}</Spin>
-      )}
-    </motion.div>
+    <div ref={ref} className={cn("size-24 shrink-0", className)} {...rest}>
+      {/* without JavaScript the hidden start state would never animate, so show the mark as is */}
+      <noscript dangerouslySetInnerHTML={{ __html: "<style>[data-spin-mark]{opacity:1!important;transform:none!important}</style>" }} />
+      <motion.div
+        data-spin-mark=""
+        className="size-full"
+        // check-ignore: no-scale-zero a brand mark popping out of nothing on a spring is the whole effect (the source does it), and it fades in too
+        initial={{ transform: "scale(0)", opacity: 0 }}
+        animate={inView ? { transform: "scale(1)", opacity: 1 } : undefined}
+        transition={reduce ? { opacity: { duration: 0.2, ease: [0.23, 1, 0.32, 1] }, transform: { duration: 0 } } : { type: "spring", stiffness: 300, damping: 20 }}
+      >
+        {mode === "scroll" ? (
+          <ScrollTurn turns={turns} container={container}>
+            {mark}
+          </ScrollTurn>
+        ) : (
+          <Spin duration={duration}>{mark}</Spin>
+        )}
+      </motion.div>
+    </div>
   );
 }

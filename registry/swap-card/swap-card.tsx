@@ -28,17 +28,19 @@ const EASE = "ease-[cubic-bezier(0.23,1,0.32,1)]";
 /**
  * A product card: on hover the image crossfades to a second one while the first zooms in and the second settles from a
  * slight zoom (fade 400ms, zoom 900ms), a wobbly badge ring turns 30 degrees and inverts its colours, and the title nudges
- * right. Pure CSS on one `group` button, so it costs nothing per frame and renders the same on the server. Hover only
+ * forward (right, or left in RTL). Pure CSS on one `group` button, so it costs nothing per frame and renders the same on the server. Hover only
  * applies on devices that really hover (Tailwind's `hover:` is gated on `(hover: hover)`), so a tap never leaves it stuck;
  * keyboard focus (`:focus-visible`) and a press (`:active`, the finger on a phone) show the same state. Reduced motion:
- * the images still crossfade and the badge still inverts, but nothing zooms, turns or moves.
+ * the images still crossfade and the badge still inverts, but nothing zooms, turns or moves. A `disabled` card dims and
+ * plays no hover. Content sits at the top, so images line up in a grid row of mixed title lengths; the badge scales with
+ * a narrow card (22% of its width, 36-56px).
  */
 export function SwapCard({ image, hoverImage, title, subtitle, badge = true, type = "button", className, ...rest }: SwapCardProps) {
   return (
     <button
       type={type}
       className={cn(
-        "group block w-full rounded-2xl text-left outline-none transition-[scale] duration-150 active:scale-[.98] motion-reduce:active:scale-100",
+        "group flex w-full flex-col rounded-2xl text-start outline-hidden transition-[scale] duration-150 active:scale-[.98] disabled:pointer-events-none disabled:opacity-60 motion-reduce:active:scale-100",
         EASE,
         className,
       )}
@@ -48,7 +50,7 @@ export function SwapCard({ image, hoverImage, title, subtitle, badge = true, typ
         {badge && (
           <span
             className={cn(
-              "absolute top-4 right-4 z-[2] size-14 text-background transition-colors duration-200 group-hover:text-foreground group-focus-visible:text-foreground group-active:text-foreground",
+              "absolute top-[3%] right-[4%] z-[2] aspect-square w-[22%] min-w-9 max-w-14 text-background transition-colors duration-200 group-hover:text-foreground group-focus-visible:text-foreground group-active:text-foreground",
               EASE,
             )}
           >
@@ -97,7 +99,7 @@ export function SwapCard({ image, hoverImage, title, subtitle, badge = true, typ
       <div className="pt-2">
         <span
           className={cn(
-            "inline-block max-w-full break-words transition-[translate] duration-300 group-hover:translate-x-1.5 group-focus-visible:translate-x-1.5 group-active:translate-x-1.5 motion-reduce:!translate-x-0",
+            "inline-block max-w-full break-words transition-[translate] duration-300 group-hover:translate-x-1.5 group-focus-visible:translate-x-1.5 group-active:translate-x-1.5 rtl:group-hover:-translate-x-1.5 rtl:group-focus-visible:-translate-x-1.5 rtl:group-active:-translate-x-1.5 motion-reduce:!translate-x-0",
             EASE,
           )}
         >

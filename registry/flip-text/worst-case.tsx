@@ -11,6 +11,7 @@ export const states: Record<string, ReactNode> = {
     <FlipText key="b" text="メールアドレスを確認してください 你好世界" />,
     <FlipText key="c" dir="rtl" text="إرسال الرسالة إلى الفريق" />,
     <FlipText key="d" text="नमस्ते दुनिया 👋🏽 🇮🇳 👩‍👩‍👧" />,
+    <FlipText key="t" text={"Tag flag 🏴󠁧󠁢󠁳󠁣󠁴󠁿 and no-break: 10\u00A0kg, Mr.\u00A0Smith"} />,
     <FlipText key="e" className="text-6xl font-semibold" text="Huge" />,
     <FlipText key="f" className="text-xs" text="Tiny print that runs on and on across several lines so the line-by-line fade has a few rows to step through in the narrow width." />,
     <a key="g" href="#flip">

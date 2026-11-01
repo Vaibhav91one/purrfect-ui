@@ -1,6 +1,6 @@
 "use client"; // check-ignore: use-client-unneeded the variants are functions (custom), which cannot cross from a server component
 
-import { motion, type Variants } from "motion/react";
+import { MotionConfig, motion, type Variants } from "motion/react";
 import type { CSSProperties, ComponentProps, ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
@@ -29,17 +29,20 @@ const SPRING = { type: "spring", stiffness: 210, damping: 20, mass: 0.75 } as co
 
 /**
  * Cards that start stacked in the centre and spring out to their own spots, tilted, when the group scrolls into view,
- * one after another. Offsets are percentages of the container (each card rides a full-size layer, so "30%" of that layer
- * is 30% of the container), which means the fan scales with whatever box it is in: no pixel offsets, no media queries.
- * Give the root a height. It plays once. Reduced motion: the cards are already in place and only fade in.
+ * one after another. Offsets are percentages of the container (each card rides a zero-size point in the centre that moves
+ * in container units, so no empty layer box ever widens the page), which means the fan scales with whatever box it is in:
+ * no pixel offsets, no media queries.
+ * Give the root a height. Cards are at most 40% of the box wide, so keep |x| within 30 to keep them inside it (further
+ * out, clip a parent with overflow-x-clip).
+ * It plays once. Reduced motion: the cards are already in place and only fade in.
  */
 export function FanOutCards({ cards, center, stagger = 0.08, cardClassName, className, ...rest }: FanOutCardsProps) {
   const layer: Variants = {
-    hidden: { x: "0%", y: "0%" },
-    shown: (c: { x: number; y: number; delay: number }) => ({ x: `${c.x}%`, y: `${c.y}%`, transition: { ...SPRING, delay: c.delay } }),
+    hidden: { x: "0cqw", y: "0cqh" },
+    shown: (c: { x: number; y: number; delay: number }) => ({ x: `${c.x}cqw`, y: `${c.y}cqh`, transition: { ...SPRING, delay: c.delay } }),
   };
   const card: Variants = {
-    hidden: { opacity: 0, scale: 0.88, rotate: 0 },
+    hidden: { opacity: 0, scale: 0.92, rotate: 0 },
     shown: (c: { rotate: number; delay: number }) => ({
       opacity: 1,
       scale: 1,
@@ -50,11 +53,13 @@ export function FanOutCards({ cards, center, stagger = 0.08, cardClassName, clas
   };
 
   return (
+    // reducedMotion="user": Motion drops the springs itself under reduced motion, so only the fade runs
+    <MotionConfig reducedMotion="user">
     <motion.div
       initial="hidden"
       whileInView="shown"
       viewport={{ once: true, amount: 0.3 }}
-      className={cn("relative isolate h-[480px] w-full", className)}
+      className={cn("relative isolate h-[480px] w-full [container-type:size]", className)}
       {...rest}
     >
       {center != null && <div className="absolute inset-0 grid place-items-center">{center}</div>}
@@ -65,14 +70,14 @@ export function FanOutCards({ cards, center, stagger = 0.08, cardClassName, clas
             key={i}
             custom={custom}
             variants={layer}
-            style={{ "--x": `${c.x}%`, "--y": `${c.y}%`, "--r": `${custom.rotate}deg` } as CSSProperties}
-            className="pointer-events-none absolute inset-0 grid place-items-center motion-reduce:![transform:translate(var(--x),var(--y))]"
+            style={{ "--x": `${c.x}cqw`, "--y": `${c.y}cqh`, "--r": `${custom.rotate}deg` } as CSSProperties}
+            className="pointer-events-none absolute top-1/2 left-1/2 flex size-0 items-center justify-center motion-reduce:![transform:translate(var(--x),var(--y))]"
           >
             <motion.div
               custom={custom}
               variants={card}
               className={cn(
-                "pointer-events-auto w-64 rounded-lg border border-border bg-card p-3 text-card-foreground shadow-lg motion-reduce:![transform:rotate(var(--r))]",
+                "pointer-events-auto w-64 max-w-[40cqw] shrink-0 rounded-lg [overflow-wrap:anywhere] border border-border bg-card p-3 text-card-foreground shadow-lg motion-reduce:![transform:rotate(var(--r))]",
                 cardClassName,
               )}
             >
@@ -82,5 +87,6 @@ export function FanOutCards({ cards, center, stagger = 0.08, cardClassName, clas
         );
       })}
     </motion.div>
+    </MotionConfig>
   );
 }

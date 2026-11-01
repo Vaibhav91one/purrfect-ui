@@ -23,7 +23,8 @@ const noop = () => () => {};
 
 /**
  * A full-screen intro: the words swap one after another, then the panel lifts off the page with a curved bottom edge.
- * Click, tap or Escape skips it, it locks page scroll while it covers the page, and it plays once per tab (`storageKey`).
+ * Click, tap or Escape (full screen only) skips it with a quicker lift, it locks page scroll while it covers the page, and
+ * it plays once per tab (`storageKey`). Each word gets at least a 220ms swap, and a word wider than the screen truncates.
  * The server HTML already covers the page, so nothing flashes before it; an inline script hides it before the first paint
  * on a repeat visit, and if JavaScript never runs it uncovers the page by itself after a few seconds. As it lifts, both
  * bottom corners round to 50%, so the edge leaving the page is one curve. Reduced motion: one word, then the panel fades out.
@@ -42,6 +43,7 @@ export function Preloader({ words = WELCOME, duration = 2.4, storageKey = "prelo
   }, () => false);
   const [phase, setPhase] = useState<"words" | "lift" | "gone">("words");
   const [i, setI] = useState(0);
+  const [skipped, setSkipped] = useState(false);
   const done = useRef(onDone);
   useEffect(() => {
     done.current = onDone;
@@ -59,17 +61,18 @@ export function Preloader({ words = WELCOME, duration = 2.4, storageKey = "prelo
       if (bar > 0) body.paddingRight = `calc(${getComputedStyle(document.body).paddingRight} + ${bar}px)`;
       body.overflow = "hidden";
     }
-    const n = reduce ? 1 : Math.max(1, words.length);
+    // only as many words as get a full 220ms swap each, so a short duration never stacks them
+    const n = reduce ? 1 : Math.max(1, Math.min(words.length, Math.floor((duration * 1000) / 220)));
     const step = (duration * 1000) / n;
     const ticks = Array.from({ length: n - 1 }, (_, k) => setTimeout(() => setI(k + 1), step * (k + 1)));
     const lift = setTimeout(() => setPhase("lift"), reduce ? 600 : duration * 1000);
-    const skip = (e: KeyboardEvent) => e.key === "Escape" && setPhase("lift");
-    // check-ignore: global-keys only while it covers the whole page: Escape skips it wherever focus is
-    window.addEventListener("keydown", skip);
+    const skip = (e: KeyboardEvent) => e.key === "Escape" && (setSkipped(true), setPhase("lift"));
+    // check-ignore: global-keys only while it covers the whole page (not contained): Escape skips it wherever focus is
+    if (!contained) window.addEventListener("keydown", skip);
     return () => {
       ticks.forEach(clearTimeout);
       clearTimeout(lift);
-      window.removeEventListener("keydown", skip);
+      if (!contained) window.removeEventListener("keydown", skip);
       [body.overflow, body.paddingRight] = prev;
     };
   }, [words.length, duration, reduce, contained, gone]);
@@ -88,34 +91,38 @@ export function Preloader({ words = WELCOME, duration = 2.4, storageKey = "prelo
   const key = storageKey ? JSON.stringify(storageKey) : "";
   return (
     <motion.div
-      data-preloader
+      // tied to its key, so a full-page preloader seen in this tab never hides another one with a different key
+      data-preloader={storageKey || ""}
       role="status"
       aria-label="Loading"
       aria-live="polite"
-      onClick={() => setPhase("lift")}
+      onClick={() => (setSkipped(true), setPhase("lift"))}
       initial={false}
+      // a full transform string (not y), so Motion can hand the lift to WAAPI while the page hydrates
       // ponytail: the radius repaints the panel for the 1s lift only; a clip-path ellipse if that ever shows in a trace
       animate={
         phase === "lift"
           ? reduce
             ? { opacity: 0 }
-            : { opacity: 1, y: "-100%", borderBottomLeftRadius: "50%", borderBottomRightRadius: "50%" }
-          : { opacity: 1, y: "0%", borderBottomLeftRadius: "0%", borderBottomRightRadius: "0%" }
+            : { opacity: 1, transform: "translateY(-100%)", borderBottomLeftRadius: "50%", borderBottomRightRadius: "50%" }
+          : { opacity: 1, transform: "translateY(0%)", borderBottomLeftRadius: "0%", borderBottomRightRadius: "0%" }
       }
-      transition={{ duration: reduce ? 0.3 : 1, ease: OUT }}
+      // a skip is the user's decision, so it answers fast (drawer curve); the automatic lift keeps the slow in-out
+      transition={reduce ? { duration: 0.3, ease: OUT } : skipped ? { duration: 0.6, ease: [0.32, 0.72, 0, 1] } : { duration: 1, ease: OUT }}
       onAnimationComplete={() => phase === "lift" && finish()}
       className={cn(contained ? "absolute" : "fixed", "inset-0 z-[9999] grid cursor-pointer place-items-center bg-foreground text-background", className)}
       style={{ animation: `preloader-failsafe 0s linear ${duration + 3}s forwards`, ...style }}
       {...rest}
     >
       {/* no JavaScript: uncover the page 3s after the words would have ended. Seen before: hide it before the first paint, no flash */}
-      <style>{`@keyframes preloader-failsafe{to{visibility:hidden}}html[data-preloader-seen] [data-preloader]{display:none}`}</style>
-      {key && !hydrated && <script dangerouslySetInnerHTML={{ __html: `try{if(sessionStorage.getItem(${key})==="1")document.documentElement.dataset.preloaderSeen=""}catch(e){}` }} />}
-      <div aria-hidden className="relative h-16 overflow-hidden text-3xl">
+      <style>{`@keyframes preloader-failsafe{to{visibility:hidden}}${key ? `html[data-preloader-seen~=${key}] [data-preloader=${key}]{display:none}` : ""}`}</style>
+      {key && !hydrated && <script dangerouslySetInnerHTML={{ __html: `try{var d=document.documentElement.dataset;if(sessionStorage.getItem(${key})==="1")d.preloaderSeen=(d.preloaderSeen||"")+" "+${key}}catch(e){}` }} />}
+      {/* full width, so the box never shrinks to the incoming word (the outgoing one stays centred and whole); a word too long for it truncates */}
+      <div aria-hidden className="relative h-16 w-full max-w-full overflow-hidden px-6 text-center text-3xl">
         <AnimatePresence initial={false} mode="popLayout">
           <motion.span
             key={i}
-            className="block leading-[4rem] whitespace-nowrap motion-reduce:!transform-none"
+            className="block truncate leading-[4rem] motion-reduce:!transform-none"
             initial={{ opacity: 0, transform: "translateY(60%)" }}
             animate={{ opacity: 1, transform: "translateY(0%)" }}
             exit={{ opacity: 0, transform: "translateY(-60%)" }}

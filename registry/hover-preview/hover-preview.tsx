@@ -32,27 +32,36 @@ const EASE = "ease-[cubic-bezier(0.23,1,0.32,1)]";
  * faster; moving to another row slides the card's strip to that row's preview. Keyboard focus opens it beside the focused
  * row, so it is not mouse-only. Positions are relative to the list, so it works anywhere on the page, and the pointer only
  * moves motion values: React re-renders once per row change, not per move. Previews mount on the first open, so a list
- * of screenshots costs nothing until someone hovers. Touch gets plain links. Reduced motion: the card appears in place
- * and jumps with the pointer, no scale and no trail.
+ * of screenshots costs nothing until someone hovers. The card stops at the viewport's side edges. Touch gets plain links.
+ * Reduced motion: the card appears in place and jumps with the pointer, no scale and no trail.
  */
 export function HoverPreview({ items, label = "View", cardClassName, className, onPointerMove, onPointerLeave, onBlur, ...rest }: HoverPreviewProps) {
   const root = useRef<HTMLDivElement>(null);
   const reduce = useReducedMotion();
-  const [state, setState] = useState({ open: false, index: 0, armed: false });
+  const card = useRef<HTMLDivElement>(null);
+  const [state, setState] = useState({ open: false, index: 0, armed: false, slide: false });
   const px = useMotionValue(0);
   const py = useMotionValue(0);
-  const cx = useSpring(px, CARD);
+  const qx = useMotionValue(0); // the card's x, kept inside the viewport
+  const cx = useSpring(qx, CARD);
   const cy = useSpring(py, CARD);
   const dx = useSpring(px, DISC);
   const dy = useSpring(py, DISC);
 
   // a closed card jumps to the pointer before it opens, so it never flies in from the corner
   const place = (x: number, y: number, jump: boolean) => {
+    // the card stops at the viewport's side edges (the disc still follows the pointer), so hovering near an edge never
+    // makes the page scroll sideways
+    const el = root.current!, r = el.getBoundingClientRect(), k = r.width / el.offsetWidth || 1;
+    const w = (card.current?.offsetWidth ?? 0) / 2;
+    const q = Math.max(w - r.left / k, Math.min(x, (document.documentElement.clientWidth - r.left) / k - w));
     px.set(x);
     py.set(y);
-    if (jump || reduce) for (const [s, v] of [[cx, x], [cy, y], [dx, x], [dy, y]] as const) s.jump(v);
+    qx.set(q);
+    if (jump || reduce) for (const [s, v] of [[cx, q], [cy, y], [dx, x], [dy, y]] as const) s.jump(v);
   };
-  const open = (index: number) => setState({ open: true, index, armed: true });
+  // the strip only slides between rows while the card is open; a reopen lands on the new row at once
+  const open = (index: number) => setState((s) => ({ open: true, index, armed: true, slide: s.open }));
   const close = () => setState((s) => ({ ...s, open: false }));
   // list coordinates, undoing any scale on an ancestor (a zoomed preview, a transformed card)
   const local = (x: number, y: number) => {
@@ -87,28 +96,30 @@ export function HoverPreview({ items, label = "View", cardClassName, className, 
               onFocus={(e) => {
                 if (!e.currentTarget.matches(":focus-visible")) return;
                 const r = e.currentTarget.getBoundingClientRect();
-                place(...local(r.left + r.width * 0.7, r.top + r.height / 2), !state.open);
+                place(...local(r.left + r.width * 0.7, r.top + r.height / 2), true); // keyboard moves land at once
                 open(i);
               }}
               className="group/row flex items-center justify-between gap-6 py-8 transition-opacity duration-200 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-foreground [@media(hover:hover)]:hover:opacity-50"
             >
-              <span className={`min-w-0 text-3xl transition-[translate] duration-300 ${EASE} [@media(hover:hover)]:group-hover/row:-translate-x-2 motion-reduce:!translate-none md:text-[40px]`}>{it.title}</span>
-              {it.meta && <span className={`shrink-0 text-sm text-muted-foreground transition-[translate] duration-300 ${EASE} [@media(hover:hover)]:group-hover/row:translate-x-2 motion-reduce:!translate-none`}>{it.meta}</span>}
+              <span className={`min-w-0 text-3xl [overflow-wrap:anywhere] transition-[translate] duration-300 ${EASE} [@media(hover:hover)]:group-hover/row:-translate-x-2 motion-reduce:!translate-none md:text-[40px]`}>{it.title}</span>
+              {it.meta && <span className={`max-w-[40%] text-right text-sm text-muted-foreground transition-[translate] duration-300 ${EASE} [@media(hover:hover)]:group-hover/row:translate-x-2 motion-reduce:!translate-none`}>{it.meta}</span>}
             </a>
           </li>
         ))}
       </ul>
 
-      {/* decorative: the rows are the links, so the card and disc are hidden from screen readers */}
-      <motion.div aria-hidden style={{ x: cx, y: cy }} className="pointer-events-none absolute top-0 left-0 z-10">
+      {/* decorative: the rows are the links, so the card and disc are hidden from screen readers. The anchors are size-0 so
+          their own boxes never widen the page; the card and disc hang off them centred */}
+      <motion.div aria-hidden style={{ x: cx, y: cy }} className="pointer-events-none absolute top-0 left-0 z-10 size-0">
         <motion.div
+          ref={card}
           initial={false}
           animate={{ opacity: state.open ? 1 : 0, transform: state.open ? "translate(-50%, -50%) scale(1)" : "translate(-50%, -50%) scale(0.92)" }}
           transition={{ duration: 0.25, ease: [0.23, 1, 0.32, 1] }}
           className={cn("h-[300px] w-[400px] max-w-[60vw] overflow-hidden rounded-2xl motion-reduce:![transform:translate(-50%,-50%)]", cardClassName)}
         >
           {state.armed && (
-            <div style={{ transform: `translateY(${state.index * -100}%)` }} className={`size-full transition-transform duration-300 ${EASE} motion-reduce:transition-none`}>
+            <div style={{ transform: `translateY(${state.index * -100}%)` }} className={cn("size-full", state.slide && `transition-transform duration-300 ${EASE} motion-reduce:transition-none`)}>
               {items.map((it, i) => (
                 <div key={i} className="grid size-full place-items-center overflow-hidden bg-muted" style={it.color ? { background: it.color } : undefined}>
                   {it.preview}
@@ -119,7 +130,7 @@ export function HoverPreview({ items, label = "View", cardClassName, className, 
         </motion.div>
       </motion.div>
       {label && (
-        <motion.div aria-hidden style={{ x: dx, y: dy }} className="pointer-events-none absolute top-0 left-0 z-10">
+        <motion.div aria-hidden style={{ x: dx, y: dy }} className="pointer-events-none absolute top-0 left-0 z-10 size-0">
           <motion.div
             initial={false}
             animate={{ opacity: state.open ? 1 : 0, transform: state.open ? "translate(-50%, -50%) scale(1)" : "translate(-50%, -50%) scale(0.9)" }}

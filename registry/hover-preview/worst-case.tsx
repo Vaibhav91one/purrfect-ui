@@ -15,7 +15,7 @@ export const states: Record<string, ReactNode> = {
     <HoverPreview
       label="Öffnen"
       items={[
-        ...items(["A project with a very long name that wraps onto a second line on narrow screens", "メールアドレス", "إرسال الرسالة"]),
+        ...items(["A project with a very long name that wraps onto a second line on narrow screens", "メールアドレス", "إرسال الرسالة", "northwindindustriesholdings.example.com"]),
         { title: "No meta", href: "#n", preview: shot(200) },
         { title: "Image preview", href: "#img", color: "#111", preview: <span className="text-4xl">🖼️</span> },
         ...items(Array.from({ length: 12 }, (_, i) => `Row ${i + 1}`)),

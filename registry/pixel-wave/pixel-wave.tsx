@@ -25,10 +25,11 @@ const STEPS = Array.from({ length: 9 }, (_, i) => (i % 3) + Math.abs(Math.floor(
  * A 3x3 pixel loader: nine square cells run one opacity fade on staggered delays, so a wavefront sweeps across the grid.
  * The fade is shorter than a full sweep plus its tail, which keeps two fronts in flight so it never reads as a metronome.
  * Opacity only, one shared keyframe, no JavaScript per frame. Cells are `currentColor`, so set the colour with `text-*`.
- * The loop pauses while the grid is off screen. It is decorative (hidden from screen readers) unless you give it an `aria-label`.
+ * The loop pauses while the grid is off screen. It is decorative (hidden from screen readers) unless you give it an `aria-label` or
+ * `aria-labelledby`. Inline in text it sits centred on the line.
  * Reduced motion: the wave runs at half speed with a smaller opacity swing.
  */
-export function PixelWave({ size = 4, gap = 1.5, duration = 0.65, stagger = 0.09, className, style, ...rest }: PixelWaveProps) {
+export function PixelWave({ size = 4, gap = 1, duration = 0.65, stagger = 0.09, className, style, ...rest }: PixelWaveProps) {
   const ref = useRef<HTMLSpanElement>(null);
 
   useEffect(() => {
@@ -39,14 +40,15 @@ export function PixelWave({ size = 4, gap = 1.5, duration = 0.65, stagger = 0.09
     return () => io.disconnect();
   }, []);
 
-  const labelled = rest["aria-label"] != null;
+  const labelled = rest["aria-label"] != null || rest["aria-labelledby"] != null;
 
   return (
     <span
       ref={ref}
       role={labelled ? "img" : undefined}
       aria-hidden={labelled ? undefined : true}
-      className={cn("group inline-grid shrink-0 grid-cols-[repeat(3,var(--pw-size))] gap-(--pw-gap)", className)}
+      // align-middle: an empty inline-grid takes its first row as the baseline, so inline in text it would hang low
+      className={cn("group inline-grid shrink-0 grid-cols-[repeat(3,var(--pw-size))] gap-(--pw-gap) align-middle", className)}
       style={{ "--pw-size": `${size}px`, "--pw-gap": `${gap}px`, "--pw-duration": `${duration}s`, ...style } as CSSProperties}
       {...rest}
     >
@@ -59,8 +61,9 @@ export function PixelWave({ size = 4, gap = 1.5, duration = 0.65, stagger = 0.09
           key={i}
           className={cn(
             "size-(--pw-size) rounded-[1px] bg-current opacity-15",
-            "animate-[pixel-wave_var(--pw-duration)_ease-in-out_infinite] group-data-paused:[animation-play-state:paused]",
-            "motion-reduce:animate-[pixel-wave-soft_calc(var(--pw-duration)*2)_ease-in-out_infinite] motion-reduce:[--pw-slow:2]",
+            // backwards: each cell shows its 0% frame during its delay, so the soft keyframe does not step on start
+            "animate-[pixel-wave_var(--pw-duration)_ease-in-out_infinite_backwards] group-data-paused:[animation-play-state:paused]",
+            "motion-reduce:animate-[pixel-wave-soft_calc(var(--pw-duration)*2)_ease-in-out_infinite_backwards] motion-reduce:[--pw-slow:2]",
           )}
           // reduced motion doubles the duration, so the delay doubles with it to keep the same wavefront
           style={{ animationDelay: `calc(${step * stagger}s * var(--pw-slow, 1))` }}

@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 export interface AnnounceStripProps extends Omit<ComponentProps<"div">, "children"> {
   /** One copy of the line: text, an icon. It is repeated to fill the width, so put the gap after it (padding) inside. */
   children: ReactNode;
-  /** Seconds for one copy of the track to pass. */
+  /** Seconds for one copy of the line to pass, so the speed is the same on every screen width. */
   duration?: number;
   /** Shown or put away by the parent. A dismissed strip closes the same way it does when you scroll down. */
   open?: boolean;
@@ -28,17 +28,20 @@ const SETTLE = 80;
  * header: it slides up and closes its row while you scroll down (or once dismissed), so the header takes its place, and
  * comes back on the way up. The loop is two identical copies of the track moved by exactly half its width on the compositor
  * (Web Animations, transform only), so it is seamless and never reads layout per frame. It pauses off screen, under the
- * mouse and while something in it has focus. Screen readers and Tab get the line once; the repeats are inert.
- * Reduced motion: the line stands still and the strip fades instead of sliding while its row closes.
+ * mouse, after a tap (tap again to resume) and while something in it has focus. Screen readers and Tab get the line once;
+ * the repeats are inert. Reduced motion: the line stands still and wraps so all of it is readable, and the strip fades
+ * instead of sliding while its row closes, with no row collapse.
  */
 export function AnnounceStrip({ children, duration = 40, open = true, onDismiss, hideOnScroll = true, container, className, ...rest }: AnnounceStripProps) {
   const root = useRef<HTMLDivElement>(null);
   const track = useRef<HTMLDivElement>(null);
   const first = useRef<HTMLDivElement>(null);
   // hover and focus hold the loop separately: the mouse leaving must not resume it while the close button has focus
-  const held = useRef({ hover: false, focus: false });
+  const held = useRef({ hover: false, focus: false, tap: false });
   const sync = useRef(() => {});
   const awayRef = useRef(false);
+  // where the loop was, so a new copy count (resize) or duration carries on instead of snapping back to the start
+  const at = useRef(0);
   const [count, setCount] = useState(3);
   const [hidden, setHidden] = useState(false);
   const away = !open || hidden;
@@ -59,12 +62,16 @@ export function AnnounceStrip({ children, duration = 40, open = true, onDismiss,
   useEffect(() => {
     const el = track.current, box = root.current;
     if (!el || !box) return;
-    const anim = el.animate([{ transform: "translateX(0)" }, { transform: "translateX(-50%)" }], { duration: duration * 1000, iterations: Infinity });
+    // half the track is `count` copies, so this keeps one copy per `duration`; RTL starts flush right and runs the other way
+    const ms = duration * count * 1000;
+    const end = getComputedStyle(el).direction === "rtl" ? "50%" : "-50%";
+    const anim = el.animate([{ transform: "translateX(0)" }, { transform: `translateX(${end})` }], { duration: ms, iterations: Infinity });
+    anim.currentTime = at.current % ms;
     const mq = matchMedia("(prefers-reduced-motion: reduce)");
     let seen = false;
     const update = () => {
       if (mq.matches) anim.cancel();
-      else if (seen && !held.current.hover && !held.current.focus && !awayRef.current) anim.play();
+      else if (seen && !held.current.hover && !held.current.focus && !held.current.tap && !awayRef.current) anim.play();
       else anim.pause();
     };
     sync.current = update;
@@ -78,6 +85,7 @@ export function AnnounceStrip({ children, duration = 40, open = true, onDismiss,
     return () => {
       io.disconnect();
       mq.removeEventListener("change", update);
+      at.current = Number(anim.currentTime) || 0;
       anim.cancel();
     };
   }, [duration, count]);
@@ -106,7 +114,7 @@ export function AnnounceStrip({ children, duration = 40, open = true, onDismiss,
     return () => target.removeEventListener("scroll", onScroll);
   }, [hideOnScroll, container]);
 
-  const hold = (by: "hover" | "focus", on: boolean) => {
+  const hold = (by: "hover" | "focus" | "tap", on: boolean) => {
     held.current[by] = on;
     sync.current();
   };
@@ -115,10 +123,12 @@ export function AnnounceStrip({ children, duration = 40, open = true, onDismiss,
     <div
       ref={root}
       // the row closes as the strip slides, so the header below takes the space instead of leaving a gap
-      className={cn("grid bg-primary text-sm font-medium text-primary-foreground transition-[grid-template-rows] duration-300 ease-[cubic-bezier(0.23,1,0.32,1)]", className)}
+      className={cn("grid bg-primary text-sm font-medium text-primary-foreground transition-[grid-template-rows] duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] motion-reduce:transition-none", className)}
       style={{ gridTemplateRows: away ? "0fr" : "1fr" }}
       onPointerEnter={(e) => e.pointerType === "mouse" && hold("hover", true)}
       onPointerLeave={() => hold("hover", false)}
+      // touch has no hover: a tap toggles the pause
+      onPointerDown={(e) => e.pointerType !== "mouse" && hold("tap", !held.current.tap)}
       onFocus={() => hold("focus", true)}
       onBlur={() => hold("focus", false)}
       {...rest}
@@ -128,9 +138,9 @@ export function AnnounceStrip({ children, duration = 40, open = true, onDismiss,
           inert={away || undefined}
           className={cn("relative overflow-hidden bg-inherit transition-[translate,opacity] duration-300 ease-[cubic-bezier(0.23,1,0.32,1)]", away && "-translate-y-full motion-reduce:translate-y-0 motion-reduce:opacity-0")}
         >
-          <div ref={track} className="flex w-max will-change-transform">
+          <div ref={track} className={cn("flex w-max will-change-transform motion-reduce:w-auto", onDismiss && "motion-reduce:pr-12")}>
             {Array.from({ length: count * 2 }, (_, i) => (
-              <div key={i} ref={i === 0 ? first : undefined} aria-hidden={i > 0 || undefined} inert={i > 0 || undefined} className="flex shrink-0 items-center whitespace-nowrap">
+              <div key={i} ref={i === 0 ? first : undefined} aria-hidden={i > 0 || undefined} inert={i > 0 || undefined} className={cn("flex shrink-0 items-center whitespace-nowrap motion-reduce:shrink motion-reduce:whitespace-normal", i > 0 && "motion-reduce:hidden")}>
                 {children}
               </div>
             ))}

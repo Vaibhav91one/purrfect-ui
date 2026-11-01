@@ -17,37 +17,49 @@ export interface QuoteCycleProps extends Omit<ComponentProps<"div">, "children">
 }
 
 const OUT = [0.22, 1, 0.36, 1] as const;
+const SNAP = [0.23, 1, 0.32, 1] as const;
 // seconds for the old line to leave; the new one waits this long, then drops in
 const LEAVE = 0.5;
+// driven by `index` (a click), the swap is feedback to input: the old line leaves fast and the new one overlaps it
+const FAST = { leave: 0.2, delay: 0.1, show: 0.25 };
 
 // opacity lives on the outer span and transform on the inner one, so reduced motion can drop the transform with a class
-// and keep a plain fade (no server-side branch on useReducedMotion)
+// and keep a plain fade (no server-side branch on useReducedMotion). `custom` is true when controlled.
 const fade: Variants = {
+  show: (fast: boolean) => ({
+    opacity: 1,
+    // check-ignore: duration an ambient rotation, not a response to input
+    transition: fast ? { delay: FAST.delay, duration: FAST.show, ease: SNAP } : { delay: LEAVE, duration: 0.5, ease: OUT },
+  }),
   // check-ignore: duration an ambient rotation, not a response to input
-  show: { opacity: 1, transition: { delay: LEAVE, duration: 0.5, ease: OUT } },
-  // check-ignore: duration an ambient rotation, not a response to input
-  leave: { opacity: 0, transition: { duration: LEAVE, ease: OUT } },
+  leave: (fast: boolean) => ({ opacity: 0, transition: fast ? { duration: FAST.leave, ease: SNAP } : { duration: LEAVE, ease: OUT } }),
   hide: { opacity: 0, transition: { duration: 0 } },
   rest: { opacity: 1, transition: { duration: 0 } },
 };
+// the held line is scale(1), its layout size, so nothing painted overflows the box; the others are relative to it
 const move: Variants = {
-  // drops in from 1.5x to rest, then pops up to 1.2x and holds there
-  show: {
-    transform: ["translateY(30px) scale(1.5)", "translateY(0px) scale(1)", "translateY(0px) scale(1.2)"],
-    // check-ignore: duration drop-in plus pop, an ambient rotation, not a response to input
-    transition: { delay: LEAVE, duration: 1, times: [0, 0.5, 1], ease: OUT },
-  },
+  // drops in from 1.25x past rest to 0.83x, then pops back up to 1x and holds there (controlled: one quick drop to 1x)
+  show: (fast: boolean) =>
+    fast
+      ? { transform: ["translateY(30px) scale(1.25)", "translateY(0px) scale(1)"], transition: { delay: FAST.delay, duration: FAST.show, ease: SNAP } }
+      : {
+          transform: ["translateY(30px) scale(1.25)", "translateY(0px) scale(0.833)", "translateY(0px) scale(1)"],
+          // check-ignore: duration drop-in plus pop, an ambient rotation, not a response to input
+          transition: { delay: LEAVE, duration: 1, times: [0, 0.5, 1], ease: OUT },
+        },
   // shrinks up and away
   // check-ignore: duration an ambient rotation, not a response to input
-  leave: { transform: "translateY(-30px) scale(0.8)", transition: { duration: LEAVE, ease: OUT } },
-  hide: { transform: "translateY(-30px) scale(0.8)", transition: { duration: 0 } },
+  leave: (fast: boolean) => ({ transform: "translateY(-30px) scale(0.667)", transition: fast ? { duration: FAST.leave, ease: SNAP } : { duration: LEAVE, ease: OUT } }),
+  hide: { transform: "translateY(-30px) scale(0.667)", transition: { duration: 0 } },
   // the first line on first paint: already popped, so nothing plays on load (or on a StrictMode remount)
-  rest: { transform: "translateY(0px) scale(1.2)", transition: { duration: 0 } },
+  rest: { transform: "translateY(0px) scale(1)", transition: { duration: 0 } },
 };
 
 /**
- * Lines that take turns: the current one pops up to 1.2x and holds, then shrinks up and away while the next drops in from
- * 1.5x. Every line sits in the same grid cell, so the box always has the height of the tallest one and never shifts.
+ * Lines that take turns: the current one pops up to its full size and holds, then shrinks up and away while the next drops
+ * in from 1.25x. The held size is the layout size, so set the font size for the held line. Every line sits in the same
+ * grid cell, so the box always has the height of the tallest one and never shifts. Driven by `index`, the swap is quick
+ * (about 350ms, the lines overlapping) since it answers a click.
  * Rotation pauses on hover, on keyboard focus inside it and while off screen; pass `index` to drive it yourself instead. Hidden lines are inert, and the live
  * region is off unless `announce` is set.
  * Under `prefers-reduced-motion` the lines cross-fade in place.
@@ -116,13 +128,14 @@ export function QuoteCycle({
           <motion.span
             key={i}
             variants={fade}
+            custom={ctrl}
             initial={false}
             animate={state}
             // inert: hidden lines are out of the a11y tree, the tab order and the pointer's way (links in them too)
             inert={i !== cur}
             className="block [grid-area:1/1] break-words text-pretty"
           >
-            <motion.span variants={move} initial={false} className="block motion-reduce:transform-none!">
+            <motion.span variants={move} custom={ctrl} initial={false} className="block motion-reduce:transform-none!">
               {line}
             </motion.span>
           </motion.span>

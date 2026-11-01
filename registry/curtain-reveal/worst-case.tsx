@@ -27,4 +27,13 @@ export const states: Record<string, ReactNode> = {
       </CurtainReveal>
     </>
   ),
+  // a scroller shorter than the screen: the panel must stick to the box, not the viewport
+  "In a scroll box": (
+    <div className="mx-auto my-8 h-[420px] w-full max-w-xl overflow-y-auto rounded-xl border border-border" data-scroll-box>
+      <section className="grid h-[600px] place-items-center bg-background text-2xl">Scroll this box</section>
+      <CurtainReveal height="300px" className="grid place-items-center">
+        <p className="text-3xl font-medium">Revealed inside the box</p>
+      </CurtainReveal>
+    </div>
+  ),
 };

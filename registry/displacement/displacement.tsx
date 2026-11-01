@@ -47,7 +47,7 @@ void main() {
   vec4 g = texture(tex, st + drag);
   float red = texture(tex, st + drag * (1.0 + aberration)).r;
   float blue = texture(tex, st + drag * (1.0 - aberration)).b;
-  float amount = min(1.0, length(lag) / r) * fall;
+  float amount = min(1.0, length(lag) / r) * fall * min(1.0, strength); // strength 0: no grain either
   color = vec4(vec3(red, g.g, blue) + (noise(px) - 0.5) * grain * amount, g.a);
 }`;
 
@@ -58,7 +58,7 @@ const K = 90; // trail spring stiffness; damping is critical, so it settles with
  * spring, the gap between them drags the pixels nearby, and the red and blue channels split along the drag with a little
  * grain. WebGL2, one full-screen triangle, no dependencies. It only draws while the trail is moving and stops while off
  * screen, so a still page costs nothing; props are read live. If WebGL2 is missing or the context is lost, the plain
- * image (or your painted canvas) shows instead. Reduced motion: the plain image, no bending.
+ * image (or your painted canvas) shows instead. Reduced motion: a small bend (30% strength) with no colour split or grain.
  */
 export function Displacement({ src, alt = "", paint, radius = 0.22, strength = 0.6, aberration = 0.5, grain = 0.08, className, ...rest }: DisplacementProps) {
   const root = useRef<HTMLDivElement>(null);
@@ -78,11 +78,12 @@ export function Displacement({ src, alt = "", paint, radius = 0.22, strength = 0
     let glResize = () => {};
     // the 2D canvas is drawn whether or not WebGL runs: it is the fallback, and the texture when `paint` is used
     const paintFlat = () => {
-      const r = box.getBoundingClientRect(), dpr = Math.min(2, devicePixelRatio || 1);
-      c2d.width = Math.max(1, Math.round(r.width * dpr));
-      c2d.height = Math.max(1, Math.round(r.height * dpr));
+      // layout size, not the on-screen rect: a scaled ancestor (a dialog growing in) must not shrink the canvas for good
+      const bw = box.offsetWidth, bh = box.offsetHeight, dpr = Math.min(2, devicePixelRatio || 1);
+      c2d.width = Math.max(1, Math.round(bw * dpr));
+      c2d.height = Math.max(1, Math.round(bh * dpr));
       const ctx = c2d.getContext("2d");
-      if (ctx && live.current.paint) { ctx.setTransform(dpr, 0, 0, dpr, 0, 0); live.current.paint(ctx, r.width, r.height); }
+      if (ctx && live.current.paint) { ctx.setTransform(dpr, 0, 0, dpr, 0, 0); live.current.paint(ctx, bw, bh); }
     };
     let pending = 0;
     const ro = new ResizeObserver(() => { cancelAnimationFrame(pending); pending = requestAnimationFrame(() => { paintFlat(); glResize(); }); });
@@ -91,7 +92,6 @@ export function Displacement({ src, alt = "", paint, radius = 0.22, strength = 0
 
     const start = () => {
       stop();
-      if (mq.matches) return void (cgl.style.opacity = "0");
       const g = cgl.getContext("webgl2", { premultipliedAlpha: false, antialias: false });
       if (!g) return;
       const sh = (type: number, code: string) => {
@@ -132,16 +132,16 @@ export function Displacement({ src, alt = "", paint, radius = 0.22, strength = 0
       };
       const draw = () => {
         if (!ready) return;
-        const p = live.current;
+        const p = live.current, calm = mq.matches; // reduced motion: a gentle bend, no colour split or flicker
         g.viewport(0, 0, cgl.width, cgl.height);
         g.uniform2f(U.res, cgl.width, cgl.height);
         g.uniform2f(U.texSize, tw, th);
         g.uniform2f(U.trail, trail.x * dpr, (h - trail.y) * dpr); // GL's y runs up
         g.uniform2f(U.lag, (mouse.x - trail.x) * dpr, -(mouse.y - trail.y) * dpr);
         g.uniform1f(U.radius, p.radius);
-        g.uniform1f(U.strength, p.strength);
-        g.uniform1f(U.aberration, p.aberration);
-        g.uniform1f(U.grain, p.grain);
+        g.uniform1f(U.strength, calm ? p.strength * 0.3 : p.strength);
+        g.uniform1f(U.aberration, calm ? 0 : p.aberration);
+        g.uniform1f(U.grain, calm ? 0 : p.grain);
         g.uniform1f(U.seed, (performance.now() / 1000) % 100);
         g.drawArrays(g.TRIANGLES, 0, 3);
       };
@@ -157,11 +157,10 @@ export function Displacement({ src, alt = "", paint, radius = 0.22, strength = 0
         raf = moving && seen ? requestAnimationFrame(frame) : 0;
         if (!raf) last = 0;
       };
-      const kick = () => { if (!raf && seen) raf = requestAnimationFrame(frame); };
+      const kick = () => { if (!raf && seen && live.current.strength !== 0) raf = requestAnimationFrame(frame); };
 
       const size = () => {
-        const r = box.getBoundingClientRect();
-        w = r.width; h = r.height; dpr = Math.min(2, devicePixelRatio || 1);
+        w = box.offsetWidth; h = box.offsetHeight; dpr = Math.min(2, devicePixelRatio || 1);
         cgl.width = Math.max(1, Math.round(w * dpr));
         cgl.height = Math.max(1, Math.round(h * dpr));
         upload(); // the 2D canvas was just repainted at the new size
@@ -171,7 +170,8 @@ export function Displacement({ src, alt = "", paint, radius = 0.22, strength = 0
       io.observe(box);
       const move = (e: PointerEvent) => {
         const r = box.getBoundingClientRect();
-        mouse.x = e.clientX - r.left; mouse.y = e.clientY - r.top;
+        const s = box.offsetWidth / r.width || 1; // the rect is scaled by any transformed ancestor; w and h are not
+        mouse.x = (e.clientX - r.left) * s; mouse.y = (e.clientY - r.top) * s;
         if (e.type === "pointerenter") { trail.x = mouse.x; trail.y = mouse.y; vel.x = vel.y = 0; } // no sweep in from the last exit
         kick();
       };
@@ -194,6 +194,11 @@ export function Displacement({ src, alt = "", paint, radius = 0.22, strength = 0
       };
     };
 
+    // a src that fails shows the box's own background, not a broken-image icon; it can fail before hydration, so check both ways
+    const plain = box.querySelector("img");
+    const broken = () => plain && (plain.style.visibility = "hidden");
+    if (plain?.complete && !plain.naturalWidth) broken();
+    plain?.addEventListener("error", broken);
     if (src) {
       img = new Image();
       img.crossOrigin = "anonymous";
@@ -209,6 +214,8 @@ export function Displacement({ src, alt = "", paint, radius = 0.22, strength = 0
       stop();
       cancelAnimationFrame(pending);
       ro.disconnect();
+      plain?.removeEventListener("error", broken);
+      if (plain) plain.style.visibility = "";
       cgl.removeEventListener("webglcontextlost", lost);
       cgl.removeEventListener("webglcontextrestored", start);
       mq.removeEventListener("change", start);

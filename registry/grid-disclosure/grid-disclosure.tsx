@@ -4,7 +4,7 @@ import { useId, useState, type ComponentProps, type ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
 export interface GridDisclosureItem {
-  /** The always-visible row: a question, a heading. */
+  /** The always-visible row: a question, a heading. A row with an empty title is skipped (it would be a button with no name). */
   title: ReactNode;
   /** What opens under it. */
   content: ReactNode;
@@ -47,6 +47,7 @@ export function GridDisclosure({ items, value, defaultValue = 0, onValueChange, 
   return (
     <ul className={cn("flex flex-col", className)} {...rest}>
       {items.map((item, i) => {
+        if (item.title == null || item.title === "") return null; // indices stay those of `items`
         const isOpen = open === i;
         return (
           <li key={i} className="border-b border-border first:border-t">
@@ -57,13 +58,13 @@ export function GridDisclosure({ items, value, defaultValue = 0, onValueChange, 
                 aria-expanded={isOpen}
                 aria-controls={`${id}-p${i}`}
                 onClick={() => toggle(i)}
-                className="flex w-full cursor-pointer items-center gap-4 py-5 text-left text-base font-semibold text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                className="flex w-full cursor-pointer items-center gap-4 py-5 text-start text-base font-semibold text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
               >
                 <span className="min-w-0 flex-1 break-words">{item.title}</span>
                 <span
                   aria-hidden="true"
                   className={cn(
-                    "grid size-4 shrink-0 place-items-center text-muted-foreground transition-transform duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] motion-reduce:transition-none",
+                    "grid size-4 shrink-0 place-items-center text-muted-foreground transition-transform duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] motion-reduce:transition-none",
                     isOpen && "rotate-180",
                   )}
                 >
@@ -77,7 +78,7 @@ export function GridDisclosure({ items, value, defaultValue = 0, onValueChange, 
               role="region"
               aria-labelledby={`${id}-b${i}`}
               inert={!isOpen}
-              className="grid transition-[grid-template-rows,opacity] duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] motion-reduce:transition-opacity"
+              className="grid transition-[grid-template-rows,opacity] duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] motion-reduce:transition-opacity"
               style={{ gridTemplateRows: isOpen ? "1fr" : "0fr", opacity: isOpen ? 1 : 0 }}
             >
               <div className="min-h-0 overflow-hidden">

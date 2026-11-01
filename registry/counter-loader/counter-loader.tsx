@@ -33,7 +33,7 @@ const noop = () => () => {};
 
 /**
  * A full-screen intro: a counter rolls through `steps` while stickers pop into a fanned pile, then a block wipes up over them
- * and the loader lifts off the page. Click, tap or Escape skips it, it locks page scroll while it covers the page, and it plays
+ * and the loader lifts off the page. Click, tap or Escape (full screen only) skips it, it locks page scroll while it covers the page, and it plays
  * once per tab (`storageKey`). The server HTML already covers the page, so nothing flashes before it; an inline script hides it
  * before the first paint on a repeat visit, and if JavaScript never runs it uncovers the page by itself after a few seconds.
  * Reduced motion: the number jumps from step to step, the stickers appear without the pop, and the loader fades out.
@@ -75,7 +75,7 @@ export function CounterLoader({ stickers = SHAPES, steps = STEPS, duration = 1.4
       : [setTimeout(() => setPhase((p) => (p === "count" ? (pile ? "exit" : "wipe") : p)), ms), setTimeout(() => setPhase((p) => (p === "exit" ? "wipe" : p)), ms + 250)];
     const skip = (e: KeyboardEvent) => e.key === "Escape" && setPhase("lift");
     // check-ignore: global-keys only while it covers the whole page: Escape skips it wherever focus is
-    window.addEventListener("keydown", skip);
+    if (!contained) window.addEventListener("keydown", skip);
     return () => {
       t.forEach(clearTimeout);
       window.removeEventListener("keydown", skip);
@@ -96,7 +96,8 @@ export function CounterLoader({ stickers = SHAPES, steps = STEPS, duration = 1.4
   if (gone) return null;
   const key = storageKey ? JSON.stringify(storageKey) : "";
   const nums = steps.length ? steps : [100];
-  const out = phase !== "count";
+  // only the timed exit pops them out; a skip leaves the pops running, since the whole loader is lifting away anyway
+  const out = phase === "exit";
   return (
     <motion.div
       data-counter-loader
@@ -126,8 +127,8 @@ export function CounterLoader({ stickers = SHAPES, steps = STEPS, duration = 1.4
         <div aria-hidden className="absolute top-1/2 left-1/2 size-[min(40cqmin,18rem)] -translate-x-1/2 -translate-y-1/2">
           {stickers.map((s, i) => {
             const [x, y, r] = PILE[i % PILE.length];
-            // stagger the pops so even a long list lands within the count
-            const gap = Math.min(0.2, (duration * 0.7) / stickers.length);
+            // stagger the pops so even a long list has landed (0.1s delay + 0.55s pop) by the end of the count
+            const gap = Math.min(0.2, Math.max(0, duration - 0.65) / stickers.length);
             return (
               <span
                 key={i}
@@ -139,7 +140,7 @@ export function CounterLoader({ stickers = SHAPES, steps = STEPS, duration = 1.4
                     rotate: `${r}deg`,
                     // a little overshoot: stickers are a playful, rare moment
                     animation: out
-                      ? `counter-loader-out 0.3s cubic-bezier(0.23,1,0.32,1) ${(stickers.length - 1 - i) * 0.05}s both`
+                      ? `counter-loader-out 0.3s cubic-bezier(0.23,1,0.32,1) ${(stickers.length - 1 - i) * Math.min(0.05, 0.2 / Math.max(1, stickers.length - 1))}s both`
                       : `counter-loader-in 0.55s cubic-bezier(0.34,1.56,0.64,1) ${0.1 + i * gap}s both`,
                   } as CSSProperties
                 }
@@ -150,7 +151,8 @@ export function CounterLoader({ stickers = SHAPES, steps = STEPS, duration = 1.4
           })}
         </div>
       )}
-      <div aria-hidden className="relative h-[1.2em] overflow-hidden text-5xl leading-[1.2] whitespace-nowrap tabular-nums">
+      {/* sized by the box too, so a long number still fits a small contained card */}
+      <div aria-hidden className="relative h-[1.2em] overflow-hidden text-[min(3rem,22cqi)] leading-[1.2] whitespace-nowrap tabular-nums">
         <div
           className="flex flex-col motion-reduce:[animation-timing-function:steps(var(--k),end)]!"
           // check-ignore: duration the count is the whole intro; `duration` sets it
@@ -158,7 +160,7 @@ export function CounterLoader({ stickers = SHAPES, steps = STEPS, duration = 1.4
         >
           {nums.map((n, i) => (
             <span key={i} className="h-[1.2em]">
-              {n}
+              {n.toLocaleString("en-US")}
             </span>
           ))}
         </div>

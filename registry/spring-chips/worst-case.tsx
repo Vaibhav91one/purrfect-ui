@@ -39,6 +39,20 @@ export const states: Record<string, ReactNode> = {
       {photo}
     </SpringChips>,
   ),
+  RTL: page(
+    <SpringChips
+      dir="rtl"
+      className="mx-auto grid h-[420px] w-[420px] place-items-center"
+      chips={[
+        { label: "تم اكتشاف فرصة لإعادة التوازن", icon: mic, className: "-right-6 top-8" },
+        { label: "بدون أيقونة", className: "-left-6 top-1/2" },
+        // a conditional icon that is off: no empty tile
+        { label: "Conditional icon off", icon: false, className: "-right-6 bottom-8" },
+      ]}
+    >
+      {photo}
+    </SpringChips>,
+  ),
   "No centre": page(<SpringChips className="h-40" chips={[{ label: "Only one, no icon", className: "left-1/3 top-10" }]} />),
   Empty: page(<SpringChips className="grid h-80 place-items-center" chips={[]}>{photo}</SpringChips>),
 };

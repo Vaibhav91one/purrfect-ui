@@ -19,7 +19,7 @@ export interface LoadPreloaderProps extends Omit<ComponentProps<"div">, "childre
   contained?: boolean;
 }
 
-const IN_OUT = [0.45, 0, 0.55, 1] as const; // the fade is a scene change, not a control responding
+const OUT = [0.23, 1, 0.32, 1] as const; // the page is ready by now: uncover it fast, not as a slow scene change
 const noop = () => () => {};
 
 /**
@@ -91,18 +91,21 @@ export function LoadPreloader({ ready, minDuration = 1.2, maxWait = 7, storageKe
       body.overflow = "hidden";
     }
     const t0 = performance.now();
-    const min = reduce ? 0 : minDuration * 1000;
-    const cap = setTimeout(() => (load.current = 1), maxWait * 1000);
+    const min = reduce ? 0 : Math.max(0, minDuration) * 1000;
+    // the cap sticks once it fires: a new `ready` promise from a re-render resets the load, never the cap
+    let over = false;
+    const cap = setTimeout(() => (over = true), maxWait * 1000);
     let value = 0;
     let last = t0;
     let shown = 0;
     let raf = 0;
     let hold = 0;
     const tick = (now: number) => {
-      const target = load.current * 100;
+      const target = over ? 100 : load.current * 100;
       // ease toward the load, but never outrun the minimum-time ramp, so the count always looks continuous
       const ramp = min ? Math.min(((now - t0) / min) * 100, 100) : 100;
-      value = reduce ? target : value + (Math.min(target, ramp) - value) * (1 - 0.88 ** ((now - last) / 16.7));
+      // never counts down, even when a new `ready` restarts the load
+      value = Math.max(value, reduce ? target : value + (Math.min(target, ramp) - value) * (1 - 0.88 ** ((now - last) / 16.7)));
       last = now;
       const end = target >= 100 && (reduce || value > 99.4);
       const n = end ? 100 : Math.round(value);
@@ -134,7 +137,7 @@ export function LoadPreloader({ ready, minDuration = 1.2, maxWait = 7, storageKe
       aria-live="polite"
       initial={false}
       animate={{ opacity: phase === "fade" ? 0 : 1 }}
-      transition={{ duration: reduce ? 0.3 : 1, ease: IN_OUT }}
+      transition={{ duration: reduce ? 0.3 : 0.6, ease: OUT }}
       onAnimationComplete={() => {
         if (phase !== "fade") return;
         try {
@@ -148,7 +151,8 @@ export function LoadPreloader({ ready, minDuration = 1.2, maxWait = 7, storageKe
         phase === "fade" && "pointer-events-none",
         className,
       )}
-      style={{ animation: `load-preloader-failsafe 0s linear ${maxWait + 2}s forwards`, ...style }}
+      // the failsafe is for no JavaScript only: once hydrated the count owns the cover (a slow count or a background tab must not hide it early)
+      style={{ animation: hydrated ? undefined : `load-preloader-failsafe 0s linear ${Math.max(minDuration, maxWait) + 2}s forwards`, ...style }}
       {...rest}
     >
       {/* no JavaScript: uncover the page 2s after the longest wait. Seen before: hide it before the first paint, no flash */}

@@ -2,7 +2,7 @@
 import type { ReactNode } from "react";
 import { Magnetic } from "./magnetic";
 
-const btn = "rounded-full bg-foreground px-6 py-3 whitespace-nowrap text-background";
+const btn = "rounded-full bg-foreground px-6 py-3 text-background"; // labels wrap, so a long one fits a phone
 const box = (...kids: ReactNode[]) => (
   <div className="flex flex-col items-start gap-8 p-6">
     {kids.map((k, i) => (
@@ -13,7 +13,7 @@ const box = (...kids: ReactNode[]) => (
 
 export const states: Record<string, ReactNode> = {
   Demo: box(
-    <Magnetic>
+    <Magnetic strength={1}>
       <button type="button" className={btn}>Full strength</button>
     </Magnetic>,
     <Magnetic strength={0.4}>

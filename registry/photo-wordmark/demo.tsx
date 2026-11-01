@@ -13,7 +13,7 @@ const COLUMNS = [
 /** Armour's footer, the wordmark rising out of its bottom edge. `container` is the scrolling box when it is not the page. */
 export function ArmourFooter({ container }: { container?: RefObject<HTMLElement | null> }) {
   return (
-    <footer className="w-full overflow-hidden rounded-3xl bg-card px-8 pt-6 text-foreground">
+    <footer className="w-full overflow-clip rounded-3xl bg-card px-8 pt-6 text-foreground">
       <div className="flex items-center justify-between border-b border-border py-5">
         <div className="flex gap-5 text-sm">
           {["Features", "How it works", "FAQ", "Download"].map((l) => (
@@ -61,7 +61,7 @@ export function ArmourFooter({ container }: { container?: RefObject<HTMLElement 
 
 export default function PhotoWordmarkDemo() {
   return (
-    <div className="relative w-[800px] overflow-hidden rounded-3xl p-6">
+    <div className="relative w-[800px] overflow-clip rounded-3xl p-6">
       <img src="/demo/storm.jpg" alt="" className="absolute inset-0 size-full object-cover" />
       <div className="relative">
         <ArmourFooter />

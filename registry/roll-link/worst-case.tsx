@@ -21,6 +21,7 @@ export const states: Record<string, ReactNode> = {
     <RollLink href="#c" dir="rtl">إرسال الرسالة</RollLink>,
     <RollLink href="#d" className="text-6xl font-semibold">Huge</RollLink>,
     <RollLink href="#e" className="text-xs">Tiny</RollLink>,
+    <RollLink href="#f" className="leading-none">Typography gjpqy ÉÅ Tiếng Việt</RollLink>,
     <RollLink asChild>
       <Link href="/components">A Next Link via asChild</Link>
     </RollLink>,

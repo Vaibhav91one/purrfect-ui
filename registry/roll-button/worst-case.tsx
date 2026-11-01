@@ -37,6 +37,12 @@ export const states: Record<string, ReactNode> = {
     <RollButton dir="rtl">إرسال الرسالة الآن</RollButton>,
     <RollButton wide>Subscribe to the quarterly engineering newsletter and product updates</RollButton>,
     <RollButton disabled>Saving your changes…</RollButton>,
+    <div dir="rtl">
+      <RollButton>Get started</RollButton>
+    </div>,
+    <RollButton>שלח הודעה</RollButton>,
+    <RollButton>Remove {1284} selected files from the shared workspace</RollButton>,
+    <RollButton size="lg" icon={<Mail className="size-4" />}>DOWNLOAD THE MOBILE APPS</RollButton>,
   ),
   One: row(<RollButton>A</RollButton>, <RollButton icon={<Mail className="size-4" />}>{""}</RollButton>),
   Empty: row(<RollButton>{""}</RollButton>),
