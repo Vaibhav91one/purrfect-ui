@@ -470,3 +470,9 @@ export const DEMOS: Record<string, (p: DemoProps) => ReactNode> = {
   "cursor-follower": CursorLoop,
   "fill-button": FillButtonDemo,
 };
+
+/** One demo by slug: the entry `Preview` loads lazily, so this whole file stays out of every route's first load. */
+export function Demo({ slug, ...p }: DemoProps & { slug: string }) {
+  const D = DEMOS[slug];
+  return <D {...p} />;
+}

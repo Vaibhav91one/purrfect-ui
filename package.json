@@ -35,7 +35,8 @@
     "check": "node scripts/check/check.mjs",
     "check:selftest": "node scripts/check/selftest.mjs",
     "check:perf": "node scripts/check/perf.mjs",
-    "check:behaviour": "node scripts/check/behaviour.mjs"
+    "check:behaviour": "node scripts/check/behaviour.mjs",
+    "check:budget": "node scripts/check/budget.mjs"
   },
   "dependencies": {
     "@paper-design/shaders-react": "0.0.71",

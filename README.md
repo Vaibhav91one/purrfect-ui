@@ -133,6 +133,7 @@ pnpm check --rules           # every rule and why it exists
 pnpm check:selftest          # proves each rule fires on bad code
 pnpm check <slug> --install  # scaffolds a throwaway Next app, shadcn-adds the component from :3120/r, tsc + next build
 pnpm check:perf <slug|all>   # runtime gate on /dev fixtures (dev server on :3120): long tasks, layout shift, console errors, with and without reduced motion
+pnpm check:budget           # page weight on a production server (pnpm build && pnpm start; --base, default :3000): gzipped first-load JS per route, long tasks and CLS scrolling /components
 ```
 
 CI runs the static gate and `pnpm build` on every push, then the install smoke test for every component in parallel.

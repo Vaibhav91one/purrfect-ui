@@ -1,8 +1,12 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useLayoutEffect, useRef, type ReactNode } from "react";
 import type { ComponentItem } from "@/lib/components-data";
-import { DEMOS, type DemoProps } from "./demos/demos";
+import type { DemoProps } from "./demos/demos";
+
+// every demo (and the registry components they draw) is one chunk, fetched when the first preview mounts, not with the page
+const Demo = dynamic(() => import("./demos/demos").then((m) => m.Demo), { ssr: false });
 
 /** Draws children at their natural size and scales them to fit whatever box they sit in. `fill`: scale by width only and stretch the height to the box. */
 function Fit({ nat, max = 1, pad = 24, fill = false, cover = false, children }: { nat: [number, number]; max?: number; pad?: number; fill?: boolean; cover?: boolean; children: ReactNode }) {
@@ -29,13 +33,17 @@ function Fit({ nat, max = 1, pad = 24, fill = false, cover = false, children }: 
   );
 }
 
-/** The component's preview, scaled to its box. `inert` keeps clicks on the card, not on the demo inside it. In a card the demo is still; the dialog passes `playing`, `speed` and the extras. */
-export function Preview({ item, inert = true, max = 1, pad, cover, playing, speed = 1, opts = {} }: { item: ComponentItem; inert?: boolean; max?: number; pad?: number; cover?: boolean } & Partial<DemoProps>) {
-  const Demo = DEMOS[item.slug];
+/**
+ * The component's preview, scaled to its box. `inert` keeps clicks on the card, not on the demo inside it. In a card the demo is still; the dialog passes `playing`, `speed` and the extras.
+ * `live={false}` (a card far from the viewport) draws only the clip poster, or nothing over the card's own background: no demo is mounted, so nothing loops or holds a WebGL context off screen.
+ */
+export function Preview({ item, inert = true, max = 1, pad, cover, live = true, playing, speed = 1, opts = {} }: { item: ComponentItem; inert?: boolean; max?: number; pad?: number; cover?: boolean; live?: boolean } & Partial<DemoProps>) {
+  // eslint-disable-next-line @next/next/no-img-element -- a static poster the card box already sizes
+  if (!live) return item.clip ? <img src={`/previews/${item.slug}.jpg`} alt="" loading="lazy" decoding="async" className="absolute inset-0 size-full object-cover" /> : null;
   return (
     <Fit nat={item.nat} max={max} pad={pad} fill={item.fill} cover={cover}>
       <div inert={inert} aria-hidden={inert || undefined} className="grid size-full place-items-center">
-        <Demo playing={playing} speed={speed} opts={opts} />
+        <Demo slug={item.slug} playing={playing} speed={speed} opts={opts} />
       </div>
     </Fit>
   );
