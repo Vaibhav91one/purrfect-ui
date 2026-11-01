@@ -130,5 +130,41 @@
     "href": "https://armour.vaibhavtomar.com",
     "w": 960,
     "h": 704
+  },
+  "quote-cycle": {
+    "label": "vaibhavtomar.com",
+    "href": "https://vaibhavtomar.com",
+    "w": 960,
+    "h": 704
+  },
+  "column-hop": {
+    "label": "bountydesk.vaibhav.quest",
+    "href": "https://bountydesk.vaibhav.quest",
+    "w": 960,
+    "h": 704
+  },
+  "line-rise": {
+    "label": "mapinly.vaibhavtomar.com",
+    "href": "https://mapinly.vaibhavtomar.com",
+    "w": 960,
+    "h": 704
+  },
+  "flip-text": {
+    "label": "vaibhavtomar.com",
+    "href": "https://vaibhavtomar.com",
+    "w": 960,
+    "h": 704
+  },
+  "spin-mark": {
+    "label": "mapinly.vaibhavtomar.com",
+    "href": "https://mapinly.vaibhavtomar.com",
+    "w": 960,
+    "h": 704
+  },
+  "arrow-link": {
+    "label": "poinu.vercel.app",
+    "href": "https://poinu.vercel.app/work/31",
+    "w": 960,
+    "h": 704
   }
 }

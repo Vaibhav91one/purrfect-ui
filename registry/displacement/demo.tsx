@@ -19,6 +19,17 @@ export function Painted({ word, fill, ...props }: { word: string; fill?: string 
   return <Displacement paint={paint} alt={word} {...props} />;
 }
 
+// the portfolio's hero: the photo bends under the pointer, with the role list resting on top
 export default function DisplacementDemo() {
-  return <Painted word="Move me" className="h-72 w-full max-w-xl rounded-3xl" />;
+  return (
+    <div className="relative h-[340px] w-[600px] overflow-hidden rounded-3xl">
+      <Displacement src="/demo/jellyfish.jpg" alt="A jellyfish" className="absolute inset-0" />
+      {/* check-ignore: hardcoded-color white type over a photo, in either theme */}
+      <ul className="pointer-events-none absolute top-1/2 right-8 grid -translate-y-1/2 gap-1 text-lg text-white">
+        <li>Design Engineer</li>
+        <li>Software Developer</li>
+        <li>Freelancer</li>
+      </ul>
+    </div>
+  );
 }

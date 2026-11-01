@@ -31,8 +31,8 @@ export type ComponentItem = {
   fill?: boolean;
 };
 
-const REPLAY = new Set(["notch", "hero-reveal", "fan-out-cards"]);
-const FILL = new Set(["scroll-marquee", "photo-wordmark"]);
+const REPLAY = new Set(["notch", "hero-reveal", "inertia-gallery", "arrow-link", "flip-text"]);
+const FILL = new Set(["scroll-marquee", "photo-wordmark", "line-rise"]);
 
 const item = (slug: string, name: string, category: string, description: string, nat: [number, number] = [420, 300], extras?: Extra[]): ComponentItem => ({
   slug,
@@ -58,7 +58,7 @@ export const COMPONENTS: ComponentItem[] = [
   item("stretch-switch", "Stretch switch", "Input", "An on/off switch whose knob stretches as it travels."),
   item("counter", "Counter", "Display", "A number that rolls digit by digit to its target."),
   item("glide-tabs", "Glide tabs", "Navigation", "Tabs with a pill that glides under the active label."),
-  item("scroll-reveal", "Scroll reveal", "Text", "Text that fills in word by word as you scroll it into view."),
+  item("scroll-reveal", "Scroll reveal", "Text", "Text that fills in word by word, or letter by letter, as you scroll it into view.", [420, 300], [{ key: "mode", label: "Mode", kind: "segmented", options: ["Words", "Letters"], default: "Words" }]),
   item("parallax-columns", "Parallax columns", "Layout", "Columns that scroll at different speeds."),
   item("path-carousel", "Path carousel", "Layout", "Items ride a curved path, the centre one biggest; scroll, swipe or use the arrows to rotate.", [560, 300]),
   item("displacement", "Displacement", "Display", "An image or painted canvas that bends around the pointer like wet glass, with a colour split and grain.", [600, 340]),
@@ -77,9 +77,15 @@ export const COMPONENTS: ComponentItem[] = [
   item("inertia-gallery", "Inertia gallery", "Layout", "An endless strip of frames you push with the wheel or a drag; it coasts, snaps by intent and morphs between list and slider.", [900, 560]),
   item("fit-title", "Fit title", "Text", "One line of display type sized to exactly fill its container, rising out of a mask on first view.", [480, 260]),
   item("fan-out-cards", "Fan-out cards", "Layout", "Cards that start stacked in the centre and spring out to their own tilted spots when scrolled into view.", [900, 520]),
-  item("stat-rotator", "Stat rotator", "Display", "A glass card that cycles through stats, each number counting up on rolling digits.", [360, 400]),
   item("shimmer-text", "Shimmer text", "Text", "Text with a light band sweeping across it, for labels that say something is running.", [420, 300]),
   item("photo-wordmark", "Photo wordmark", "Text", "A huge wordmark filled with a photo, cropped at the bottom and rising out of the crop as it scrolls in.", [800, 320]),
+  item("drawer-menu", "Drawer menu", "Navigation", "A round burger that crosses into an X and slides a full-height link panel in from the right.", [390, 640]),
+  item("quote-cycle", "Quote cycle", "Text", "Lines that pop up, hold, then shrink away as the next one drops in.", [480, 320]),
+  item("column-hop", "Column hop", "Layout", "A small board whose card hops between columns on a loop: its row collapses, the next one opens and it rises in.", [800, 560]),
+  item("line-rise", "Line rise", "Text", "Lines of text that slide up one after another from behind a clipping edge when the block comes into view.", [1000, 420]),
+  item("flip-text", "Flip text", "Text", "Text whose lines fade in on scroll and whose letters flip over under the pointer.", [560, 300]),
+  item("spin-mark", "Spin mark", "Display", "A mark that pops in with a spring, then spins forever or turns as you scroll.", [448, 320]),
+  item("arrow-link", "Arrow link", "Navigation", "A big arrow link that rises from a mask on first view; on hover or focus the arrow slides and the label rolls over.", [480, 180]),
   item("fill-button", "Fill button", "Input", "An outlined pill whose fill sweeps in from the left and out to the right."),
 ];
 

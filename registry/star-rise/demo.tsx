@@ -3,22 +3,22 @@
 import { useState } from "react";
 import { StarRise } from "./star-rise";
 
+// the source's hero: big heading top-left, the mark rising behind it, the subheading off to the right
 export default function StarRiseDemo() {
   const [run, setRun] = useState(0);
   return (
-    <section className="relative flex min-h-[28rem] w-full flex-col items-center justify-center gap-6 overflow-hidden bg-background px-6 text-center">
-      <StarRise key={run} size={240} className="absolute top-8" />
-      <div className="relative z-10 mt-56 flex flex-col items-center gap-3">
-        <h1 className="max-w-xl text-4xl font-medium tracking-tight text-balance text-foreground sm:text-5xl">Maps, made in minutes.</h1>
-        <p className="max-w-md text-sm text-muted-foreground">Pin places, draw routes and share a link.</p>
-        <button
-          type="button"
-          onClick={() => setRun((n) => n + 1)}
-          className="mt-2 rounded-full border border-border px-4 py-1.5 text-sm text-foreground transition-colors hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
-        >
-          Replay
+    <div className="relative h-[560px] w-[1000px] overflow-hidden rounded-3xl p-6">
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src="/demo/storm.jpg" alt="" className="absolute inset-0 size-full object-cover" />
+      <section className="relative flex size-full flex-col gap-8 overflow-hidden rounded-2xl bg-background p-10 text-foreground">
+        <button type="button" aria-label="Replay the rise" onClick={() => setRun((n) => n + 1)} className="absolute top-44 left-1/2 -translate-x-1/2 rounded-full">
+          <StarRise key={run} size={320} />
         </button>
-      </div>
-    </section>
+        <h1 className="pointer-events-none relative text-[64px] leading-tight font-normal tracking-tight">Connect Through Language &amp; Culture</h1>
+        <p className="pointer-events-none relative max-w-[17rem] self-end text-sm leading-tight tracking-tight">
+          A new way to connect with the world. With Mapinly, you can learn new languages and cultures, and connect with people from all over the world.
+        </p>
+      </section>
+    </div>
   );
 }

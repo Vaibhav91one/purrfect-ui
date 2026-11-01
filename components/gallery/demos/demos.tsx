@@ -1,6 +1,6 @@
 "use client";
 
-import { Rocket } from "lucide-react";
+import { ArrowUpRight, Rocket } from "lucide-react";
 import { useEffect, useRef, useState, type ReactNode, type RefObject } from "react";
 import { createPortal } from "react-dom";
 import { cn } from "@/lib/utils";
@@ -31,9 +31,16 @@ import StickerCoverDemo from "@/registry/sticker-cover/demo";
 import InertiaGalleryDemo from "@/registry/inertia-gallery/demo";
 import FitTitleDemo from "@/registry/fit-title/demo";
 import FanOutCardsDemo from "@/registry/fan-out-cards/demo";
-import StatRotatorDemo from "@/registry/stat-rotator/demo";
 import ShimmerTextDemo from "@/registry/shimmer-text/demo";
-import { PhotoWordmark } from "@/registry/photo-wordmark/photo-wordmark";
+import { ArmourFooter } from "@/registry/photo-wordmark/demo";
+import { DrawerMenu } from "@/registry/drawer-menu/drawer-menu";
+import { links as drawerLinks, footer as drawerFooter } from "@/registry/drawer-menu/demo";
+import QuoteCycleDemo from "@/registry/quote-cycle/demo";
+import ColumnHopDemo from "@/registry/column-hop/demo";
+import { LineRiseScene } from "@/registry/line-rise/demo";
+import FlipTextDemo from "@/registry/flip-text/demo";
+import SpinMarkDemo from "@/registry/spin-mark/demo";
+import ArrowLinkDemo from "@/registry/arrow-link/demo";
 import RollLinkDemo from "@/registry/roll-link/demo";
 import { useTick } from "./use-tick";
 
@@ -76,9 +83,12 @@ function TabsDemo({ playing, speed }: DemoProps) {
 function ButtonLoop({ playing, speed, opts }: DemoProps) {
   const n = useTick(playing, speed, 1500) % 2;
   return (
-    <Button variant={opts.variant === "Ghost" ? "ghost" : "solid"} size={opts.size === "Large" ? "lg" : "md"} data-hover={n === 1 ? "true" : undefined} data-cuelume-tap="" icon={<Rocket className="size-4" />}>
-      Ship it
-    </Button>
+    <div className="relative grid h-[300px] w-[420px] place-items-center overflow-hidden rounded-2xl">
+      {photo(PHOTOS.indexOf("dunes"), "absolute inset-0")}
+      <Button variant={opts.variant === "Ghost" ? "ghost" : "solid"} size={opts.size === "Large" ? "lg" : "md"} data-hover={n === 1 ? "true" : undefined} data-cuelume-tap="" icon={<Rocket className="size-4" />}>
+        Ship it
+      </Button>
+    </div>
   );
 }
 
@@ -203,14 +213,28 @@ function ScrollBox({ playing, speed, children, boxRef, className }: { playing?: 
   );
 }
 
-function RevealLoop({ playing, speed }: DemoProps) {
+function RevealLoop({ playing, speed, opts }: DemoProps) {
   const box = useRef<HTMLDivElement>(null);
+  const chars = opts.mode === "Letters";
   return (
-    <ScrollBox playing={playing} speed={speed} boxRef={box}>
-      <div className="h-56" />
-      <ScrollReveal text="Scroll and the words fill in, one after another." className="text-center text-3xl font-light tracking-tight" container={box} offset={["start 0.9", "start 0.3"]} />
-      <div className="h-56" />
-    </ScrollBox>
+    <div className="relative grid h-[300px] w-[420px] place-items-center overflow-hidden rounded-3xl">
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src="/demo/fjord.jpg" alt="" className="absolute inset-0 size-full object-cover" />
+      <div className="relative h-[236px] w-[372px] overflow-hidden rounded-2xl bg-background">
+        <ScrollBox playing={playing} speed={speed} boxRef={box} className="h-full max-w-none px-6">
+          <div className="h-56" />
+          <ScrollReveal
+            key={chars ? "chars" : "words"}
+            mode={chars ? "chars" : "words"}
+            text={chars ? "Projects" : "Each one is a single file. Open it, tweak it, copy it."}
+            className={chars ? "text-center text-7xl italic" : "text-center text-3xl font-light tracking-tight"}
+            container={box}
+            offset={["start 0.9", "start 0.3"]}
+          />
+          <div className="h-56" />
+        </ScrollBox>
+      </div>
+    </div>
   );
 }
 
@@ -226,18 +250,21 @@ function ParallaxLoop({ playing, speed }: DemoProps) {
   );
 }
 
-// the box scrolls the marquee into view under a "Scroll" hint, and it flips each time the loop turns back up
+// the portfolio's hero: the name runs across the bottom of a photo; the box scrolls it up and back, and it flips each time the loop turns
 function MarqueeLoop({ playing, speed }: DemoProps) {
   const box = useRef<HTMLDivElement>(null);
   return (
-    <ScrollBox playing={playing} speed={speed} boxRef={box} className="h-full max-w-none">
-      <div className="grid h-full place-items-center text-3xl text-muted-foreground">↓ Scroll</div>
-      <div className="flex h-full items-center">
+    <div className="relative size-full overflow-hidden rounded-2xl">
+      {photo(PHOTOS.indexOf("storm"), "absolute inset-0")}
+      <ScrollBox playing={playing} speed={speed} boxRef={box} className="h-full max-w-none">
+        <div className="h-[55%]" />
         <ScrollMarquee container={box} className="w-full">
-          <p className="pr-16 text-8xl font-medium whitespace-nowrap">Scroll to flip me —</p>
+          {/* check-ignore: hardcoded-color white type over a photo, in either theme */}
+          <p className="pr-16 text-8xl font-medium whitespace-nowrap text-white">Vaibhav Tomar —</p>
         </ScrollMarquee>
-      </div>
-    </ScrollBox>
+        <div className="h-1/2" />
+      </ScrollBox>
+    </div>
   );
 }
 
@@ -245,24 +272,18 @@ function MarqueeLoop({ playing, speed }: DemoProps) {
 function WordmarkLoop({ playing, speed }: DemoProps) {
   const box = useRef<HTMLDivElement>(null);
   return (
-    <ScrollBox playing={playing} speed={speed} boxRef={box} className="h-full max-w-none">
-      <div className="grid h-full place-items-center text-3xl text-muted-foreground">↓ Scroll</div>
-      <div className="h-1/3" />
-      <footer className="overflow-hidden rounded-3xl border border-border bg-card px-10 pt-10 text-card-foreground">
-        <div className="grid grid-cols-3 gap-8 text-lg">
-          <p className="font-medium">Armour</p>
-          <ul className="space-y-1 text-muted-foreground">
-            <li>Shop</li>
-            <li>Journal</li>
-          </ul>
-          <ul className="space-y-1 text-muted-foreground">
-            <li>Instagram</li>
-            <li>Contact</li>
-          </ul>
-        </div>
-        <PhotoWordmark text="ARMOUR" src="/demo/field.jpg" container={box} className="mt-12 font-black tracking-tight" />
-      </footer>
-    </ScrollBox>
+    <div className="h-full py-16">
+      <div className="relative h-full overflow-hidden rounded-3xl">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/demo/storm.jpg" alt="" className="absolute inset-0 size-full object-cover" />
+        <ScrollBox playing={playing} speed={speed} boxRef={box} className="h-full max-w-none px-6">
+          <div className="grid h-full place-items-center text-3xl text-white">↓ Scroll</div>
+          <div className="h-1/3" />
+          <ArmourFooter container={box} />
+          <div className="h-6" />
+        </ScrollBox>
+      </div>
+    </div>
   );
 }
 
@@ -270,10 +291,21 @@ function WordmarkLoop({ playing, speed }: DemoProps) {
 function CurtainLoop({ playing, speed }: DemoProps) {
   const box = useRef<HTMLDivElement>(null);
   return (
-    <ScrollBox playing={playing} speed={speed} boxRef={box}>
-      <section className="grid h-72 place-items-center bg-muted text-3xl">Scroll down</section>
-      <CurtainReveal height="18rem" className="grid place-items-center">
-        <p className="text-4xl font-medium">Let&apos;s work together</p>
+    <ScrollBox playing={playing} speed={speed} boxRef={box} className="h-[420px] w-[560px] max-w-none rounded-2xl">
+      <section className="relative h-[420px]">{photo(PHOTOS.indexOf("fjord"), "absolute inset-0")}</section>
+      <CurtainReveal height="420px" className="px-10 pt-14">
+        <p className="text-5xl leading-[0.95]">Let&apos;s ✺ work together</p>
+        <div className="mt-10 grid w-fit grid-cols-2 gap-12 text-base">
+          <div>
+            <p className="mb-2 text-xs tracking-wider uppercase opacity-60">Contact</p>
+            <a href="#mail" onClick={(e) => e.preventDefault()} className="block py-1">hello@example.com</a>
+          </div>
+          <div>
+            <p className="mb-2 text-xs tracking-wider uppercase opacity-60">Socials</p>
+            <a href="#github" onClick={(e) => e.preventDefault()} className="flex items-center gap-1 py-1">GitHub <ArrowUpRight className="size-4" /></a>
+            <a href="#linkedin" onClick={(e) => e.preventDefault()} className="flex items-center gap-1 py-1">LinkedIn <ArrowUpRight className="size-4" /></a>
+          </div>
+        </div>
       </CurtainReveal>
     </ScrollBox>
   );
@@ -308,13 +340,41 @@ function CursorLoop() {
     setHost(el.closest("dialog") ?? (el.closest("[inert]") ? null : document.body));
   }, []);
   return (
-    <div ref={stage} className="relative grid h-64 w-96 grid-cols-2 overflow-hidden rounded-2xl text-lg">
-      <div className="grid place-items-center bg-muted">Page</div>
-      <div className="grid place-items-center bg-foreground text-background">Inverted</div>
-      <a href="#grow" onClick={(e) => e.preventDefault()} data-cursor-scale="4" className="absolute bottom-6 left-1/2 -translate-x-1/2 rounded-full border border-foreground bg-background px-5 py-2 text-sm whitespace-nowrap">
-        Hover me: it grows
-      </a>
-      {host ? createPortal(<CursorFollower />, host) : <span className="absolute top-1/2 left-1/2 size-10 -translate-1/2 rounded-full bg-white mix-blend-difference" />}
+    <div ref={stage} className="relative grid h-64 w-96 place-items-center overflow-hidden rounded-2xl">
+      {photo(PHOTOS.indexOf("dunes"), "absolute inset-0")}
+      <div className="relative rounded-2xl bg-background px-10 py-8 text-center text-foreground">
+        <h2 data-cursor-scale="8" className="text-5xl italic">Projects</h2>
+        <p className="mt-3 text-sm text-muted-foreground">Design is thinking made visual. — Saul Bass</p>
+      </div>
+      {host ? createPortal(<CursorFollower />, host) : <span className="absolute top-[42%] left-[44%] size-20 -translate-1/2 rounded-full bg-white mix-blend-difference" />}
+    </div>
+  );
+}
+
+// opens and closes on the same beat as MenuLoop; a click takes over until the next step
+function DrawerLoop({ playing, speed }: DemoProps) {
+  const n = useTick(playing, speed, 4200);
+  const [pick, setPick] = useState<{ at: number; open: boolean } | null>(null);
+  const open = pick?.at === n ? pick.open : n % 2 === 1;
+  return (
+    <div className="relative h-[640px] w-[390px] overflow-hidden rounded-3xl bg-background">
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src="/demo/coast.jpg" alt="" className="absolute inset-0 size-full object-cover" />
+      <DrawerMenu contained active="#projects" open={open} onOpenChange={(o) => setPick({ at: n, open: o })} links={drawerLinks} footer={drawerFooter} />
+    </div>
+  );
+}
+
+// the box scrolls the text section in and out, so its lines rise and drop back with the scroll
+function LineRiseLoop({ playing, speed }: DemoProps) {
+  const box = useRef<HTMLDivElement>(null);
+  return (
+    <div className="relative h-full w-full overflow-hidden rounded-3xl">
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src="/demo/cliffs.jpg" alt="" className="absolute inset-0 size-full object-cover" />
+      <ScrollBox playing={playing} speed={speed} boxRef={box} className="absolute inset-4 h-auto max-w-none rounded-2xl bg-background text-foreground">
+        <LineRiseScene container={box} />
+      </ScrollBox>
     </div>
   );
 }
@@ -346,9 +406,15 @@ export const DEMOS: Record<string, (p: DemoProps) => ReactNode> = {
   "inertia-gallery": InertiaGalleryDemo,
   "fit-title": FitTitleDemo,
   "fan-out-cards": FanOutCardsDemo,
-  "stat-rotator": StatRotatorDemo,
   "shimmer-text": ShimmerTextDemo,
   "photo-wordmark": WordmarkLoop,
+  "drawer-menu": DrawerLoop,
+  "quote-cycle": QuoteCycleDemo,
+  "column-hop": ColumnHopDemo,
+  "line-rise": LineRiseLoop,
+  "flip-text": FlipTextDemo,
+  "spin-mark": SpinMarkDemo,
+  "arrow-link": ArrowLinkDemo,
   "cursor-follower": CursorLoop,
   "fill-button": FillButtonDemo,
 };

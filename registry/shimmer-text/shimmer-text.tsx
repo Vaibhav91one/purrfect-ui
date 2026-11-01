@@ -36,7 +36,8 @@ export function ShimmerText({ as: Tag = "span", duration = 2.8, className, style
     <Tag
       ref={ref}
       className={cn(
-        "inline-block bg-[linear-gradient(90deg,var(--color-muted-foreground)_35%,var(--color-foreground)_50%,var(--color-muted-foreground)_65%)] bg-[length:200%_100%] bg-clip-text text-transparent",
+        // token utilities, not var(--color-*): those resolve at :root, so a .dark-scoped block would keep the page theme's colours
+        "inline-block bg-linear-90 from-muted-foreground from-35% via-foreground via-50% to-muted-foreground to-65% bg-[length:200%_100%] bg-clip-text text-transparent",
         // ponytail: background-position repaints the text box every frame; fine for a label, a masked transform layer if it ever covers a paragraph
         "animate-[shimmer-text_var(--shimmer-duration)_linear_infinite]",
         "motion-reduce:animate-none motion-reduce:bg-none motion-reduce:text-muted-foreground",
