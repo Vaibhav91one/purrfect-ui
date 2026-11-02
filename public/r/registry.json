@@ -768,6 +768,29 @@
       }
     },
     {
+      "name": "asterisk-rows",
+      "type": "registry:ui",
+      "title": "Asterisk rows",
+      "description": "Rows of big asterisks that pop in, drift both ways with the scroll and turn as you go.",
+      "dependencies": [
+        "motion@^14.6.0"
+      ],
+      "registryDependencies": [
+        "utils"
+      ],
+      "files": [
+        {
+          "path": "registry/asterisk-rows/asterisk-rows.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "meta": {
+        "react": ">=19",
+        "tailwindcss": ">=4",
+        "tokens": "shadcn (background, foreground, muted, border, ...): run shadcn init first"
+      }
+    },
+    {
       "name": "arrow-link",
       "type": "registry:ui",
       "title": "Arrow link",
