@@ -37,7 +37,8 @@ const graphemes = (s: string) => [...(segmenter ??= new Intl.Segmenter(undefined
  */
 function StaggerText({ text, chars }: { text: string; chars: string[] }) {
   const mid = Math.floor((chars.length + 1) / 2); // the centre of the label plus its trailing space, so the wave starts where it does on Armour
-  const roll = `transition-[translate,opacity] duration-300 ${ROLL_EASE} [transition-delay:var(--d,0ms)] motion-reduce:transition-none`;
+  // the stagger is for the roll in only: leaving is a response, so every letter snaps back at once in 200ms
+  const roll = `transition-[translate,opacity] duration-200 ${ROLL_EASE} [transition-delay:0ms] [@media(hover:hover)_and_(pointer:fine)]:group-hover/btn:duration-300 [@media(hover:hover)_and_(pointer:fine)]:group-hover/btn:[transition-delay:var(--d,0ms)] group-data-[hover=true]/btn:duration-300 group-data-[hover=true]/btn:[transition-delay:var(--d,0ms)] motion-reduce:transition-none`;
   return (
     <span dir="ltr" className="inline-flex leading-none">
       <span className="sr-only">{text}</span>
@@ -45,10 +46,10 @@ function StaggerText({ text, chars }: { text: string; chars: string[] }) {
         <span key={i} aria-hidden className="relative inline-block overflow-clip whitespace-pre">
           <span
             style={{ "--d": `${Math.min(Math.abs(i - mid) * STEP, MAX_DELAY)}ms` } as CSSProperties}
-            className={`block ${roll} [@media(hover:hover)]:group-hover/btn:-translate-y-full group-data-[hover=true]/btn:-translate-y-full motion-reduce:[@media(hover:hover)]:group-hover/btn:translate-y-0 motion-reduce:group-data-[hover=true]/btn:translate-y-0`}
+            className={`block ${roll} [@media(hover:hover)_and_(pointer:fine)]:group-hover/btn:-translate-y-full group-data-[hover=true]/btn:-translate-y-full motion-reduce:[@media(hover:hover)_and_(pointer:fine)]:group-hover/btn:translate-y-0 motion-reduce:group-data-[hover=true]/btn:translate-y-0`}
           >
-            <span className={`block opacity-85 ${roll} [@media(hover:hover)]:group-hover/btn:opacity-0 group-data-[hover=true]/btn:opacity-0 motion-reduce:[@media(hover:hover)]:group-hover/btn:opacity-85 motion-reduce:group-data-[hover=true]/btn:opacity-85`}>{c}</span>
-            <span className={`absolute top-full left-0 opacity-0 ${roll} [@media(hover:hover)]:group-hover/btn:opacity-100 group-data-[hover=true]/btn:opacity-100 motion-reduce:[@media(hover:hover)]:group-hover/btn:opacity-0 motion-reduce:group-data-[hover=true]/btn:opacity-0`}>{c}</span>
+            <span className={`block opacity-85 ${roll} [@media(hover:hover)_and_(pointer:fine)]:group-hover/btn:opacity-0 group-data-[hover=true]/btn:opacity-0 motion-reduce:[@media(hover:hover)_and_(pointer:fine)]:group-hover/btn:opacity-85 motion-reduce:group-data-[hover=true]/btn:opacity-85`}>{c}</span>
+            <span className={`absolute top-full left-0 opacity-0 ${roll} [@media(hover:hover)_and_(pointer:fine)]:group-hover/btn:opacity-100 group-data-[hover=true]/btn:opacity-100 motion-reduce:[@media(hover:hover)_and_(pointer:fine)]:group-hover/btn:opacity-0 motion-reduce:group-data-[hover=true]/btn:opacity-0`}>{c}</span>
           </span>
         </span>
       ))}
@@ -73,8 +74,8 @@ export function RollButton({ variant = "solid", size = "md", wide, icon, iconPos
     `group/btn relative inline-flex ${size === "lg" ? "min-h-16 min-w-16 px-10" : "min-h-[46px] min-w-[46px] px-[22px]"} max-w-full items-center justify-center gap-2 rounded-full text-base font-medium`,
     wraps ? "py-3 text-center whitespace-normal" : "shrink-0 whitespace-nowrap",
     `transition-[translate,scale,opacity,background-color] duration-200 ${EASE} active:scale-[0.97] disabled:pointer-events-none disabled:opacity-50`,
-    "[@media(hover:hover)]:motion-safe:hover:-translate-y-0.5 data-[hover=true]:motion-safe:-translate-y-0.5 before:absolute before:inset-x-0 before:-bottom-[3px] before:h-[3px] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foreground",
-    variant === "solid" ? "bg-foreground text-background [@media(hover:hover)]:hover:bg-foreground/85 data-[hover=true]:bg-foreground/85" : "border border-foreground text-foreground [@media(hover:hover)]:hover:bg-foreground/5 data-[hover=true]:bg-foreground/5",
+    "[@media(hover:hover)_and_(pointer:fine)]:motion-safe:hover:-translate-y-0.5 data-[hover=true]:motion-safe:-translate-y-0.5 before:absolute before:inset-x-0 before:-bottom-[3px] before:h-[3px] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foreground",
+    variant === "solid" ? "bg-foreground text-background [@media(hover:hover)_and_(pointer:fine)]:hover:bg-foreground/85 data-[hover=true]:bg-foreground/85" : "border border-foreground text-foreground [@media(hover:hover)_and_(pointer:fine)]:hover:bg-foreground/5 data-[hover=true]:bg-foreground/5",
     wide && "w-full",
     child?.props.className,
     className,

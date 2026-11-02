@@ -23,7 +23,8 @@ export interface FitTitleProps extends Omit<ComponentProps<"h1">, "children" | "
  * that is pure CSS, and the ResizeObserver only decides whether to wrap, from the width it is handed (no layout reads).
  * The rise is hidden only under `@media (scripting: enabled)`, so with no JS the title is simply visible. Motion only spots
  * the title entering view and sets `data-in`; a CSS transition (on the compositor, not a per-frame JS write) plays the rise,
- * and under reduced motion a short fade, so nothing branches in JS. An empty title renders nothing.
+ * and under reduced motion a short fade, so nothing branches in JS. Until JS runs and it is seen, the title stays hidden, so
+ * pass `rise={false}` for an above-the-fold hero. An empty title renders nothing.
  */
 export function FitTitle({ as = "h1", children, min = 28, max, rise = true, className, ...rest }: FitTitleProps) {
   const ref = useRef<HTMLHeadingElement>(null);
@@ -80,7 +81,7 @@ export function FitTitle({ as = "h1", children, min = 28, max, rise = true, clas
       initial={false}
       onViewportEnter={rise ? (e) => e?.target.setAttribute("data-in", "") : undefined}
       viewport={{ once: true, amount: 0.12 }}
-      className={cn("@container m-0 font-normal whitespace-nowrap [overflow-wrap:anywhere] data-[wrap]:whitespace-normal", className)}
+      className={cn("group/fit @container m-0 font-normal whitespace-nowrap [overflow-wrap:anywhere] data-[wrap]:whitespace-normal", className)}
       {...rest}
     >
       {/* the mask: line height .75 with padding above for accents and emoji and below for descenders, pulled back with negative margins */}
@@ -95,7 +96,7 @@ export function FitTitle({ as = "h1", children, min = 28, max, rise = true, clas
             // hidden a full line plus .8em down, past the mask's padding, so no cap or accent peeks over its edge
             // check-ignore: duration the display-type rise is a slow 1.2s on purpose, like the source
             rise &&
-              "motion-safe:[@media(scripting:enabled)]:translate-y-[calc(100%+.8em)] motion-safe:transition-[translate] motion-safe:duration-[1.2s] motion-safe:ease-[cubic-bezier(.18,.66,.18,1)] motion-reduce:[@media(scripting:enabled)]:opacity-0 motion-reduce:transition-opacity motion-reduce:duration-[400ms] [[data-in]_&]:translate-y-0 [[data-in]_&]:opacity-100",
+              "motion-safe:[@media(scripting:enabled)]:translate-y-[calc(100%+.8em)] motion-safe:transition-[translate] motion-safe:duration-[1.2s] motion-safe:ease-[cubic-bezier(.18,.66,.18,1)] motion-reduce:[@media(scripting:enabled)]:opacity-0 motion-reduce:transition-opacity motion-reduce:duration-[400ms] group-data-in/fit:translate-y-0 group-data-in/fit:opacity-100",
           )}
         >
           {children}

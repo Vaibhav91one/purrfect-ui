@@ -646,9 +646,6 @@
       "type": "registry:ui",
       "title": "Photo wordmark",
       "description": "A huge wordmark filled with a photo and cropped at the bottom edge, rising out of the crop as it scrolls in.",
-      "dependencies": [
-        "motion@^14.6.0"
-      ],
       "registryDependencies": [
         "utils"
       ],

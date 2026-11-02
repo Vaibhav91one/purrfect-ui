@@ -99,8 +99,10 @@ export function PeekCard({ image, imgProps, title, description, meta, index, hre
           // a container, so the layout follows the row's own width (a sidebar on a wide screen stacks like a phone)
           "group/peek @container/peek relative w-full overflow-hidden bg-muted/60 text-foreground",
           appear,
-          // after appear, so tailwind-merge keeps the background in the list; 200ms for the hover background
-          "transition-[background-color,opacity,translate] [transition-duration:200ms,500ms,500ms]",
+          // after appear, so tailwind-merge keeps the background in the list; 200ms `ease` for the hover background, no stagger on it.
+          // Siblings fade up 50ms apart, capped at 200ms (sibling-index() is progressive: without it they start together); the card does the same
+          "transition-[background-color,opacity,translate] [transition-duration:200ms,500ms,500ms] [transition-timing-function:ease,cubic-bezier(0.23,1,0.32,1),cubic-bezier(0.23,1,0.32,1)]",
+          "[transition-delay:0ms,calc((min(sibling-index(),5)_-_1)*50ms),calc((min(sibling-index(),5)_-_1)*50ms)]",
           muted ? "data-[shown]:opacity-60" : "hover:bg-muted",
           className,
         )}
@@ -149,7 +151,7 @@ export function PeekCard({ image, imgProps, title, description, meta, index, hre
   return (
     <article
       ref={root}
-      className={cn("group/peek @container/peek relative aspect-[4/5] w-full overflow-hidden bg-muted text-card-foreground", appear, muted && "data-[shown]:opacity-60", className)}
+      className={cn("group/peek @container/peek relative aspect-[4/5] w-full overflow-hidden bg-muted text-card-foreground", appear, "[transition-delay:calc((min(sibling-index(),5)_-_1)*50ms)]", muted && "data-[shown]:opacity-60", className)}
       {...rest}
     >
       <div className="absolute inset-0 overflow-hidden">

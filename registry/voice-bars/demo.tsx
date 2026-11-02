@@ -1,11 +1,12 @@
 /* eslint-disable @next/next/no-img-element */
+import { cn } from "@/lib/utils";
 import { VoiceBars } from "./voice-bars";
 
 // Armour's "Multi-channel" feature card: the brand orb (a mesh gradient on the site) with the voice meter under it
 const ORB =
   "radial-gradient(circle at 72% 22%, #fff 0 12%, transparent 34%), radial-gradient(circle at 62% 46%, #ff0000aa, transparent 45%), radial-gradient(circle at 20% 40%, #e38810cc, transparent 60%), linear-gradient(135deg, #e38810, #f39db2 55%, #ff3b2f)";
 
-export default function VoiceBarsDemo() {
+export default function VoiceBarsDemo({ playing = true, speed = 1 }: { playing?: boolean; speed?: number }) {
   return (
     <div className="relative grid h-[640px] w-[600px] place-items-center overflow-hidden rounded-3xl">
       <img src="/demo/dunes.jpg" alt="" className="absolute inset-0 size-full object-cover" />
@@ -14,7 +15,8 @@ export default function VoiceBarsDemo() {
           <div className="mx-auto grid size-70 place-items-center p-8">
             <div className="size-full rounded-full" style={{ background: ORB }} />
           </div>
-          <VoiceBars className="text-foreground" />
+          {/* the gallery's Pause and Speed: `.x>span` outranks the bars' own animate-* classes */}
+          <VoiceBars duration={1 / speed} stagger={0.08 / speed} className={cn("text-foreground", !playing && "[&>span]:[animation-play-state:paused]")} />
         </div>
         <div className="mt-auto p-6">
           <h2 className="text-3xl font-normal text-foreground">Multi-channel</h2>

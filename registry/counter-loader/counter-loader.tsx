@@ -33,7 +33,7 @@ const noop = () => () => {};
 
 /**
  * A full-screen intro: a counter rolls through `steps` while stickers pop into a fanned pile, then a block wipes up over them
- * and the loader lifts off the page. Click, tap or Escape (full screen only) skips it, it locks page scroll while it covers the page, and it plays
+ * and the loader lifts off the page. Click, tap or Escape (full screen only) skips it with a quicker lift, it locks page scroll while it covers the page, and it plays
  * once per tab (`storageKey`). The server HTML already covers the page, so nothing flashes before it; an inline script hides it
  * before the first paint on a repeat visit, and if JavaScript never runs it uncovers the page by itself after a few seconds.
  * Reduced motion: the number jumps from step to step, the stickers appear without the pop, and the loader fades out.
@@ -51,6 +51,9 @@ export function CounterLoader({ stickers = SHAPES, steps = STEPS, duration = 1.4
     }
   }, () => false);
   const [phase, setPhase] = useState<"count" | "exit" | "wipe" | "lift" | "gone">("count");
+  // a click or Escape: the user asked to get out, so the lift snaps instead of replaying the slow scene change
+  const [skipped, setSkipped] = useState(false);
+  const roll = useRef<HTMLDivElement>(null);
   const done = useRef(onDone);
   useEffect(() => {
     done.current = onDone;
@@ -69,11 +72,16 @@ export function CounterLoader({ stickers = SHAPES, steps = STEPS, duration = 1.4
       body.overflow = "hidden";
     }
     // count, then the pile exits (250ms), the block wipes up (800ms) and the loader lifts; reduced motion fades out after the count
-    const ms = duration * 1000;
+    // the roll is CSS and started at first paint, so take off what already played while the page hydrated
+    const ms = Math.max(0, duration * 1000 - Number(roll.current?.getAnimations()[0]?.currentTime ?? 0));
     const t = reduce
       ? [setTimeout(() => setPhase("lift"), ms)]
       : [setTimeout(() => setPhase((p) => (p === "count" ? (pile ? "exit" : "wipe") : p)), ms), setTimeout(() => setPhase((p) => (p === "exit" ? "wipe" : p)), ms + 250)];
-    const skip = (e: KeyboardEvent) => e.key === "Escape" && setPhase("lift");
+    const skip = (e: KeyboardEvent) => {
+      if (e.key !== "Escape") return;
+      setSkipped(true);
+      setPhase("lift");
+    };
     // check-ignore: global-keys only while it covers the whole page: Escape skips it wherever focus is
     if (!contained) window.addEventListener("keydown", skip);
     return () => {
@@ -96,18 +104,23 @@ export function CounterLoader({ stickers = SHAPES, steps = STEPS, duration = 1.4
   if (gone) return null;
   const key = storageKey ? JSON.stringify(storageKey) : "";
   const nums = steps.length ? steps : [100];
-  // only the timed exit pops them out; a skip leaves the pops running, since the whole loader is lifting away anyway
-  const out = phase === "exit";
+  // only the timed exit pops them out, and they stay out under the wipe; a skip leaves the pops running, since the whole
+  // loader is lifting away anyway
+  const out = phase === "exit" || phase === "wipe";
   return (
     <motion.div
       data-counter-loader
       role="status"
       aria-label="Loading"
       aria-live="polite"
-      onClick={() => setPhase("lift")}
+      onClick={() => {
+        setSkipped(true);
+        setPhase("lift");
+      }}
       initial={false}
-      animate={phase === "lift" ? (reduce ? { opacity: 0 } : { opacity: 1, y: "-100%" }) : { opacity: 1, y: "0%" }}
-      transition={{ duration: reduce ? 0.3 : 0.9, ease: COVER }}
+      // the same keys in every target: a reduced target without `y` completed at once and cut the fade
+      animate={phase === "lift" ? (reduce ? { opacity: 0, y: "0%" } : { opacity: 1, y: "-100%" }) : { opacity: 1, y: "0%" }}
+      transition={reduce ? { duration: 0.3, ease: COVER } : skipped ? { duration: 0.45, ease: [0.32, 0.72, 0, 1] } : { duration: 0.9, ease: COVER }}
       onAnimationComplete={() => phase === "lift" && finish()}
       className={cn(
         contained ? "absolute" : "fixed",
@@ -154,6 +167,7 @@ export function CounterLoader({ stickers = SHAPES, steps = STEPS, duration = 1.4
       {/* sized by the box too, so a long number still fits a small contained card */}
       <div aria-hidden className="relative h-[1.2em] overflow-hidden text-[min(3rem,22cqi)] leading-[1.2] whitespace-nowrap tabular-nums">
         <div
+          ref={roll}
           className="flex flex-col motion-reduce:[animation-timing-function:steps(var(--k),end)]!"
           // check-ignore: duration the count is the whole intro; `duration` sets it
           style={{ "--n": nums.length, "--k": Math.max(1, nums.length - 1), animation: `counter-loader-roll ${duration}s cubic-bezier(0.18,0.66,0.18,1) forwards` } as CSSProperties}

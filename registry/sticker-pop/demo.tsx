@@ -51,8 +51,9 @@ export function LoaderBox({ stickers = PILE.map(([f]) => `/demo/${f}.jpg`), stic
           ))}
         </button>
         <div key={run} className="h-[1.2em] overflow-hidden text-[40px] leading-[1.2] tabular-nums">
-          {/* check-ignore: duration the source counter rolls for 1.4s while the pile pops */}
-          <motion.div initial={{ y: "0%" }} animate={{ y: "-75%" }} transition={{ duration: reduce ? 0 : 1.4, ease: [0.23, 1, 0.32, 1] }} className="flex flex-col">
+          {/* check-ignore: duration the source counter rolls for 1.4s while the pile pops; ease-in-out so it reaches 100 with the
+              last sticker, and under reduced motion it jumps to 100 as the last fade ends */}
+          <motion.div initial={{ y: "0%" }} animate={{ y: "-75%" }} transition={reduce ? { duration: 0, delay: 0.9 } : { duration: 1.4, ease: [0.77, 0, 0.175, 1] }} className="flex flex-col">
             {STEPS.map((s) => (
               <span key={s} className="h-[1.2em]">
                 {s}

@@ -204,7 +204,7 @@ export function InertiaGallery({
         if (busy()) return;
         const g = G.g0 ?? g0();
         const moved = G.off + G.vel / (1 - fr()) / unitOf(G.mode) - g.off;
-        let b = reduce ? Math.round(g.off + moved) : k0();
+        let b = Math.round(g.off + moved);
         if (Math.abs(moved) < 0.15) b = g.k;
         else if (b === g.k) b = g.k + Math.sign(moved);
         snapTo(b);
@@ -270,7 +270,7 @@ export function InertiaGallery({
 
     const setMode = (m: L) => {
       G.want = m;
-      if (m === G.mode || busy()) return;
+      if (G.intro || m === G.mode && !G.trans) return;
       killSnap(); clearTimeout(G.snapT); G.vel = 0;
       const a = k0(), ia = mod(a, M);
       const finish = () => {

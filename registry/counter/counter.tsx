@@ -1,7 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
-import { useEffect, useMemo, useRef, type ComponentProps, type Ref } from "react";
+import { useEffect, useMemo, useRef, useSyncExternalStore, type ComponentProps, type Ref } from "react";
 import { cn } from "@/lib/utils";
 
 export interface CounterProps extends Omit<ComponentProps<"span">, "children"> {
@@ -16,10 +16,13 @@ export interface CounterProps extends Omit<ComponentProps<"span">, "children"> {
 }
 
 const OUT = [0.23, 1, 0.32, 1] as const;
+const noop = () => () => {};
+type Enter = false | { opacity: number };
 
-function Digit({ d, glyphs, reduce, countUp, ref }: { d: number; glyphs: string[]; reduce: boolean; countUp: boolean; ref?: Ref<HTMLSpanElement> }) {
+function Digit({ d, glyphs, reduce, countUp, enter, ref }: { d: number; glyphs: string[]; reduce: boolean; countUp: boolean; enter: Enter; ref?: Ref<HTMLSpanElement> }) {
   const box = useRef<HTMLSpanElement>(null);
-  const last = useRef(d);
+  // a count-up starts at 0, so reduced motion fades it in on mount too
+  const last = useRef(countUp ? 0 : d);
   // reduced motion: the column jumps, and a quick fade marks the change (client only, so the server HTML never differs)
   useEffect(() => {
     if (last.current === d) return;
@@ -27,7 +30,7 @@ function Digit({ d, glyphs, reduce, countUp, ref }: { d: number; glyphs: string[
     if (matchMedia("(prefers-reduced-motion: reduce)").matches) box.current?.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 150, easing: "ease-out" });
   }, [d]);
   return (
-    <motion.span ref={ref} layout="position" exit={{ opacity: 0 }} transition={{ duration: reduce ? 0 : 0.3, ease: OUT }} aria-hidden className="relative inline-block h-[1em] w-[1ch] overflow-hidden leading-none">
+    <motion.span ref={ref} layout="position" initial={enter} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: reduce ? 0 : 0.3, ease: OUT }} aria-hidden className="relative inline-block h-[1em] w-[1ch] overflow-hidden leading-none">
       <motion.span
         ref={box}
         initial={countUp ? { transform: "translateY(0%)" } : false}
@@ -49,11 +52,13 @@ function Digit({ d, glyphs, reduce, countUp, ref }: { d: number; glyphs: string[
 /**
  * A number that rolls digit by digit to its value. Each column slides up or down to its digit; integer columns are keyed
  * from the right and decimals from the point, so 99 -> 100 grows a column instead of reshuffling, and a column that comes
- * or goes fades while the rest slide over. Screen readers read the formatted number as text, not the 0-9 stack. It always
+ * or goes fades in or out while the rest slide over. Screen readers read the formatted number as text, not the 0-9 stack. It always
  * lays out left to right, even inside RTL text. Under `prefers-reduced-motion` the digits switch with no roll and a quick fade.
  */
 export function Counter({ value, locale = "en-US", countUp = false, className, ...rest }: CounterProps) {
   const reduce = useReducedMotion() ?? false;
+  // a column that comes later fades in; the server HTML (and the hydration render) shows every column, so no-JS sees the number
+  const enter: Enter = useSyncExternalStore(noop, () => true, () => false) && { opacity: 0 };
   const format = useMemo(() => {
     try {
       return new Intl.NumberFormat(locale, { signDisplay: "negative" });
@@ -80,9 +85,9 @@ export function Counter({ value, locale = "en-US", countUp = false, className, .
       <AnimatePresence mode="popLayout" initial={countUp}>
         {cells.map(({ ch, key }) =>
           glyphs.includes(ch) ? (
-            <Digit key={key} d={glyphs.indexOf(ch)} glyphs={glyphs} reduce={reduce} countUp={countUp} />
+            <Digit key={key} d={glyphs.indexOf(ch)} glyphs={glyphs} reduce={reduce} countUp={countUp} enter={enter} />
           ) : (
-            <motion.span key={key} layout="position" exit={{ opacity: 0 }} transition={{ duration: reduce ? 0 : 0.3, ease: OUT }} aria-hidden>
+            <motion.span key={key} layout="position" initial={enter} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: reduce ? 0 : 0.3, ease: OUT }} aria-hidden>
               {ch}
             </motion.span>
           ),

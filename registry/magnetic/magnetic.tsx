@@ -28,7 +28,7 @@ const onReduce = (cb: () => void) => {
 /**
  * Pulls what it wraps toward the mouse while the pointer is over it, then springs back with an elastic overshoot (one motion
  * spring per axis, written straight to `translate`, so React never re-renders). Mouse only (touch and pen leave it still).
- * Under `prefers-reduced-motion` it follows a quarter as far, with no overshoot. The hit area is the wrapper, which never
+ * Under `prefers-reduced-motion` it follows a quarter as far (at most a tenth of the offset), with no overshoot. The hit area is the wrapper, which never
  * moves: only the content inside it is pulled, so it lets go at its resting edge and can't be dragged across the page.
  */
 export function Magnetic({ children, strength = 0.4, className, ...rest }: MagneticProps) {
@@ -43,7 +43,8 @@ export function Magnetic({ children, strength = 0.4, className, ...rest }: Magne
   const y = useSpring(ty, reduce ? GENTLE : ELASTIC);
 
   useEffect(() => {
-    power.current = reduce ? strength / 4 : strength;
+    // reduced motion: a quarter of the pull, capped at a tenth of the offset (about 7px on a 140px button)
+    power.current = reduce ? Math.sign(strength) * Math.min(Math.abs(strength) / 4, 0.1) : strength;
   });
 
   useEffect(() => {

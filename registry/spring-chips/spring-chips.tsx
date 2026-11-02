@@ -23,7 +23,8 @@ export interface SpringChipsProps extends Omit<ComponentProps<"div">, "ref" | "o
 }
 
 const chip: Variants = {
-  // full transform strings, not the y/scale shorthands, so motion can run them off the main thread while the page loads
+  // full transform strings, not the y/scale shorthands, so motion can run them off the main thread while the page loads.
+  // 22px and 0.82 (below the usual 0.9 entrance scale) are copied from the source on purpose: the pop is its character
   hidden: { opacity: 0, transform: "translateY(22px) scale(0.82)" },
   shown: (delay: number) => ({ opacity: 1, transform: "translateY(0px) scale(1)", transition: { type: "spring", stiffness: 220, damping: 18, mass: 0.7, delay } }),
 };

@@ -27,7 +27,7 @@ const noop = () => () => {};
  * it plays once per tab (`storageKey`). Each word gets at least a 220ms swap, and a word wider than the screen truncates.
  * The server HTML already covers the page, so nothing flashes before it; an inline script hides it before the first paint
  * on a repeat visit, and if JavaScript never runs it uncovers the page by itself after a few seconds. As it lifts, both
- * bottom corners round to 50%, so the edge leaving the page is one curve. Reduced motion: one word, then the panel fades out.
+ * bottom edge bulges into one curve. Reduced motion: one word, then the panel fades out in place.
  */
 export function Preloader({ words = WELCOME, duration = 2.4, storageKey = "preloader-seen", onDone, contained = false, className, style, ...rest }: PreloaderProps) {
   const reduce = useReducedMotion();
@@ -44,6 +44,8 @@ export function Preloader({ words = WELCOME, duration = 2.4, storageKey = "prelo
   const [phase, setPhase] = useState<"words" | "lift" | "gone">("words");
   const [i, setI] = useState(0);
   const [skipped, setSkipped] = useState(false);
+  const panel = useRef<HTMLDivElement>(null);
+  const ticks = useRef<ReturnType<typeof setTimeout>[]>([]);
   const done = useRef(onDone);
   useEffect(() => {
     done.current = onDone;
@@ -64,18 +66,28 @@ export function Preloader({ words = WELCOME, duration = 2.4, storageKey = "prelo
     // only as many words as get a full 220ms swap each, so a short duration never stacks them
     const n = reduce ? 1 : Math.max(1, Math.min(words.length, Math.floor((duration * 1000) / 220)));
     const step = (duration * 1000) / n;
-    const ticks = Array.from({ length: n - 1 }, (_, k) => setTimeout(() => setI(k + 1), step * (k + 1)));
+    ticks.current = Array.from({ length: n - 1 }, (_, k) => setTimeout(() => setI(k + 1), step * (k + 1)));
     const lift = setTimeout(() => setPhase("lift"), reduce ? 600 : duration * 1000);
     const skip = (e: KeyboardEvent) => e.key === "Escape" && (setSkipped(true), setPhase("lift"));
     // check-ignore: global-keys only while it covers the whole page (not contained): Escape skips it wherever focus is
     if (!contained) window.addEventListener("keydown", skip);
     return () => {
-      ticks.forEach(clearTimeout);
+      ticks.current.forEach(clearTimeout);
       clearTimeout(lift);
       if (!contained) window.removeEventListener("keydown", skip);
       [body.overflow, body.paddingRight] = prev;
     };
   }, [words.length, duration, reduce, contained, gone]);
+  // a skip settles the words: no more swaps while the panel leaves
+  useEffect(() => {
+    if (skipped) ticks.current.forEach(clearTimeout);
+  }, [skipped]);
+  // a click on the server HTML before hydration still skips: the inline script marks the node (a property, not an attribute, so hydration matches)
+  useEffect(() => {
+    if (!(panel.current as { preloaderSkip?: number } | null)?.preloaderSkip) return;
+    setSkipped(true);
+    setPhase("lift");
+  }, []);
 
   const finish = () => {
     try {
@@ -88,9 +100,13 @@ export function Preloader({ words = WELCOME, duration = 2.4, storageKey = "prelo
   }, [gone]);
 
   if (gone) return null;
+  // a skip is the user's decision, so it answers fast (drawer curve); the automatic lift keeps the slow in-out; the reduced
+  // fade is an exit, so ease-out
+  const lift = reduce ? { duration: 0.3, ease: [0.23, 1, 0.32, 1] as const } : skipped ? { duration: 0.6, ease: [0.32, 0.72, 0, 1] as const } : { duration: 1, ease: OUT };
   const key = storageKey ? JSON.stringify(storageKey) : "";
   return (
     <motion.div
+      ref={panel}
       // tied to its key, so a full-page preloader seen in this tab never hides another one with a different key
       data-preloader={storageKey || ""}
       role="status"
@@ -98,17 +114,10 @@ export function Preloader({ words = WELCOME, duration = 2.4, storageKey = "prelo
       aria-live="polite"
       onClick={() => (setSkipped(true), setPhase("lift"))}
       initial={false}
-      // a full transform string (not y), so Motion can hand the lift to WAAPI while the page hydrates
-      // ponytail: the radius repaints the panel for the 1s lift only; a clip-path ellipse if that ever shows in a trace
-      animate={
-        phase === "lift"
-          ? reduce
-            ? { opacity: 0 }
-            : { opacity: 1, transform: "translateY(-100%)", borderBottomLeftRadius: "50%", borderBottomRightRadius: "50%" }
-          : { opacity: 1, transform: "translateY(0%)", borderBottomLeftRadius: "0%", borderBottomRightRadius: "0%" }
-      }
-      // a skip is the user's decision, so it answers fast (drawer curve); the automatic lift keeps the slow in-out
-      transition={reduce ? { duration: 0.3, ease: OUT } : skipped ? { duration: 0.6, ease: [0.32, 0.72, 0, 1] } : { duration: 1, ease: OUT }}
+      // a full transform string (not y), so Motion can hand the lift to WAAPI while the page hydrates. Every state names the
+      // same keys: a missing one becomes an instant animation whose completion would end the reduced fade in one frame
+      animate={phase === "lift" ? (reduce ? { opacity: 0, transform: "translateY(0%)" } : { opacity: 1, transform: "translateY(-100%)" }) : { opacity: 1, transform: "translateY(0%)" }}
+      transition={lift}
       onAnimationComplete={() => phase === "lift" && finish()}
       className={cn(contained ? "absolute" : "fixed", "inset-0 z-[9999] grid cursor-pointer place-items-center bg-foreground text-background", className)}
       style={{ animation: `preloader-failsafe 0s linear ${duration + 3}s forwards`, ...style }}
@@ -116,7 +125,16 @@ export function Preloader({ words = WELCOME, duration = 2.4, storageKey = "prelo
     >
       {/* no JavaScript: uncover the page 3s after the words would have ended. Seen before: hide it before the first paint, no flash */}
       <style>{`@keyframes preloader-failsafe{to{visibility:hidden}}${key ? `html[data-preloader-seen~=${key}] [data-preloader=${key}]{display:none}` : ""}`}</style>
-      {key && !hydrated && <script dangerouslySetInnerHTML={{ __html: `try{var d=document.documentElement.dataset;if(sessionStorage.getItem(${key})==="1")d.preloaderSeen=(d.preloaderSeen||"")+" "+${key}}catch(e){}` }} />}
+      {/* a click before hydration marks the panel, and the mount effect skips */}
+      {!hydrated && <script dangerouslySetInnerHTML={{ __html: `var p=document.currentScript.parentElement;p.addEventListener("click",function(){p.preloaderSkip=1},{once:true});` + (key ? `try{var d=document.documentElement.dataset;if(sessionStorage.getItem(${key})==="1")d.preloaderSeen=(d.preloaderSeen||"")+" "+${key}}catch(e){}` : "") }} />}
+      {/* the curved bottom edge: a half ellipse under the panel that grows as it lifts (transform only, so it stays in step with the slide) */}
+      <motion.span
+        aria-hidden
+        className="absolute inset-x-0 top-full h-[15%] origin-top rounded-b-[50%] bg-foreground"
+        initial={false}
+        animate={{ transform: phase === "lift" && !reduce ? "scaleY(1)" : "scaleY(0)" }}
+        transition={lift}
+      />
       {/* full width, so the box never shrinks to the incoming word (the outgoing one stays centred and whole); a word too long for it truncates */}
       <div aria-hidden className="relative h-16 w-full max-w-full overflow-hidden px-6 text-center text-3xl">
         <AnimatePresence initial={false} mode="popLayout">

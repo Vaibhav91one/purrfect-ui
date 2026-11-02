@@ -133,7 +133,7 @@ export function DrawerMenu({ links, active, heading = "Navigation", footer, cont
         aria-controls={isOpen ? id : undefined}
         aria-label={isOpen ? "Close menu" : "Open menu"}
         onClick={() => set(!isOpen)}
-        className={cn(`${pos} top-0 right-0 z-50 m-5 grid size-16 place-items-center rounded-full bg-muted-foreground text-background transition-transform duration-150 ease-out active:scale-95 motion-reduce:transition-none focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-muted-foreground`, className)}
+        className={cn(`${pos} top-0 right-0 z-50 m-5 grid size-16 place-items-center rounded-full bg-muted-foreground text-background transition-transform duration-150 ease-out active:scale-95 motion-reduce:transition-opacity motion-reduce:active:scale-100 motion-reduce:active:opacity-80 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-muted-foreground`, className)}
       >
         <span className={`${line} ${isOpen ? "rotate-45" : "-translate-y-[5px]"}`} />
         <span className={`${line} ${isOpen ? "-rotate-45" : "translate-y-[5px]"}`} />

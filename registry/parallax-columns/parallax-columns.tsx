@@ -1,7 +1,7 @@
 "use client";
 
-import { motion, useScroll, useSpring, useTransform, type MotionValue } from "motion/react";
-import { useRef, type ComponentProps, type ReactNode, type RefObject } from "react";
+import { motion, useMotionValueEvent, useReducedMotion, useScroll, useSpring, useTransform, type MotionValue } from "motion/react";
+import { useEffect, useRef, type ComponentProps, type ReactNode, type RefObject } from "react";
 import { cn } from "@/lib/utils";
 
 // ponytail: kept in step with SCROLL_SPRING in lib/motion.ts; duplicated so this file installs on its own.
@@ -32,6 +32,14 @@ export function ParallaxColumns({ columns, speeds = [0.12, 0.22, 0.05], containe
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end end"], container });
   // ease toward the scroll position (the tutorial gets this feel from Lenis; a spring keeps native scrolling)
   const progress = useSpring(scrollYProgress, SPRING);
+  // the spring starts at 0: jump it to the first measured progress, so a page that opens scrolled into the section does
+  // not slide the columns by themselves; later scrolls still ease through the spring
+  const settled = useRef(false);
+  useMotionValueEvent(scrollYProgress, "change", (v) => {
+    if (settled.current) return;
+    settled.current = true;
+    progress.jump(v);
+  });
   return (
     <div ref={ref} className={cn("relative overflow-hidden", className)} style={style} {...rest}>
       <div className="flex gap-3 sm:gap-4">
@@ -44,9 +52,16 @@ export function ParallaxColumns({ columns, speeds = [0.12, 0.22, 0.05], containe
 }
 
 function Column({ items, speed, progress }: { items: ReactNode[]; speed: number; progress: MotionValue<number> }) {
-  const transform = useTransform(progress, (p) => `translateY(${(1 - p) * speed * 100}svh)`);
+  // reduced motion: CSS already hides the transform; "none" also stops the per-frame style writes. Read through a ref set
+  // after hydration, so the first render (and the server HTML) never branches on it
+  const reduce = useReducedMotion();
+  const off = useRef(false);
+  useEffect(() => {
+    off.current = !!reduce;
+  }, [reduce]);
+  const transform = useTransform(progress, (p) => (off.current ? "none" : `translateY(${(1 - p) * speed * 100}svh)`));
   return (
-    <motion.ul style={{ transform }} className="flex min-w-0 flex-1 flex-col gap-3 will-change-transform motion-reduce:!transform-none sm:gap-4">
+    <motion.ul style={{ transform }} className="flex min-w-0 flex-1 flex-col gap-3 will-change-transform motion-reduce:!transform-none motion-reduce:will-change-auto sm:gap-4">
       {items.map((item, i) => (
         <li key={i}>{item}</li>
       ))}

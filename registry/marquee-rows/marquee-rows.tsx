@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, useAnimationFrame, useInView, useMotionValue, useReducedMotion } from "motion/react";
+import { useInView, useReducedMotion } from "motion/react";
 import { useEffect, useRef, useState, type ComponentProps, type MouseEvent, type ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
@@ -23,7 +23,7 @@ export interface MarqueeRowsProps extends Omit<ComponentProps<"div">, "children"
 }
 
 const INDENTS = ["", "md:ps-[25%]", "md:ps-[20%]", "md:ps-[60%]"];
-// check-ignore: duration 0.4s is the source's timing for a full-row text swap, not a small UI control
+// check-ignore: duration 0.4s and this curve are the source's timing for a full-row text swap, not a small UI control
 const SLIDE = "transition-[translate,opacity] duration-400 ease-[cubic-bezier(0.585,0.039,0.26,0.681)] motion-reduce:transition-opacity motion-reduce:duration-200";
 
 function Asterisk() {
@@ -41,9 +41,9 @@ function Asterisk() {
  * slides up from below, running the same text as a marquee with spinning asterisks between the repeats. A row opens on
  * mouse hover, on keyboard focus, and on tap (a tap toggles a button row; on a link row the first tap opens it and the
  * second follows the link), so touch never sticks open from a stale hover. The row's height comes from its text. The
- * marquee runs at a fixed speed per second whatever the frame rate, renders as many copies as the width needs and wraps by
- * exactly one copy; only the open row's marquee runs, and only while on screen. The band is a visual duplicate, so it is
- * hidden from screen readers and inert.
+ * marquee is a linear WAAPI loop (off the main thread) at a fixed speed per second, renders as many copies as the width needs
+ * and wraps by exactly one copy; only the open row's marquee runs, and only while on screen. Keyboard focus swaps the row
+ * without the slide. The band is a visual duplicate, so it is hidden from screen readers and inert.
  * Reduced motion: the band fades in without the slide and its marquee stands still.
  */
 export function MarqueeRows({ items, speed = 120, separator = <Asterisk />, indent = true, bandClassName, className, ...rest }: MarqueeRowsProps) {
@@ -71,33 +71,41 @@ type RowProps = { item: MarqueeRowsItem; open: boolean; setOpen: (v: boolean) =>
 function Row({ item, open, setOpen, speed, separator, indent, bandClassName }: RowProps) {
   const band = useRef<HTMLSpanElement>(null);
   const first = useRef<HTMLSpanElement>(null);
+  const strip = useRef<HTMLSpanElement>(null);
+  const loop = useRef<Animation>(null);
   const pointer = useRef("mouse");
   const reduce = useReducedMotion();
   const visible = useInView(band);
-  const x = useMotionValue(0);
-  const copy = useRef(0);
+  const [w, setW] = useState(0);
   const [count, setCount] = useState(2);
+  const [kb, setKb] = useState(false); // opened from the keyboard: swap without the slide
 
   // one copy's width, and enough copies to cover the band plus the one that scrolls out
   useEffect(() => {
     const box = band.current, one = first.current;
     if (!box || !one) return;
     const ro = new ResizeObserver(() => {
-      copy.current = one.offsetWidth;
-      if (copy.current) setCount(Math.max(2, Math.ceil(box.clientWidth / copy.current) + 1));
+      setW(one.offsetWidth);
+      if (one.offsetWidth) setCount(Math.max(2, Math.ceil(box.clientWidth / one.offsetWidth) + 1));
     });
     ro.observe(box);
     ro.observe(one);
     return () => ro.disconnect();
   }, []);
 
-  useAnimationFrame((_, delta) => {
-    const w = copy.current;
-    if (!open || reduce || !visible || !w) return;
-    let next = x.get() - (speed * Math.min(delta, 100)) / 1000; // a backgrounded tab must not jump on return
-    if (next <= -w) next += w;
-    x.set(next);
-  });
+  // the marquee: one copy's width per loop, rebuilt when that width or the speed changes
+  useEffect(() => {
+    const el = strip.current;
+    if (!el || !w) return;
+    const a = el.animate([{ transform: "translateX(0)" }, { transform: `translateX(${-w}px)` }], { duration: (w / speed) * 1000, iterations: Infinity });
+    a.pause();
+    loop.current = a;
+    return () => a.cancel();
+  }, [w, speed]);
+  useEffect(() => {
+    if (open && visible && !reduce) loop.current?.play();
+    else loop.current?.pause();
+  }, [open, visible, reduce, w, speed]);
 
   // touch and pen: a tap toggles (a link's first tap only opens). Keyboard clicks (detail 0) and mouse clicks pass through.
   const onClick = (e: MouseEvent) => {
@@ -107,10 +115,20 @@ function Row({ item, open, setOpen, speed, separator, indent, bandClassName }: R
   };
 
   const props = {
-    onPointerDown: (e: { pointerType: string }) => (pointer.current = e.pointerType),
-    onPointerEnter: (e: { pointerType: string }) => e.pointerType === "mouse" && setOpen(true),
+    onPointerDown: (e: { pointerType: string }) => {
+      pointer.current = e.pointerType;
+      setKb(false);
+    },
+    onPointerEnter: (e: { pointerType: string }) => {
+      setKb(false);
+      if (e.pointerType === "mouse") setOpen(true);
+    },
     onPointerLeave: (e: { pointerType: string }) => e.pointerType === "mouse" && setOpen(false),
-    onFocus: (e: { currentTarget: Element }) => e.currentTarget.matches(":focus-visible") && setOpen(true),
+    onFocus: (e: { currentTarget: Element }) => {
+      if (!e.currentTarget.matches(":focus-visible")) return;
+      setKb(true);
+      setOpen(true);
+    },
     onBlur: () => setOpen(false),
     onClick,
     className: "relative block w-full cursor-pointer overflow-hidden text-start not-last:border-b border-border focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ring",
@@ -118,7 +136,7 @@ function Row({ item, open, setOpen, speed, separator, indent, bandClassName }: R
 
   const inner = (
     <>
-      <span className={cn("block truncate py-2", indent, SLIDE, open && "-translate-y-full motion-reduce:translate-y-0 motion-reduce:opacity-0")}>{item.label}</span>
+      <span className={cn("block truncate py-2", indent, SLIDE, kb && "transition-none", open && "-translate-y-full motion-reduce:translate-y-0 motion-reduce:opacity-0")}>{item.label}</span>
       {/* the band repeats the label for the eye only: the text above is the row's name */}
       {/* dir="ltr" on the band, not the strip: an RTL page would pin the strip to the band's right edge and the run left
           would open a gap there. The label keeps dir="auto" so Arabic still shapes */}
@@ -130,20 +148,21 @@ function Row({ item, open, setOpen, speed, separator, indent, bandClassName }: R
         className={cn(
           "absolute inset-0 flex items-center overflow-hidden bg-primary text-primary-foreground",
           SLIDE,
+          kb && "transition-none",
           !open && "translate-y-full motion-reduce:translate-y-0 motion-reduce:opacity-0",
           // a closed band is out of sight: pause the spinning separators in it too, not just the marquee
           !open && "[&_*]:[animation-play-state:paused]",
           bandClassName,
         )}
       >
-        <motion.span style={{ x }} className="flex w-max will-change-transform">
+        <span ref={strip} className="flex w-max will-change-transform">
           {Array.from({ length: count }, (_, i) => (
             <span key={i} ref={i === 0 ? first : undefined} className="flex shrink-0 items-center gap-[0.4em] pe-[0.4em] whitespace-nowrap">
               <span dir="auto">{item.label}</span>
               {separator}
             </span>
           ))}
-        </motion.span>
+        </span>
       </span>
     </>
   );

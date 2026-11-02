@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, useInView, useReducedMotion, useScroll, useTransform } from "motion/react";
+import { motion, useInView, useReducedMotion, useScroll, useTransform, type MotionStyle } from "motion/react";
 import { useRef, type ComponentProps, type ReactNode, type RefObject } from "react";
 import { cn } from "@/lib/utils";
 
@@ -32,12 +32,23 @@ function Spin({ duration, children }: { duration: number; children: ReactNode })
   );
 }
 
-// page (or container) scroll progress 0 → 1 maps to 0 → turns full turns, written straight to transform
+// the page's scroll on the compositor where scroll-driven animations exist; it sets `rotate`, not `transform`, so it never fights the fallback
+const TURN = "@keyframes spin-mark-turn{to{rotate:calc(var(--turns)*360deg)}}@supports (animation-timeline:scroll()){@media (prefers-reduced-motion:no-preference){[data-spin-turn]{animation:spin-mark-turn linear both;animation-timeline:scroll(root)}}}";
+
+// page (or container) scroll progress 0 → 1 maps to 0 → turns full turns. A container, or a browser without scroll timelines,
+// writes it straight to transform from JavaScript instead
 function ScrollTurn({ turns, container, children }: { turns: number; container?: RefObject<HTMLElement | null>; children: ReactNode }) {
   const { scrollYProgress } = useScroll({ container });
-  const rotate = useTransform(scrollYProgress, [0, 1], [0, turns * 360]);
+  // false on the server and progress is 0 there, so both renders write no rotation
+  const css = !container && typeof CSS !== "undefined" && CSS.supports("animation-timeline: scroll()");
+  const rotate = useTransform(scrollYProgress, (v) => (css ? 0 : v * turns * 360));
   return (
-    <motion.div className="size-full origin-center motion-reduce:!transform-none" style={{ rotate }}>
+    <motion.div data-spin-turn={container ? undefined : ""} className="size-full origin-center motion-reduce:!transform-none" style={{ rotate, "--turns": turns } as unknown as MotionStyle}>
+      {!container && (
+        <style href="spin-mark-turn" precedence="default">
+          {TURN}
+        </style>
+      )}
       {children}
     </motion.div>
   );
@@ -79,7 +90,7 @@ export function SpinMark({ children, mode = "spin", duration = 20, turns = 3, co
         // check-ignore: no-scale-zero a brand mark popping out of nothing on a spring is the whole effect (the source does it), and it fades in too
         initial={{ transform: "scale(0)", opacity: 0 }}
         animate={inView ? { transform: "scale(1)", opacity: 1 } : undefined}
-        transition={reduce ? { opacity: { duration: 0.2, ease: [0.23, 1, 0.32, 1] }, transform: { duration: 0 } } : { type: "spring", stiffness: 300, damping: 20 }}
+        transition={reduce ? { opacity: { duration: 0.2, ease: [0.23, 1, 0.32, 1] }, transform: { duration: 0 } } : { type: "spring", stiffness: 300, damping: 20, opacity: { duration: 0.2, ease: [0.23, 1, 0.32, 1] } }}
       >
         {mode === "scroll" ? (
           <ScrollTurn turns={turns} container={container}>

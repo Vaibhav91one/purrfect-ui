@@ -86,32 +86,34 @@ function MetalAsterisk({ colorBack, colorTint }: { colorBack?: string; colorTint
     return () => mo.disconnect();
   }, [colorTint, colorBack]);
   return (
-    <div ref={ref} className="size-full">
-      {gl && theme ? (
+    <div ref={ref} className="relative size-full">
+      <Asterisk />
+      {gl && theme && (
         // the shader pre-processes its image on the CPU (a heavy pass); suspend mode caches it by URL, so every star on the
-        // page shares one pass instead of one each. The plain asterisk shows meanwhile.
-        <Suspense fallback={<Asterisk />}>
-          <LiquidMetal
-            suspendWhenProcessingImage
-            width="100%"
-            height="100%"
-            image={ASTERISK_URL}
-            colorBack={theme.back}
-            colorTint={theme.text}
-            repetition={2}
-            softness={0.1}
-            shiftRed={0.3}
-            shiftBlue={0.3}
-            distortion={0.07}
-            contour={0.4}
-            angle={70}
-            speed={visible && !reduce ? 1 : 0} // speed 0 stops the shader's rAF entirely
-            scale={0.8}
-            fit="contain"
-          />
+        // page shares one pass instead of one each. The plain asterisk shows meanwhile, and the metal fades in over it
+        // (its opaque colorBack then hides it): opacity only, so reduced motion keeps the crossfade
+        <Suspense fallback={null}>
+          <div className="absolute inset-0 transition-opacity duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] starting:opacity-0">
+            <LiquidMetal
+              suspendWhenProcessingImage
+              width="100%"
+              height="100%"
+              image={ASTERISK_URL}
+              colorBack={theme.back}
+              colorTint={theme.text}
+              repetition={2}
+              softness={0.1}
+              shiftRed={0.3}
+              shiftBlue={0.3}
+              distortion={0.07}
+              contour={0.4}
+              angle={70}
+              speed={visible && !reduce ? 1 : 0} // speed 0 stops the shader's rAF entirely
+              scale={0.8}
+              fit="contain"
+            />
+          </div>
         </Suspense>
-      ) : (
-        <Asterisk />
       )}
     </div>
   );
@@ -173,7 +175,7 @@ export function StarRise({
   // The progress reads 0 until the first measurement, so the start is that first change, not the initial value.
   const start = useRef<number | null>(null);
   useMotionValueEvent(scrollYProgress, "change", (v) => void (start.current ??= v));
-  const rotate = useTransform(scrollYProgress, (v) => (start.current === null ? 0 : (v - start.current) * turns * 360));
+  const rotate = useTransform(scrollYProgress, (v) => (reduce || start.current === null ? 0 : (v - start.current) * turns * 360));
 
   return (
     <div ref={root} className={cn("relative shrink-0", className)} style={{ width: size, height: size, ...style }} {...rest}>

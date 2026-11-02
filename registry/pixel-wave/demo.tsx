@@ -1,5 +1,6 @@
 /* eslint-disable @next/next/no-img-element */
 import { ArrowLeft, ArrowUp, Bot, ListChecks, Search, ShieldCheck, Wrench } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { ShimmerText } from "@/registry/shimmer-text/shimmer-text";
 import { PixelWave } from "./pixel-wave";
 
@@ -11,9 +12,10 @@ const PROMPTS = [
   { label: "Verify a fix", icon: ShieldCheck },
 ];
 
-export default function PixelWaveDemo() {
+// playing/speed come from the gallery's Pause and Speed controls; the !important class beats the loops' own play state
+export default function PixelWaveDemo({ playing, speed = 1 }: { playing?: boolean; speed?: number }) {
   return (
-    <div className="relative grid h-[700px] w-[600px] place-items-center overflow-hidden rounded-3xl">
+    <div className={cn("relative grid h-[700px] w-[600px] place-items-center overflow-hidden rounded-3xl", playing === false && "[&_*]:![animation-play-state:paused]")}>
       <img src="/demo/canal.jpg" alt="" className="absolute inset-0 size-full object-cover" />
       <section className="relative flex h-[600px] w-[520px] flex-col overflow-hidden rounded-2xl bg-card text-card-foreground shadow-2xl ring-1 ring-border/50">
         <header className="grid grid-cols-3 items-center border-b border-border/50 px-4 py-3">
@@ -37,8 +39,8 @@ export default function PixelWaveDemo() {
           </p>
           <p className="self-end rounded-xl bg-muted px-3 py-1.5 text-foreground">Does the drafted comment say which commit was tested?</p>
           <div className="flex items-center gap-2.5 py-1" role="status" aria-label="Agent Bounty is thinking">
-            <PixelWave className="text-foreground" />
-            <ShimmerText className="font-medium">Agent Bounty is thinking</ShimmerText>
+            <PixelWave duration={0.65 / speed} stagger={0.09 / speed} className="text-foreground" />
+            <ShimmerText duration={2.8 / speed} className="font-medium">Agent Bounty is thinking</ShimmerText>
           </div>
         </div>
 

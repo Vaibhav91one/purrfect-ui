@@ -1,5 +1,4 @@
 /* eslint-disable @next/next/no-img-element */
-import type { RefObject } from "react";
 import { PhotoWordmark } from "./photo-wordmark";
 
 const link = "text-muted-foreground transition-colors hover:text-foreground";
@@ -10,8 +9,8 @@ const COLUMNS = [
   { title: "Socials", links: ["Website", "Instagram", "Facebook", "LinkedIn"] },
 ];
 
-/** Armour's footer, the wordmark rising out of its bottom edge. `container` is the scrolling box when it is not the page. */
-export function ArmourFooter({ container }: { container?: RefObject<HTMLElement | null> }) {
+/** Armour's footer, the wordmark rising out of its bottom edge. */
+export function ArmourFooter() {
   return (
     <footer className="w-full overflow-clip rounded-3xl bg-card px-8 pt-6 text-foreground">
       <div className="flex items-center justify-between border-b border-border py-5">
@@ -54,7 +53,7 @@ export function ArmourFooter({ container }: { container?: RefObject<HTMLElement 
           ))}
         </div>
       </div>
-      <PhotoWordmark text="ARMOUR" src="/demo/field.jpg" container={container} className="mt-4 font-black tracking-tight" />
+      <PhotoWordmark text="ARMOUR" src="/demo/field.jpg" className="mt-4 font-black tracking-tight" />
     </footer>
   );
 }

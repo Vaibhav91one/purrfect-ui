@@ -78,7 +78,7 @@ function CounterDemo({ playing, speed }: DemoProps) {
   const n = useTick(playing, speed, 2400);
   const [bump, setBump] = useState(0);
   return (
-    <button type="button" onClick={() => setBump((b) => b + 1)} aria-label="Next number">
+    <button type="button" onClick={() => setBump((b) => b + 1)} aria-label="Next number" className="transition-transform duration-150 ease-[cubic-bezier(0.23,1,0.32,1)] active:scale-[0.97] motion-reduce:transition-opacity motion-reduce:active:scale-100 motion-reduce:active:opacity-80">
       <Counter value={TARGETS[(n + bump) % TARGETS.length]} className="text-8xl font-semibold tracking-tight" />
     </button>
   );
@@ -170,11 +170,14 @@ function MagneticLoop({ playing, speed, opts }: DemoProps) {
       const cx = r.left + r.width / 2;
       const cy = r.top + r.height / 2;
       const over = t < 3.4;
-      const x = over ? cx + Math.cos(t * 1.7) * 70 : cx + 150;
-      const y = over ? cy + Math.sin(t * 2.3) * 14 : cy - 60;
+      // the dot glides in from the away point over 0.3s, and pulls only once it has arrived
+      const k = over ? Math.min(t / 0.3, 1) : 0;
+      const e = 1 - (1 - k) ** 3;
+      const x = cx + 150 + (Math.cos(t * 1.7) * 70 - 150) * e;
+      const y = cy - 60 + (Math.sin(t * 2.3) * 14 + 60) * e;
       cur.style.transform = `translate(${x - r.left}px, ${y - r.top}px)`;
-      cur.style.opacity = over ? "1" : "0.35";
-      if (over) {
+      cur.style.opacity = String(0.35 + 0.65 * e);
+      if (k === 1) {
         wrap.dispatchEvent(new PointerEvent("pointermove", { clientX: x, clientY: y, pointerType: "mouse" }));
         inside = true;
       } else if (inside) {
@@ -291,7 +294,7 @@ function WordmarkLoop({ playing, speed }: DemoProps) {
         <ScrollBox playing={playing} speed={speed} boxRef={box} className="h-full max-w-none px-6">
           <div className="grid h-full place-items-center text-3xl text-white">↓ Scroll</div>
           <div className="h-1/3" />
-          <ArmourFooter container={box} />
+          <ArmourFooter />
           <div className="h-6" />
         </ScrollBox>
       </div>
@@ -458,7 +461,7 @@ export const DEMOS: Record<string, (p: DemoProps) => ReactNode> = {
   "sticky-crossfade": StickyCrossfadeLoop,
   "stroke-replay": StrokeReplayDemo,
   "spring-chips": SpringChipsDemo,
-  "voice-bars": VoiceBarsDemo,
+  "voice-bars": ({ playing, speed }: DemoProps) => <VoiceBarsDemo playing={playing} speed={speed} />,
   "announce-strip": AnnounceStripDemo,
   "grid-disclosure": GridDisclosureDemo,
   "step-ring": StepRingDemo,
