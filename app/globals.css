@@ -526,14 +526,6 @@ svg[data-awake="true"] .cat-eye-ball {
   70% { translate: 0.004em 0; rotate: -3deg; }
 }
 
-/* the play-bow cat on "rf": its stretched-out front paw taps the f's stem, twice, now and then */
-@keyframes wm-tap {
-  0%, 56%, 80%, 100% { rotate: 0deg; }
-  62% { rotate: -25deg; }
-  66% { rotate: -17deg; }
-  71% { rotate: -25deg; }
-}
-
 @keyframes wm-watch {
   0%, 50%, 86%, 100% { rotate: 0deg; }
   58%, 76% { rotate: -14deg; }
@@ -581,10 +573,6 @@ svg[data-awake="true"] .cat-eye-ball {
   animation: 5s ease-in-out infinite wm-watch;
 }
 
-[data-in] .wm-tap {
-  animation: 3.8s ease-in-out infinite wm-tap;
-}
-
 /* pointing at the sleeping cat wakes it, the same way the sleeping cat elsewhere wakes */
 @media (hover: hover) and (pointer: fine) {
   .wm-sleep:hover {
@@ -611,7 +599,7 @@ svg[data-awake="true"] .cat-eye-ball {
     transition: opacity 0.4s ease var(--i, 0ms);
   }
 
-  [data-in] .wm-paw-bat, [data-in] .wm-dot, [data-in] .wm-watch, [data-in] .wm-tap, .wm-sleep:hover .cat-eye-ball {
+  [data-in] .wm-paw-bat, [data-in] .wm-dot, [data-in] .wm-watch, .wm-sleep:hover .cat-eye-ball {
     animation: none;
   }
 

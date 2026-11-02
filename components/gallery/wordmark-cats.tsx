@@ -187,39 +187,41 @@ export function SittingOnU() {
 }
 
 /**
- * The playing cat (`playing-cat.tsx`) in a play-bow across the "rr", facing the "f": back legs standing on the first
- * r's arm, rump up with the reference's tail curving up from it, chest low over the second r, both front legs out
- * along the f's crossbar under the head. Every few seconds the near paw taps the f's stem, twice. The head is the
- * sleeping cat's (same ears, cheeks and two dot eyes), seated on the chest. From the second r's origin: first r's arm
- * top -0.005-0.058em, r stem top 0.07-0.19em, r arm 0.31-0.37em, f crossbar to 0.44em, f stem from 0.439em; all at
- * 0.534em.
+ * The playing cat (`playing-cat.tsx`), drawn exactly as it is there (same shapes, strokes and motion), crouched along
+ * the tops of the "rr" facing the "f", with its ball resting on the f's crossbar: it swats, the ball hops and rolls to
+ * the stem and back. From the second r's origin: f crossbar's left arm ~0.37-0.44em, f stem from 0.439em; all at 0.534em.
  */
 export function PlayingOnR() {
-  const { TAIL, BLOB_AT } = PLAYING;
-  const { HEAD, EYES: DOTS } = SLEEPING;
-  // in the playing cat's viewBox (ground y 125 = the letter tops); the f's stem (0.439em) is x 223
-  const k = 0.0026;
-  const body = "M44 98 C34 76 48 54 76 52 C106 50 138 74 160 96 C170 106 168 120 154 122 C140 124 128 116 116 108 C100 98 82 96 70 102 C60 106 50 106 44 98 Z";
-  const head = "translate(-25 -12)"; // the sleeping cat's head, skull now x 151-209, y 46-106, chin over the front legs
+  const { BODY, HEAD, EYE, TAIL, HIND, PAW, BLOB_AT } = PLAYING;
+  const BALL = { x: 228, y: 112, r: 11 }; // as in playing-cat.tsx; ground (paws, ball shadow) is y 126
+  const k = 0.0028; // about the sleeping cat's size; the ball (x 228) rests on the f's crossbar, its roll ends at the stem
+  const ballAt = 0.388; // em: the middle of the crossbar's left arm
+  const vb = (x: number, y: number) => ({ transformOrigin: `${x}px ${y}px`, transformBox: "view-box" }) as CSSProperties;
+  const line = (d: string, f: boolean, w: number, cls: string, origin?: [number, number]) => (
+    <path d={d} fill="none" stroke={f ? "white" : undefined} strokeWidth={w + (f ? 0 : OUTLINE)} strokeLinecap="round" className={cls} style={origin ? vb(...origin) : undefined} />
+  );
   const parts = (f: boolean) => (
     <>
-      {stroke(TAIL, f, 10, "play-tail", "38px 90px")}
-      {stroke("M52 96 L50 120 M67 98 L68 120", f, 11, "", "0 0")}
-      {part(body, f)}
-      {stroke("M142 115 L203 122", f, 11, "", "0 0")}
-      {/* legs before the head, so a raised paw never fills in the eye cuts */}
-      {stroke("M152 113 L219 121", f, 11, "wm-tap", "152px 113px")}
-      <g className="play-head" style={{ transformOrigin: "165px 100px", transformBox: "view-box" }}>
-        <g transform={head}>
-          {HEAD.map((d) => part(d, f))}
-          {f && DOTS.map(([cx, cy]) => <circle key={cx} cx={cx} cy={cy} r="2.8" fill="black" />)}
-        </g>
+      {line(TAIL, f, 10, "play-tail", [38, 90])}
+      {line(HIND, f, 12, "", undefined)}
+      {part(BODY, f)}
+      <g className="play-head" style={vb(160, 112)}>
+        {HEAD.map((d) => part(d, f))}
+        {f && <path d={EYE} fill="black" />}
       </g>
+      {line(PAW, f, 11, "play-paw", [146, 108])}
     </>
   );
-  // a hairline along the near leg's underside so the two front legs read as two, not one thick band
-  const cuts = <path d="M164 120.5 L200 124.6" className="wm-tap" style={{ transformOrigin: "152px 113px" }} fill="none" stroke="black" strokeWidth="2.2" strokeLinecap="round" />;
-  return <Cat id="play" i={1} variant={1} vb={[260, 140]} at={[0.439 - 223 * k, 0.534 - 15 * k, 260 * k]} blobs={BLOB_AT} blob={[70, 12]} spin={[130, 80]} parts={parts} cuts={cuts} />;
+  const look = VARIANTS[1];
+  return (
+    <Cat id="play" i={1} variant={1} vb={[260, 140]} at={[ballAt - BALL.x * k, 0.534 - 14 * k, 260 * k]} blobs={BLOB_AT} blob={[70, 12]} spin={[130, 80]} parts={parts}>
+      <ellipse cx={BALL.x} cy="126" rx="12" ry="2.5" fill="currentColor" fillOpacity="0.25" className="play-shadow text-foreground" style={vb(BALL.x, 126)} />
+      <g className="play-ball" style={vb(BALL.x, BALL.y + BALL.r)}>
+        <circle cx={BALL.x} cy={BALL.y} r={BALL.r} fill={look.blobs[0]} className="text-foreground" stroke="currentColor" strokeWidth="3" />
+        <path d={`M${BALL.x - 8} ${BALL.y - 4} Q${BALL.x} ${BALL.y - 10} ${BALL.x + 8} ${BALL.y - 4}`} fill="none" stroke="white" strokeOpacity="0.7" strokeWidth="2" strokeLinecap="round" />
+      </g>
+    </Cat>
+  );
 }
 
 /** The dot of the "i", as its own element (the letter itself is set as a dotless ı) so the cat can knock it. */
