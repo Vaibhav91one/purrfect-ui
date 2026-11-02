@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, useAnimationFrame, useInView, useMotionValue, useMotionValueEvent, useReducedMotion, useScroll, useVelocity } from "motion/react";
+import { useAnimationFrame, useInView, useMotionValueEvent, useReducedMotion, useScroll, useVelocity } from "motion/react";
 import { useEffect, useRef, useState, type ComponentProps, type ReactNode, type RefObject } from "react";
 import { cn } from "@/lib/utils";
 
@@ -18,22 +18,25 @@ export interface ScrollMarqueeProps extends Omit<ComponentProps<"div">, "ref" | 
 /**
  * A marquee that flips direction with the page's scroll: scroll down and it runs left, scroll back up and it runs right.
  * It moves at a fixed speed per second whatever the frame rate, renders as many copies as the width needs and wraps by
- * exactly one copy, so it never runs out. It only runs while on screen, and pauses while hovered or while focus is inside. A
- * scroll flip eases the speed through zero instead of snapping. Screen readers and Tab get the first copy only (the
- * repeats are inert, so links inside are not doubled).
+ * exactly one copy, so it never runs out. The motion is a WAAPI animation on the compositor, so a busy main thread does
+ * not stall it; JavaScript only eases its playback rate. It only runs while on screen, eases to a stop while hovered and
+ * stops at once while focus is inside. A scroll flip eases the speed through zero instead of snapping. Screen readers and
+ * Tab get the first copy only (the repeats are inert, so links inside are not doubled).
  * Reduced motion: it stands still.
  */
 export function ScrollMarquee({ children, speed = 80, direction = "left", container, className, onPointerEnter, onPointerLeave, onFocus, onBlur, ...rest }: ScrollMarqueeProps) {
   const root = useRef<HTMLDivElement>(null);
   const first = useRef<HTMLDivElement>(null);
+  const track = useRef<HTMLDivElement>(null);
+  const anim = useRef<Animation | null>(null);
   const reduce = useReducedMotion();
   const visible = useInView(root);
-  const x = useMotionValue(0);
   const dir = useRef(direction === "left" ? -1 : 1);
   const v = useRef(direction === "left" ? -1 : 1); // the eased sign, so a flip slows through zero instead of snapping
   const rtl = useRef(false);
-  const paused = useRef(false);
-  const copy = useRef(0);
+  const paused = useRef(false); // focus inside: stop at once, keyboard gets no motion
+  const hovered = useRef(false); // pointer over it: ease to a stop
+  const rate = useRef(0);
   const [count, setCount] = useState(2);
 
   const { scrollY } = useScroll({ container });
@@ -43,49 +46,60 @@ export function ScrollMarquee({ children, speed = 80, direction = "left", contai
 
   // one copy's width, and enough copies to cover the box plus the one that scrolls out
   useEffect(() => {
-    const box = root.current, one = first.current;
-    if (!box || !one) return;
+    const box = root.current, one = first.current, el = track.current;
+    if (!box || !one || !el) return;
     const ro = new ResizeObserver(() => {
-      copy.current = one.offsetWidth;
-      rtl.current = getComputedStyle(box).direction === "rtl"; // RTL copies stack leftwards from the right edge
-      if (copy.current) setCount(Math.max(2, Math.ceil(box.clientWidth / copy.current) + 1));
+      const w = one.offsetWidth, isRtl = getComputedStyle(box).direction === "rtl"; // RTL copies stack leftwards from the right edge
+      if (!w) return;
+      setCount(Math.max(2, Math.ceil(box.clientWidth / w) + 1));
+      const prev = anim.current, t = prev?.effect?.getTiming();
+      if (prev && t?.duration === w && rtl.current === isRtl) return;
+      rtl.current = isRtl;
+      // one copy in w ms (1000px/s at rate 1), so the rate alone sets the speed; keep the phase across a resize
+      const p = prev && t ? (Number(prev.currentTime) % Number(t.duration)) / Number(t.duration) : 0;
+      prev?.cancel();
+      const a = el.animate(isRtl ? [{ transform: `translateX(${w}px)` }, { transform: "translateX(0px)" }] : [{ transform: "translateX(0px)" }, { transform: `translateX(${-w}px)` }], { duration: w, iterations: Infinity });
+      a.currentTime = w * (1e6 + p); // far from 0, so running backwards (right) never reaches the start and finishes
+      a.playbackRate = rate.current;
+      anim.current = a;
     });
     ro.observe(box);
     ro.observe(one);
     return () => ro.disconnect();
   }, []);
+  useEffect(() => () => anim.current?.cancel(), []);
 
+  // only the rate is set from here, and only while it changes: once it settles the compositor runs the loop alone
   useAnimationFrame((_, delta) => {
-    const w = copy.current;
-    if (reduce || !visible || !w || paused.current) return;
-    const dt = Math.min(delta, 100); // a backgrounded tab must not jump on return
-    v.current += (dir.current - v.current) * (1 - Math.exp(-dt / 80));
-    let next = x.get() + (v.current * speed * dt) / 1000;
-    if (rtl.current) {
-      if (next >= w) next -= w;
-      else if (next < 0) next += w;
-    } else if (next <= -w) next += w;
-    else if (next > 0) next -= w;
-    x.set(next);
+    const a = anim.current;
+    if (!a) return;
+    const run = !reduce && visible && !paused.current;
+    if (run) {
+      const target = hovered.current ? 0 : dir.current;
+      v.current += (target - v.current) * (1 - Math.exp(-Math.min(delta, 100) / 80));
+      if (Math.abs(target - v.current) < 1e-3) v.current = target;
+    }
+    const next = run ? (-v.current * speed) / 1000 : 0;
+    if (next !== rate.current) a.updatePlaybackRate((rate.current = next));
   });
 
   return (
     <div
       ref={root}
       className={cn("overflow-hidden", className)}
-      onPointerEnter={(e) => ((paused.current = true), onPointerEnter?.(e))}
-      onPointerLeave={(e) => ((paused.current = e.currentTarget.contains(document.activeElement)), onPointerLeave?.(e))}
+      onPointerEnter={(e) => ((hovered.current = true), onPointerEnter?.(e))}
+      onPointerLeave={(e) => ((hovered.current = false), onPointerLeave?.(e))}
       onFocus={(e) => ((paused.current = true), onFocus?.(e))}
-      onBlur={(e) => ((paused.current = e.currentTarget.contains(e.relatedTarget) || e.currentTarget.matches(":hover")), onBlur?.(e))}
+      onBlur={(e) => ((paused.current = e.currentTarget.contains(e.relatedTarget)), onBlur?.(e))}
       {...rest}
     >
-      <motion.div style={{ x }} className="flex w-max will-change-transform">
+      <div ref={track} className="flex w-max will-change-transform">
         {Array.from({ length: count }, (_, i) => (
           <div key={i} ref={i === 0 ? first : undefined} aria-hidden={i > 0 || undefined} inert={i > 0 || undefined} className="shrink-0">
             {children}
           </div>
         ))}
-      </motion.div>
+      </div>
     </div>
   );
 }

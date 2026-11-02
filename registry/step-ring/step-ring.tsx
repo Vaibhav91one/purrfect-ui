@@ -14,12 +14,15 @@ export interface StepRingProps extends Omit<ComponentProps<"span">, "children"> 
   index: number;
 }
 
+const TICK = "@keyframes step-ring-tick{from{opacity:0;scale:.9}}";
+
 /**
  * A numbered circular badge for one step of a pipeline. The current step's ring has a quarter-arc turning on it, a finished step
  * is a filled tick, a skipped one a dash. Opaque on purpose (`bg-background`), so a connector line running behind it never
  * crosses the number. Size it with `className` (`size-7 text-xs` by default, so `size-40 text-4xl` scales the number too); the arc and the tick
  * take the text colour. Screen readers hear "Step 3, current" from a hidden label.
- * Reduced motion: the arc turns at a third of the speed.
+ * A step that changes state in place fades its colours and the tick fades in from 90% scale.
+ * Reduced motion: the arc turns at a third of the speed and a state change only fades its colours.
  */
 export function StepRing({ state, index, className, ...rest }: StepRingProps) {
   const ref = useRef<SVGSVGElement>(null);
@@ -28,20 +31,23 @@ export function StepRing({ state, index, className, ...rest }: StepRingProps) {
   if (state === "done") {
     return (
       <span
-        className={cn("relative z-10 flex size-7 shrink-0 items-center justify-center rounded-full bg-foreground text-xs text-background", className)}
+        className={cn("relative z-10 flex size-7 shrink-0 items-center justify-center rounded-full bg-foreground text-xs text-background transition-colors duration-150 ease-out", className)}
         {...rest}
       >
-        <svg viewBox="0 0 256 256" aria-hidden className="size-1/2">
+        <svg viewBox="0 0 256 256" aria-hidden className="size-1/2 motion-safe:animate-[step-ring-tick_160ms_cubic-bezier(0.23,1,0.32,1)]">
           <path d="M40 144l56 56L216 80" fill="none" stroke="currentColor" strokeWidth="28" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
         <span className="sr-only">{`Step ${index}, ${state}`}</span>
+        <style href="step-ring" precedence="default">
+          {TICK}
+        </style>
       </span>
     );
   }
 
   return (
     <span
-      className={cn("relative z-10 flex size-7 shrink-0 items-center justify-center rounded-full bg-background text-xs text-foreground", className)}
+      className={cn("relative z-10 flex size-7 shrink-0 items-center justify-center rounded-full bg-background text-xs text-foreground transition-colors duration-150 ease-out", className)}
       {...rest}
     >
       <svg ref={ref} viewBox="0 0 28 28" aria-hidden className="absolute inset-0 size-full">

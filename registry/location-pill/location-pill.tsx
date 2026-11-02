@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, useInView, useReducedMotion, useScroll, useSpring, useTransform } from "motion/react";
+import { motion, useInView, useMotionValueEvent, useReducedMotion, useScroll, useSpring, useTransform } from "motion/react";
 import { useRef, type ComponentProps, type ReactNode, type RefObject } from "react";
 import { cn } from "@/lib/utils";
 
@@ -32,7 +32,7 @@ export interface LocationPillProps extends Omit<ComponentProps<"div">, "ref" | "
  * A "Located in …" pill meant to sit on the left edge of a hero: square on the left, round on the right, with an icon
  * turning slowly in a grey circle (a CSS animation, paused while off screen). Once its bottom passes the middle of the
  * viewport (or of `container`) it drifts up by `drift` of its height as you scroll, smoothed like a scrubbed timeline.
- * Reduced motion: the icon turns four times slower and the drift is off (scroll-linked movement is a vestibular trigger).
+ * Reduced motion: the icon holds still and the drift is off (scroll-linked movement is a vestibular trigger).
  * The corners are logical, so in a right-to-left page it mirrors: round on the left, flush on the right.
  */
 export function LocationPill({ label = "Located in India", icon, duration = 10, drift = 0.2, container, className, ...rest }: LocationPillProps) {
@@ -42,6 +42,14 @@ export function LocationPill({ label = "Located in India", icon, duration = 10, 
   // bottom edge at the middle of the view → bottom edge at the top: the source's ScrollTrigger("bottom center") range
   const { scrollYProgress } = useScroll({ target: ref, container, offset: ["end center", "end start"] });
   const smooth = useSpring(scrollYProgress, { stiffness: 120, damping: 30, restDelta: 0.001 });
+  // the spring starts at 0: jump it to the first measured progress, so a pill already past the middle at load sits at
+  // its offset instead of rising by itself; later scrolls still trail through the spring
+  const settled = useRef(false);
+  useMotionValueEvent(scrollYProgress, "change", (v) => {
+    if (settled.current) return;
+    settled.current = true;
+    smooth.jump(v);
+  });
   // safe for the server HTML: y is "-0%" at progress 0 whatever reduce is
   const y = useTransform(smooth, (p) => `${-p * (reduce ? 0 : drift) * 100}%`);
   return (
@@ -57,8 +65,8 @@ export function LocationPill({ label = "Located in India", icon, duration = 10, 
       {label ? <span className="min-w-0 truncate">{label}</span> : null}
       <span className="shrink-0 rounded-full bg-muted-foreground p-4 text-background">
         <span
-          className="block animate-spin [--slow:1] motion-reduce:[--slow:4]"
-          style={{ animationDuration: `calc(${duration}s * var(--slow))`, animationPlayState: visible ? "running" : "paused" }}
+          className="block animate-spin motion-reduce:animate-none"
+          style={{ animationDuration: `${duration}s`, animationPlayState: visible ? "running" : "paused" }}
         >
           {icon ?? <GlobeIcon />}
         </span>

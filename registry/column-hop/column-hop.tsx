@@ -26,10 +26,10 @@ export interface ColumnHopProps extends Omit<ComponentProps<"div">, "children" |
 
 type Phase = "settled" | "leaving" | "arriving";
 
-/** ms per half of a hop: the sink plus collapse, then the open the rise overlaps. */
-const MOVE = 340;
+/** ms per half of a hop: the sink plus collapse (visually done by 200ms of its 300ms), then the open the rise overlaps. */
+const MOVE = 200;
 const ARRIVE = 140;
-/** Reduced motion: both halves are just the 150ms fade. */
+/** Reduced motion: the card fades out over this, then its new row opens and it fades straight back in. */
 const FADE = 150;
 const EASE = "ease-[cubic-bezier(0.23,1,0.32,1)]";
 
@@ -67,7 +67,7 @@ export function ColumnHop({ columns, item, itemByColumn, stops = [0, 1], interva
           t = window.setTimeout(() => {
             setPhase("settled");
             run();
-          }, mq.matches ? FADE : ARRIVE);
+          }, mq.matches ? 0 : ARRIVE);
         }, mq.matches ? FADE : MOVE);
       }, interval * 1000);
     };

@@ -27,7 +27,7 @@ export interface PathCarouselProps extends Omit<ComponentProps<"div">, "children
 }
 
 /**
- * Items ride a curved path, the centre one biggest. Scroll over it, swipe, use the arrow keys while focus is in it, or
+ * Items ride a curved path, the centre one biggest. Scroll over it, drag or flick it, use the arrow keys while focus is in it, or
  * click a neighbour to rotate; a spring moves the rotation and every frame writes position, size and fade straight to the
  * nodes, so React never re-renders while it moves. With 3+ items it loops (the wheel still hands back to the page at the
  * first and last item). It fills its parent, so give the parent a height. Every listener is on the carousel itself: the page
@@ -97,14 +97,16 @@ export function PathCarousel({ items, active, onActive, itemWidth = 300, itemHei
         el.style.visibility = op < 0.02 && i !== act ? "hidden" : ""; // the tab stop stays focusable mid-glide
       });
     };
+    // implicit end keyframe: fades up to whatever opacity render() wrote
+    const fadeIn = (el: HTMLElement) => { if (!el.getAnimations().length) el.animate([{ opacity: 0, offset: 0 }], { duration: 200, easing: "cubic-bezier(0.23, 1, 0.32, 1)" }); };
     const frame = (now: number) => {
       const dt = Math.min(0.05, last ? (now - last) / 1000 : 1 / 60);
       last = now;
       if (reduce) {
         const jumped = rot !== target;
         rot = target; vel = 0; render();
-        // a jump, softened: every visible item fades in at its new place
-        if (jumped) L.forEach((el) => { if (!el.style.visibility) el.animate({ opacity: ["0", el.style.opacity] }, { duration: 200, easing: "ease-out" }); });
+        // a jump, softened: every visible item fades in at its new place (a fade already running is left alone, so held keys don't flicker)
+        if (jumped) L.forEach((el) => { if (!el.style.visibility) fadeIn(el); });
       } else { vel += ((target - rot) * K - vel * 2 * Math.sqrt(K)) * dt; rot += vel * dt; }
       render();
       raf = Math.abs(target - rot) > 0.0008 || Math.abs(vel) > 0.0008 ? requestAnimationFrame(frame) : 0;
@@ -148,12 +150,13 @@ export function PathCarousel({ items, active, onActive, itemWidth = 300, itemHei
     };
     if (activeRef.current !== undefined) target = rot = norm(activeRef.current);
     layout();
+    L.forEach(fadeIn); // the first placement fades in instead of popping after hydration
     announce();
     const ro = new ResizeObserver(layout);
     ro.observe(st);
 
     // wheel only counts over the carousel, and arrows only while focus is in it, so the rest of the page is untouched
-    let acc = 0, lock = 0, idle: ReturnType<typeof setTimeout> | undefined, tx = 0, ty = 0;
+    let acc = 0, lock = 0, idle: ReturnType<typeof setTimeout> | undefined, tx = 0, ty = 0, t0 = 0, rot0 = 0, drag = false;
     const onWheel = (e: WheelEvent) => {
       if (e.ctrlKey) return;
       const dv = Math.abs(e.deltaY) >= Math.abs(e.deltaX) ? e.deltaY : e.deltaX;
@@ -165,28 +168,41 @@ export function PathCarousel({ items, active, onActive, itemWidth = 300, itemHei
       acc += dv; // trackpads fire many small deltas: one step per ~60px, then a short lock so inertia doesn't skip items
       clearTimeout(idle);
       idle = setTimeout(() => (acc = 0), 160);
-      if (Math.abs(acc) >= 60) { step(Math.sign(acc)); acc = 0; lock = performance.now() + (reduce ? 0 : 520); }
+      if (Math.abs(acc) >= 60) { step(Math.sign(acc)); acc = 0; lock = performance.now() + 520; }
     };
     const onKey = (e: KeyboardEvent) => {
       if (e.metaKey || e.ctrlKey || e.altKey || (e.target as Element).closest?.("input,textarea,select,[contenteditable=true],[role=radiogroup],[role=tablist],[role=slider]")) return;
       const m = ({ ArrowDown: 1, ArrowRight: 1, ArrowUp: -1, ArrowLeft: -1 } as Record<string, number>)[e.key];
       if (m) { e.preventDefault(); step(m); }
     };
-    const onTs = (e: TouchEvent) => { tx = e.touches[0].clientX; ty = e.touches[0].clientY; };
+    const onTs = (e: TouchEvent) => { tx = e.touches[0].clientX; ty = e.touches[0].clientY; t0 = e.timeStamp; rot0 = rot; drag = false; };
+    // the path follows the finger; horizontal swipes only, a vertical one belongs to the page (touch-action: pan-y)
+    const onTm = (e: TouchEvent) => {
+      const dx = e.touches[0].clientX - tx, dy = e.touches[0].clientY - ty;
+      if (!drag && (Math.abs(dx) < 6 || Math.abs(dx) < Math.abs(dy))) return;
+      drag = true;
+      cancelAnimationFrame(raf); raf = 0; last = 0; vel = 0;
+      rot = clamp(rot0 - dx / (xOf(1) || 1));
+      render();
+    };
     const onTe = (e: TouchEvent) => {
-      const t = e.changedTouches[0], dx = t.clientX - tx, dy = t.clientY - ty;
-      // horizontal swipes only: a vertical one belongs to the page (touch-action: pan-y)
-      if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)) step(dx < 0 ? 1 : -1);
+      if (!drag) return;
+      drag = false;
+      const dx = e.changedTouches[0].clientX - tx;
+      // a quick flick (~0.11px/ms) goes on to the next item; a slow drag settles on the nearest one
+      go(Math.abs(dx) / Math.max(1, e.timeStamp - t0) > 0.11 ? (dx < 0 ? Math.ceil(rot) : Math.floor(rot)) : Math.round(rot));
     };
     st.addEventListener("wheel", onWheel, { passive: false }); // on the carousel only: the rest of the page scrolls off the main thread
     st.addEventListener("keydown", onKey);
     st.addEventListener("touchstart", onTs, { passive: true });
+    st.addEventListener("touchmove", onTm, { passive: true });
     st.addEventListener("touchend", onTe, { passive: true });
     return () => {
       st.removeEventListener("wheel", onWheel);
       st.removeEventListener("keydown", onKey);
       mq.removeEventListener("change", onMq);
       st.removeEventListener("touchstart", onTs);
+      st.removeEventListener("touchmove", onTm);
       st.removeEventListener("touchend", onTe);
       cancelAnimationFrame(raf);
       clearTimeout(idle);

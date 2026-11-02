@@ -32,7 +32,8 @@ export interface StickerCoverProps extends Omit<ComponentProps<"div">, "ref" | "
 }
 
 // every timing lives here, nowhere else (no matching CSS durations to keep in sync)
-const EASE = [0.66, 0, 0.23, 1] as const; // the cover curve: a slow start, then a long settle
+const EASE = [0.66, 0, 0.23, 1] as const; // the lift curve: a slow start, then a long settle
+const RISE_EASE = [0.32, 0.72, 0, 1] as const; // the rise answers a click, so it starts fast
 const OUT_EASE = [0.23, 1, 0.32, 1] as const;
 const DRIFT = "-7rem"; // how far the old page drifts up while the sheet rises over it
 const SWAP_AT = 0.88; // run the change slightly before the rise ends; the lift still waits for the whole rise
@@ -48,7 +49,7 @@ const FADE = { duration: 0.2, ease: OUT_EASE }; // reduced motion: a quick cross
  * routing: wrap the page in it and call `ref.current.play(() => router.push(href))`. While covered the page is `inert`
  * and focus comes back to where it was (or to the page box if that element is gone); the sheet is `aria-hidden`.
  * The page box is `isolate`, so a sticky header inside it never paints over the sheet. A change that has not settled after
- * 8s is given up on and the cover lifts. A play during the lift reverses the sheet from where it is.
+ * 8s is given up on and the cover lifts as the sticker leaves. A play during the lift reverses the sheet from where it is.
  * Everything is imperative motion on refs, so React never re-renders while it plays. Reduced motion: a quick crossfade
  * and no sticker.
  */
@@ -93,7 +94,7 @@ export function StickerCover({ ref, sticker, duration = 0.5, contained = false, 
       const p = page.current, s = sheet.current, st = pop.current;
       if (!p || !s) return;
       const { duration: d, reduce: still } = live.current;
-      const rise = { duration: d, ease: EASE };
+      const rise = { duration: d, ease: RISE_EASE };
       const r = turn.current++ % 2 ? 6 : -6; // the sticker tilts the other way each time
       const focused = document.activeElement;
       const hadFocus = focused instanceof HTMLElement && p.contains(focused);
@@ -108,7 +109,7 @@ export function StickerCover({ ref, sticker, duration = 0.5, contained = false, 
       } else {
         s.style.opacity = "1";
         // resuming an interrupted lift: rise from wherever the sheet is, so it reverses instead of leaving and coming back
-        risen = Promise.all([track(animate(s, { y: resume ? "0%" : ["102%", "0%"] }, rise)), track(animate(p, { y: ["0rem", DRIFT] }, rise))]);
+        risen = Promise.all([track(animate(s, { y: resume ? "0%" : ["102%", "0%"] }, resume ? { duration: d * 0.6, ease: OUT_EASE } : rise)), track(animate(p, { y: ["0rem", DRIFT] }, rise))]);
       }
       const showSticker = !!st && !still;
       const popDelay = instant ? 0 : POP.delay;
@@ -132,7 +133,8 @@ export function StickerCover({ ref, sticker, duration = 0.5, contained = false, 
       } while (queue.current);
       covered.current = false;
 
-      if (showSticker) await track(animate(st, { opacity: 0, scale: 0.8, rotate: r + 10 }, STICKER_OUT));
+      // the sticker leaves as the lift starts (its slow start hides nothing), so there is no gap where a play has to wait
+      if (showSticker) track(animate(st, { opacity: 0, scale: 0.8, rotate: r + 10 }, STICKER_OUT));
       p.style.transform = "none";
       p.inert = false;
       if (hadFocus) (focused.isConnected && p.contains(focused) ? focused : p).focus({ preventScroll: true });
@@ -157,7 +159,7 @@ export function StickerCover({ ref, sticker, duration = 0.5, contained = false, 
       }
       const back = lift.current; // lifting: stop the lift and cover again from where the sheet is
       if (back) back();
-      else if (busy.current) return busy.current.then(() => play(change, options)); // sticker leaving: cover again once gone
+      else if (busy.current) return busy.current.then(() => play(change, options)); // the last frames of a run: cover again once done
       queue.current = change ?? null;
       covered.current = true;
       const b = run(!!options?.instant, !!back).finally(() => {

@@ -61,7 +61,7 @@ export function LineRise({
         <span key={i} className="-mt-[.15em] -mb-[.15em] block overflow-x-visible overflow-y-clip pt-[.15em] pb-[.15em]">
           <span
             style={{ "--t": on ? `${duration}s` : "0.2s", "--d": on ? `${i * step}s` : "0s" } as CSSProperties}
-            className="block [transition:transform_var(--t)_cubic-bezier(0.33,1,0.68,1)_var(--d),opacity_calc(var(--t)/3)_linear_var(--d)] motion-safe:[@media(scripting:enabled)]:[transform:translateY(calc(100%_+_.3em))] motion-reduce:[@media(scripting:enabled)]:opacity-0 group-data-in/rise:![transform:none] group-data-in/rise:!opacity-100"
+            className="block [transition:transform_var(--t)_cubic-bezier(0.23,1,0.32,1)_var(--d),opacity_calc(var(--t)/3)_cubic-bezier(0.23,1,0.32,1)_var(--d)] motion-safe:[@media(scripting:enabled)]:[transform:translateY(calc(100%_+_.3em))] motion-reduce:[@media(scripting:enabled)]:opacity-0 group-data-in/rise:![transform:none] group-data-in/rise:!opacity-100"
           >
             {line === "" ? "\u00a0" : line /* an empty line keeps its height */}
           </span>

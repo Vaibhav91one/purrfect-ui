@@ -5,6 +5,7 @@ export const SITE = "https://vaibhavtomar.com";
 export const ARMOUR = "https://armour.vaibhavtomar.com";
 export const MAPINLY = "https://mapinly.vaibhavtomar.com";
 export const POINU = "https://poinu.vercel.app";
+const POINU_LOCAL = "http://localhost:3155";
 // Mapinly asks for a language once per browser; every Mapinly clip marks it answered
 const ML = { hasSeenLocaleDialog: "true" };
 // Poinu marks its loader and gallery intro seen per tab
@@ -14,10 +15,17 @@ export const BOUNTYDESK = "https://bountydesk.vaibhav.quest";
 // page's own entrance; start is a page expression that turns true on its first frame; focus + zoom aim the camera).
 // zoom overrides the automatic camera push; seconds the length. session: sessionStorage flags preset before the page loads
 // (the site's intro marked seen; default the portfolio's seenPreloader); fresh: true sets none, so the intro plays.
+// load with a target records it centred (and aims the camera at it) instead of the page top. href: the clip's link when
+// it was recorded elsewhere (a local copy of the site); poster: the second the still (.jpg) is taken at.
 // the first frame of Armour's own entrance: its nav is mounted but still at opacity 0, so the notch drop is in the clip
 const NAV_MOUNTED = "(() => { const n = document.querySelector('nav[role=navigation]'); return !!n && getComputedStyle(n).opacity === '0'; })()";
 // the notch clip starts once the hero has finished opening and the nav is still hidden, so it opens on the real page with no notch and the drop follows
 const NOTCH_NEXT = "(() => { const n = document.querySelector('nav[role=navigation]'); const h = document.querySelector('section .origin-center'); return !!n && getComputedStyle(n).opacity === '0' && !!h && (h.style.transform === 'none' || h.style.transform === ''); })()";
+
+const TL = 'div[class*="aspect-[4/5]"]:has(input[type=range])';
+// the timelapse hides the finished painting once it comes into view (a 0.7s fade): scroll it in, start a beat later on the blank paper
+const TL_STARTED = `(() => { const b = document.querySelector('${TL}'); if (!b || document.readyState !== "complete") return false; if (!window.__tl) { b.scrollIntoView({ block: "center" }); window.__tl = performance.now(); } return performance.now() - window.__tl > 900; })()`;
+const VB ="div.rounded-lg:nth-child(4):has(> div > div h2)";
 
 export const CLIPS = {
   "roll-button": { site: ARMOUR, target: 'section button[data-slot="button"]', interact: "hover", label: "armour.vaibhavtomar.com" },
@@ -39,6 +47,9 @@ export const CLIPS = {
   // Poinu: the intro skipped (session) except for counter-loader, which plays its own; on / it hands off into the gallery,
   // so it is recorded landing on /about, where it wipes and lifts like the component
   "counter-loader": { site: `${POINU}/about`, interact: "load", fresh: true, realtime: true, start: "!!document.querySelector('.ui-ld')", seconds: 3.4, label: "poinu.vercel.app" },
+  // the same intro, framed on its sticker pile: the stickers pop in one by one while the counter runs, then leave in reverse;
+  // it ends before the loader wipes up, and its still is the full pile (poster: seconds into the clip)
+  "sticker-pop": { site: `${POINU}/about`, interact: "load", fresh: true, realtime: true, start: "!!document.querySelector('.ui-ld')", focus: ".ui-ld > div.absolute", zoom: 1.8, seconds: 1.4, poster: 1.2, label: "poinu.vercel.app" },
   "sticker-cover": { site: POINU, target: 'nav[aria-label="Primary"] a:not([aria-current])', interact: "click", realtime: true, stay: 2.2, zoom: 1, session: PS, label: "poinu.vercel.app" },
   "inertia-gallery": { site: POINU, target: '[role=group][aria-label="Work view"] button:last-child', interact: "click", realtime: true, stay: 2.4, zoom: 1, session: PS, label: "poinu.vercel.app" },
   "fit-title": { site: `${POINU}/shop`, interact: "load", realtime: true, start: "!!document.querySelector('h1.ui-mk')", seconds: 2.5, session: PS, label: "poinu.vercel.app" },
@@ -57,5 +68,16 @@ export const CLIPS = {
   "spin-mark": { site: MAPINLY, target: "footer .origin-center svg", interact: "scroll", session: { "mapinly-intro": "1" }, local: ML, label: "mapinly.vaibhavtomar.com" },
   "arrow-link": { site: `${POINU}/work/31`, target: 'small + a[href^="/work/"]', interact: "hover", realtime: true, stay: 2.2, zoom: 1, session: PS, label: "poinu.vercel.app" },
   "fill-button": { target: '[class*="isolate"][class*="rounded-full"]', interact: "hover", label: "vaibhavtomar.com" },
+  // the "Multi-channel" card, recorded centred (load with a target) while its meter loops; the card has nothing to hover
+  "voice-bars": { site: ARMOUR, target: VB, interact: "load", realtime: true, start: `performance.now() > 5000 && document.readyState === "complete" && !!document.querySelector('${VB} canvas')`, zoom: 2.2, seconds: 4, label: "armour.vaibhavtomar.com" },
+  // the hero's phone, jumped to once the page has loaded: the chips spring in as it comes into view, under the camera
+  "spring-chips": { site: ARMOUR, target: 'div:has(> div[class*="shadow-[0_14px_35px"])', interact: "load", start: 'performance.now() > 6000 && document.readyState === "complete"', zoom: 1.35, seconds: 2.6, label: "armour.vaibhavtomar.com" },
+  // /about: the pictures crossfade as each block crosses the middle; the section itself starts at the page top (nothing to
+  // scroll), so the target is the fifth block (third in the clients grid) and the scroll runs over the blocks above it
+  "sticky-crossfade": { site: `${POINU}/about`, target: 'section[aria-label="About"] div[class*="mt-[90px]"] > [data-pic-block]:nth-child(3)', interact: "scroll", realtime: true, seconds: 4.5, session: PS, label: "poinu.vercel.app" },
+  // the live Poinu has no shop products and only real works (no placeholder timelapse): recorded from a local Poinu
+  // (`pnpm dev -p 3155` in the poinu repo, its seeded database); href points at the live page
+  "swap-card": { site: `${POINU_LOCAL}/shop`, href: `${POINU}/shop`, target: "main button.group", interact: "hover", realtime: true, stay: 2.4, session: PS, label: "poinu.vercel.app" },
+  "stroke-replay": { site: `${POINU_LOCAL}/work/1`, href: `${POINU}/work/1`, target: TL, interact: "load", realtime: true, start: TL_STARTED, zoom: 1.75, seconds: 10, poster: 9.5, session: PS, label: "poinu.vercel.app" },
   "scroll-reveal": { site: ARMOUR, target: 'p[class*="flex-wrap"][class*="leading-[1.1]"]', interact: "scroll", seconds: 4.5, endAt: 0.12, label: "armour.vaibhavtomar.com" },
 };

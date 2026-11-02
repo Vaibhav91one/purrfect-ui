@@ -18,8 +18,11 @@ export interface QuoteCycleProps extends Omit<ComponentProps<"div">, "children">
 
 const OUT = [0.22, 1, 0.36, 1] as const;
 const SNAP = [0.23, 1, 0.32, 1] as const;
-// seconds for the old line to leave; the new one waits this long, then drops in
+// seconds for the old line to leave; the new one starts at ENTER, as the old one is mostly gone, so the box never reads empty
 const LEAVE = 0.5;
+const ENTER = 0.3;
+// where an incoming line starts: below and 1.25x
+const ENTRY = "translateY(30px) scale(1.25)";
 // driven by `index` (a click), the swap is feedback to input: the old line leaves fast and the new one overlaps it
 const FAST = { leave: 0.2, delay: 0.1, show: 0.25 };
 
@@ -29,7 +32,7 @@ const fade: Variants = {
   show: (fast: boolean) => ({
     opacity: 1,
     // check-ignore: duration an ambient rotation, not a response to input
-    transition: fast ? { delay: FAST.delay, duration: FAST.show, ease: SNAP } : { delay: LEAVE, duration: 0.5, ease: OUT },
+    transition: fast ? { delay: FAST.delay, duration: FAST.show, ease: SNAP } : { delay: ENTER, duration: 0.5, ease: OUT },
   }),
   // check-ignore: duration an ambient rotation, not a response to input
   leave: (fast: boolean) => ({ opacity: 0, transition: fast ? { duration: FAST.leave, ease: SNAP } : { duration: LEAVE, ease: OUT } }),
@@ -38,19 +41,22 @@ const fade: Variants = {
 };
 // the held line is scale(1), its layout size, so nothing painted overflows the box; the others are relative to it
 const move: Variants = {
-  // drops in from 1.25x past rest to 0.83x, then pops back up to 1x and holds there (controlled: one quick drop to 1x)
+  // drops in from 1.25x past rest to 0.83x, then pops back up to 1x and holds there, each half on its own ease-out.
+  // Controlled: one quick drop to 1x from wherever the line is (a single target, so a line shown again mid-leave retargets)
   show: (fast: boolean) =>
     fast
-      ? { transform: ["translateY(30px) scale(1.25)", "translateY(0px) scale(1)"], transition: { delay: FAST.delay, duration: FAST.show, ease: SNAP } }
+      ? { transform: "translateY(0px) scale(1)", transition: { delay: FAST.delay, duration: FAST.show, ease: SNAP } }
       : {
-          transform: ["translateY(30px) scale(1.25)", "translateY(0px) scale(0.833)", "translateY(0px) scale(1)"],
+          transform: [ENTRY, "translateY(0px) scale(0.833)", "translateY(0px) scale(1)"],
           // check-ignore: duration drop-in plus pop, an ambient rotation, not a response to input
-          transition: { delay: LEAVE, duration: 1, times: [0, 0.5, 1], ease: OUT },
+          transition: { delay: ENTER, duration: 1, times: [0, 0.5, 1], ease: [OUT, OUT] },
         },
   // shrinks up and away
   // check-ignore: duration an ambient rotation, not a response to input
   leave: (fast: boolean) => ({ transform: "translateY(-30px) scale(0.667)", transition: fast ? { duration: FAST.leave, ease: SNAP } : { duration: LEAVE, ease: OUT } }),
-  hide: { transform: "translateY(-30px) scale(0.667)", transition: { duration: 0 } },
+  // controlled: once the line is invisible, snap it to the entry pose for its next show
+  hide: (fast: boolean) =>
+    fast ? { transform: ENTRY, transition: { duration: 0, delay: FAST.leave } } : { transform: "translateY(-30px) scale(0.667)", transition: { duration: 0 } },
   // the first line on first paint: already popped, so nothing plays on load (or on a StrictMode remount)
   rest: { transform: "translateY(0px) scale(1)", transition: { duration: 0 } },
 };
@@ -62,7 +68,7 @@ const move: Variants = {
  * (about 350ms, the lines overlapping) since it answers a click.
  * Rotation pauses on hover, on keyboard focus inside it and while off screen; pass `index` to drive it yourself instead. Hidden lines are inert, and the live
  * region is off unless `announce` is set.
- * Under `prefers-reduced-motion` the lines cross-fade in place.
+ * Under `prefers-reduced-motion` the lines cross-fade in place (the new one starts fading in as the old one is mostly gone).
  */
 export function QuoteCycle({
   lines,

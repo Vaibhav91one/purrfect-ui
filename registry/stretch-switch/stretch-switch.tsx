@@ -66,14 +66,14 @@ export function StretchSwitch({ checked, defaultChecked = false, onCheckedChange
       aria-label={label}
       onClick={flip}
       className={cn(
-        "flex h-[var(--switch-h)] w-[var(--switch-w)] shrink-0 items-center rounded-full p-[calc(var(--switch-h)/8)] transition-colors duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] [--switch-dir:1] [--switch-h:4rem] [--switch-w:7rem] rtl:[--switch-dir:-1] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foreground disabled:cursor-not-allowed disabled:opacity-50",
+        "flex h-[var(--switch-h)] w-[var(--switch-w)] shrink-0 items-center rounded-full p-[calc(var(--switch-h)/8)] transition-colors duration-200 ease-[ease] [--switch-dir:1] [--switch-h:4rem] [--switch-w:7rem] rtl:[--switch-dir:-1] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foreground disabled:cursor-not-allowed disabled:opacity-50",
         on ? "bg-primary" : "bg-input",
         className,
       )}
       {...rest}
     >
       {/* knob colours as in shadcn's Switch, so it sits in a shadcn theme in light and dark */}
-      <motion.span ref={knob} aria-hidden style={{ transform }} className={cn("aspect-square h-full rounded-full bg-background shadow", on ? "dark:bg-primary-foreground" : "dark:bg-foreground")} />
+      <motion.span ref={knob} aria-hidden style={{ transform }} className={cn("aspect-square h-full rounded-full bg-background shadow transition-colors duration-200 ease-[ease]", on ? "dark:bg-primary-foreground" : "dark:bg-foreground")} />
       {name && on && !rest.disabled && <input type="hidden" name={name} value={value} />}
     </button>
   );

@@ -10,7 +10,7 @@ export interface ShimmerTextProps extends Omit<ComponentProps<"span">, "ref"> {
   duration?: number;
 }
 
-const KEYFRAMES = "@keyframes shimmer-text{from{background-position:100% 0}to{background-position:-100% 0}}@keyframes shimmer-text-pulse{50%{opacity:.6}}";
+const KEYFRAMES = "@keyframes shimmer-text{from{background-position:100% 0}to{background-position:-100% 0}}@keyframes shimmer-text-pulse{50%{color:var(--foreground)}}";
 
 /**
  * Text that reads as busy: a bright band sweeps across the glyphs, which are clipped to a gradient (`bg-clip-text`).
@@ -18,7 +18,7 @@ const KEYFRAMES = "@keyframes shimmer-text{from{background-position:100% 0}to{ba
  * One CSS keyframe moves `background-position`: a repaint of the text box, cheap on a short label, no JavaScript per frame.
  * The loop pauses while the text is off screen. The text is one node, so screen readers read it once.
  * Icons (svg) stay static in the base colour; a child that sets its own colour opts out. The band's speed grows with the
- * box width, so it is a label effect. Reduced motion: no sweep, the base colour gently pulses in opacity.
+ * box width, so it is a label effect. Reduced motion: no sweep, the base colour gently pulses toward `foreground` (a colour pulse, so contrast never drops).
  */
 export function ShimmerText({ as: Tag = "span", duration = 2.8, className, style, children, ...rest }: ShimmerTextProps) {
   const ref = useRef<HTMLElement>(null);

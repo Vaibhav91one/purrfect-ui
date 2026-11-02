@@ -30,7 +30,7 @@ const EASE = "ease-[cubic-bezier(0.23,1,0.32,1)]";
 /**
  * A list of links where hovering a row floats a preview card that trails the pointer, with a "View" disc that keeps up
  * faster; moving to another row slides the card's strip to that row's preview. Keyboard focus opens it beside the focused
- * row, so it is not mouse-only. Positions are relative to the list, so it works anywhere on the page, and the pointer only
+ * row, so it is not mouse-only, and shows it at once (no fade, scale or slide). Positions are relative to the list, so it works anywhere on the page, and the pointer only
  * moves motion values: React re-renders once per row change, not per move. Previews mount on the first open, so a list
  * of screenshots costs nothing until someone hovers. The card stops at the viewport's side edges. Touch gets plain links.
  * Reduced motion: the card appears in place and jumps with the pointer, no scale and no trail.
@@ -39,7 +39,7 @@ export function HoverPreview({ items, label = "View", cardClassName, className, 
   const root = useRef<HTMLDivElement>(null);
   const reduce = useReducedMotion();
   const card = useRef<HTMLDivElement>(null);
-  const [state, setState] = useState({ open: false, index: 0, armed: false, slide: false });
+  const [state, setState] = useState({ open: false, index: 0, armed: false, slide: false, kb: false });
   const px = useMotionValue(0);
   const py = useMotionValue(0);
   const qx = useMotionValue(0); // the card's x, kept inside the viewport
@@ -60,8 +60,8 @@ export function HoverPreview({ items, label = "View", cardClassName, className, 
     qx.set(q);
     if (jump || reduce) for (const [s, v] of [[cx, q], [cy, y], [dx, x], [dy, y]] as const) s.jump(v);
   };
-  // the strip only slides between rows while the card is open; a reopen lands on the new row at once
-  const open = (index: number) => setState((s) => ({ open: true, index, armed: true, slide: s.open }));
+  // the strip only slides between rows while the card is open; a reopen lands on the new row at once. Keyboard opens never animate
+  const open = (index: number, kb = false) => setState((s) => ({ open: true, index, armed: true, slide: !kb && s.open, kb }));
   const close = () => setState((s) => ({ ...s, open: false }));
   // list coordinates, undoing any scale on an ancestor (a zoomed preview, a transformed card)
   const local = (x: number, y: number) => {
@@ -97,12 +97,12 @@ export function HoverPreview({ items, label = "View", cardClassName, className, 
                 if (!e.currentTarget.matches(":focus-visible")) return;
                 const r = e.currentTarget.getBoundingClientRect();
                 place(...local(r.left + r.width * 0.7, r.top + r.height / 2), true); // keyboard moves land at once
-                open(i);
+                open(i, true);
               }}
-              className="group/row flex items-center justify-between gap-6 py-8 transition-opacity duration-200 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-foreground [@media(hover:hover)]:hover:opacity-50"
+              className="group/row flex items-center justify-between gap-6 py-8 transition-opacity duration-200 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-foreground [@media(hover:hover)_and_(pointer:fine)]:hover:opacity-50"
             >
-              <span className={`min-w-0 text-3xl [overflow-wrap:anywhere] transition-[translate] duration-300 ${EASE} [@media(hover:hover)]:group-hover/row:-translate-x-2 motion-reduce:!translate-none md:text-[40px]`}>{it.title}</span>
-              {it.meta && <span className={`max-w-[40%] text-right text-sm text-muted-foreground transition-[translate] duration-300 ${EASE} [@media(hover:hover)]:group-hover/row:translate-x-2 motion-reduce:!translate-none`}>{it.meta}</span>}
+              <span className={`min-w-0 text-3xl [overflow-wrap:anywhere] transition-[translate] duration-200 ${EASE} [@media(hover:hover)_and_(pointer:fine)]:group-hover/row:-translate-x-2 motion-reduce:!translate-none md:text-[40px]`}>{it.title}</span>
+              {it.meta && <span className={`max-w-[40%] text-right text-sm text-muted-foreground transition-[translate] duration-200 ${EASE} [@media(hover:hover)_and_(pointer:fine)]:group-hover/row:translate-x-2 motion-reduce:!translate-none`}>{it.meta}</span>}
             </a>
           </li>
         ))}
@@ -115,11 +115,11 @@ export function HoverPreview({ items, label = "View", cardClassName, className, 
           ref={card}
           initial={false}
           animate={{ opacity: state.open ? 1 : 0, transform: state.open ? "translate(-50%, -50%) scale(1)" : "translate(-50%, -50%) scale(0.92)" }}
-          transition={{ duration: 0.25, ease: [0.23, 1, 0.32, 1] }}
+          transition={{ duration: state.kb ? 0 : 0.25, ease: [0.23, 1, 0.32, 1] }}
           className={cn("h-[300px] w-[400px] max-w-[60vw] overflow-hidden rounded-2xl motion-reduce:![transform:translate(-50%,-50%)]", cardClassName)}
         >
           {state.armed && (
-            <div style={{ transform: `translateY(${state.index * -100}%)` }} className={cn("size-full", state.slide && `transition-transform duration-300 ${EASE} motion-reduce:transition-none`)}>
+            <div style={{ transform: `translateY(${state.index * -100}%)` }} className={cn("size-full", state.slide && `transition-transform duration-[250ms] ${EASE} motion-reduce:transition-none`)}>
               {items.map((it, i) => (
                 <div key={i} className="grid size-full place-items-center overflow-hidden bg-muted" style={it.color ? { background: it.color } : undefined}>
                   {it.preview}
@@ -134,7 +134,7 @@ export function HoverPreview({ items, label = "View", cardClassName, className, 
           <motion.div
             initial={false}
             animate={{ opacity: state.open ? 1 : 0, transform: state.open ? "translate(-50%, -50%) scale(1)" : "translate(-50%, -50%) scale(0.9)" }}
-            transition={{ duration: 0.2, ease: [0.23, 1, 0.32, 1] }}
+            transition={{ duration: state.kb ? 0 : 0.2, ease: [0.23, 1, 0.32, 1] }}
             className="grid size-20 place-items-center rounded-full bg-primary text-sm font-light text-primary-foreground motion-reduce:![transform:translate(-50%,-50%)]"
           >
             {label}

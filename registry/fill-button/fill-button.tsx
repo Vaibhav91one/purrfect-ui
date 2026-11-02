@@ -11,7 +11,7 @@ export type FillButtonProps =
 /**
  * An outlined pill whose fill sweeps in from the reading start on hover or keyboard focus and sweeps out the far side on
  * leave, the label switching colour with it. A long label wraps (balanced) instead of widening the page. One CSS transition does the sweep; a data attribute says which way, so React never
- * re-renders. Touch and pen get the press colour only. Reduced motion: the fill fades in and out instead of sweeping.
+ * re-renders. Touch and pen get the fill only while pressed, with no sweep. Every press scales the pill to 0.97. Reduced motion: the fill fades in and out instead of sweeping.
  */
 export function FillButton({ className, children, ...rest }: FillButtonProps) {
   const fill = useRef<HTMLSpanElement>(null);
@@ -31,7 +31,7 @@ export function FillButton({ className, children, ...rest }: FillButtonProps) {
     onBlur: (e: FocusEvent<HTMLElement>) => (own.onBlur?.(e), !e.currentTarget.matches(":hover") && go("out")),
   };
   const cls = cn(
-    "group/fill relative isolate inline-flex items-center justify-center gap-2 overflow-hidden rounded-full border border-foreground px-6 py-3 max-w-full text-center text-sm font-semibold text-balance text-foreground transition-colors duration-250 ease-[cubic-bezier(0.23,1,0.32,1)] active:text-background has-[[data-state=in]]:text-background focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-foreground disabled:pointer-events-none disabled:opacity-50",
+    "group/fill relative isolate inline-flex items-center justify-center gap-2 overflow-hidden rounded-full border border-foreground px-6 py-3 max-w-full text-center text-sm font-semibold text-balance text-foreground transition-[color,background-color,border-color,scale] duration-250 ease-[cubic-bezier(0.23,1,0.32,1)] active:scale-[0.97] active:text-background has-[[data-state=idle]]:transition-[scale] has-[[data-state=in]]:text-background focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-foreground disabled:pointer-events-none disabled:opacity-50",
     className,
   );
   const inner = (
@@ -40,7 +40,7 @@ export function FillButton({ className, children, ...rest }: FillButtonProps) {
         ref={fill}
         aria-hidden
         data-state="idle"
-        className="absolute inset-0 -z-10 bg-foreground transition-[translate,opacity] duration-250 ease-[cubic-bezier(0.23,1,0.32,1)] data-[state=idle]:-translate-x-full data-[state=idle]:transition-none data-[state=in]:translate-x-0 data-[state=out]:translate-x-full rtl:data-[state=idle]:translate-x-full rtl:data-[state=out]:-translate-x-full group-active/fill:translate-x-0 motion-reduce:!translate-x-0 motion-reduce:data-[state=idle]:opacity-0 motion-reduce:data-[state=out]:opacity-0"
+        className="absolute inset-0 -z-10 bg-foreground transition-[translate,opacity] duration-250 ease-[cubic-bezier(0.23,1,0.32,1)] data-[state=idle]:-translate-x-full data-[state=idle]:transition-none data-[state=in]:translate-x-0 data-[state=out]:translate-x-full rtl:data-[state=idle]:translate-x-full rtl:data-[state=out]:-translate-x-full group-active/fill:!translate-x-0 motion-reduce:!translate-x-0 motion-reduce:group-active/fill:!opacity-100 motion-reduce:data-[state=idle]:opacity-0 motion-reduce:data-[state=out]:opacity-0"
       />
       {children}
     </>

@@ -69,8 +69,9 @@ export function HeroReveal({ src, alt = "", imgProps, title, description, action
           // corners never squash. Reduced motion keeps only the fade (no clip in CSS), so the server HTML and the first client render agree
           initial={appear ? { opacity: 0, clipPath: "inset(50% 0% 50% 0%)" } : false}
           animate={inView ? { opacity: 1, clipPath: "inset(0% 0% 0% 0%)" } : undefined}
+          // the opacity is short so the photo is solid before the white text fades in over it (it is all of the reduced-motion fade)
           // check-ignore: duration a one-off entrance, seen once per page load
-          transition={{ duration: 0.9, ease: OUT }}
+          transition={{ duration: 0.9, ease: OUT, opacity: { duration: 0.3, ease: OUT } }}
         >
           {/* a dark frame behind the photo (the photo is `relative` so it paints over this): if it fails to load, the white text still has something to sit on. check-ignore: hardcoded-color it sits under a photo, not the theme */}
           <div className="absolute inset-x-2 inset-y-2 rounded-[2rem] bg-neutral-900" />
@@ -99,7 +100,7 @@ export function HeroReveal({ src, alt = "", imgProps, title, description, action
             initial={appear ? { opacity: 0, transform: "scale(0.9) translateY(12px)" } : false}
             animate={inView ? { opacity: 1, transform: "scale(1) translateY(0px)" } : undefined}
             // check-ignore: duration a spring settles on its own time; it is the last beat of a one-off entrance
-            transition={reduce ? { duration: 0.2, delay: 0.2 } : { delay: 0.9, type: "spring", duration: 0.5, bounce: 0.2 }}
+            transition={reduce ? { duration: 0.2, delay: 0.2 } : { delay: 0.45, type: "spring", duration: 0.5, bounce: 0.2 }}
           >
             {action}
           </motion.div>

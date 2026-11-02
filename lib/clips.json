@@ -184,5 +184,41 @@
     "href": "https://vaibhavtomar.com",
     "w": 960,
     "h": 704
+  },
+  "voice-bars": {
+    "label": "armour.vaibhavtomar.com",
+    "href": "https://armour.vaibhavtomar.com",
+    "w": 960,
+    "h": 704
+  },
+  "spring-chips": {
+    "label": "armour.vaibhavtomar.com",
+    "href": "https://armour.vaibhavtomar.com",
+    "w": 960,
+    "h": 704
+  },
+  "swap-card": {
+    "label": "poinu.vercel.app",
+    "href": "https://poinu.vercel.app/shop",
+    "w": 960,
+    "h": 704
+  },
+  "stroke-replay": {
+    "label": "poinu.vercel.app",
+    "href": "https://poinu.vercel.app/work/1",
+    "w": 960,
+    "h": 704
+  },
+  "sticky-crossfade": {
+    "label": "poinu.vercel.app",
+    "href": "https://poinu.vercel.app/about",
+    "w": 960,
+    "h": 704
+  },
+  "sticker-pop": {
+    "label": "poinu.vercel.app",
+    "href": "https://poinu.vercel.app/about",
+    "w": 960,
+    "h": 704
   }
 }

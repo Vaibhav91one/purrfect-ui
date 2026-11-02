@@ -72,7 +72,7 @@ export function GlideTabs({ tabs, value, defaultValue, onValueChange, label = "T
       const to = [el.offsetTop, w.offsetWidth - el.offsetLeft - el.offsetWidth, w.offsetHeight - el.offsetTop - el.offsetHeight, el.offsetLeft];
       const jump = snap || viaKey.current || reduce; // the first placing, a resize, keyboard picks and reduced motion skip the glide
       [top, right, bottom, left].forEach((m, i) => (jump ? m.jump(to[i]) : m.set(to[i])));
-      if (reduce && !snap) animate(shown, [0, 1], { duration: 0.15, ease: [0.23, 1, 0.32, 1] });
+      if (reduce && !snap && !viaKey.current) animate(shown, [0, 1], { duration: 0.15, ease: [0.23, 1, 0.32, 1] });
       viaKey.current = false;
       box.dataset.ready = ""; // the clipped copy takes over from the server-drawn pill
     };
@@ -171,7 +171,7 @@ export function GlideTabs({ tabs, value, defaultValue, onValueChange, label = "T
                 "relative focus-visible:z-10 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-foreground disabled:pointer-events-none disabled:opacity-40",
                 selected
                   ? // the server draws the pill here; once the clipped copy is placed it takes over
-                    "bg-foreground text-background group-data-[ready]/tabs:bg-transparent group-data-[ready]/tabs:text-muted-foreground group-data-[ready]/tabs:focus-visible:text-background"
+                    "bg-foreground text-background group-data-[ready]/tabs:bg-transparent group-data-[ready]/tabs:text-muted-foreground group-data-[ready]/tabs:hover:text-foreground group-data-[ready]/tabs:focus-visible:text-background"
                   : "text-muted-foreground transition-colors duration-200 hover:text-foreground",
               )}
             >

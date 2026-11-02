@@ -23,7 +23,7 @@ const fmt = (ms: number) => {
  * Replays an SVG painting shape by shape, like a drawing-app timelapse: each shape scales up from 60% and fades in.
  * It starts once 40% of it is on screen, pauses when it leaves, and loops after a short hold. Play/pause and a scrubber
  * (keyboard-friendly range input) sit in a pill at the bottom; progress lives in refs and is written straight to the DOM,
- * so playback never re-renders React. Scrubbing shows shapes in 150ms so the painting keeps up with the thumb; below a
+ * so playback never re-renders React. Scrubbing shows shapes in 150ms so the painting keeps up with the thumb, and a jump of more than 30 shapes lands at once; below a
  * 13rem-wide box the time readout hides so the scrubber stays usable. Swapping the painting re-collects its shapes. Reduced motion: it shows the finished painting and does not autoplay; shapes fade
  * without scaling when you play or scrub.
  */
@@ -44,6 +44,9 @@ export function StrokeReplay({ children, duration = 12000, hold = 1600, label = 
     pos.current = p;
     const n = Math.round(p * shapes.current.length);
     if (n !== shown.current) {
+      // a big jump (a track click, the loop reset, a large painting) lands at once: hundreds of SVG transitions at a time
+      // repaint on the main thread and drop frames
+      box.current?.toggleAttribute("data-jump", Math.abs(n - shown.current) > 30);
       shown.current = n;
       shapes.current.forEach((s, i) => s.classList.toggle("on", i < n));
     }
@@ -128,6 +131,7 @@ export function StrokeReplay({ children, duration = 12000, hold = 1600, label = 
         "[&>svg>*:not([data-static])]:duration-700",
         // scrubbing is direct manipulation: shapes follow the thumb in 150ms instead of trailing it by a stroke
         "[&[data-scrub]>svg>*:not([data-static])]:duration-150",
+        "[&[data-jump]>svg>*:not([data-static])]:duration-0!",
         "[&>svg>.on:not([data-static])]:scale-100 [&>svg>.on:not([data-static])]:opacity-100",
         "motion-reduce:[&>svg>*:not([data-static])]:scale-100",
         className,
@@ -146,7 +150,7 @@ export function StrokeReplay({ children, duration = 12000, hold = 1600, label = 
             touched.current = true;
             setPlaying((p) => !p);
           }}
-          className="relative grid size-6 shrink-0 place-items-center rounded-full outline-none before:absolute before:-inset-2 focus-visible:ring-2 focus-visible:ring-background"
+          className="relative grid size-6 shrink-0 place-items-center rounded-full outline-none transition-transform duration-150 ease-[cubic-bezier(0.23,1,0.32,1)] before:absolute before:-inset-2 focus-visible:ring-2 focus-visible:ring-background active:scale-[0.97] motion-reduce:active:scale-100"
         >
           <svg viewBox="0 0 24 24" className="size-3.5 fill-current" aria-hidden>
             {playing ? (

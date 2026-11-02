@@ -37,23 +37,33 @@ export interface LayeredMenuProps extends Omit<ComponentProps<"div">, "children"
 const OUT = [0.22, 1, 0.36, 1] as const;
 const COLORS: [string, string, string, string] = ["#D94A3A", "#D9C8A4", "#4FA06B", "#0E7DDA"];
 // per panel, back to front: seconds in (duration, delay) and out (duration, delay). The front panel leaves first, and
-// the exit (~0.4s) is quicker than the entrance: by then the user has already decided
+// the exit (~0.4s) is quicker than the entrance (~0.7s, landing by ~0.5s on the strong ease-out): by then the user has already decided
 const TIMING = [
-  { in: [0.56, 0.02], out: [0.34, 0.09] },
-  { in: [0.62, 0.07], out: [0.36, 0.06] },
-  { in: [0.68, 0.12], out: [0.38, 0.03] },
-  { in: [0.74, 0.18], out: [0.4, 0] },
+  { in: [0.42, 0], out: [0.34, 0.09] },
+  { in: [0.46, 0.04], out: [0.36, 0.06] },
+  { in: [0.51, 0.08], out: [0.38, 0.03] },
+  { in: [0.56, 0.13], out: [0.4, 0] },
 ] as const;
-const REVEAL = 0.44; // links start fading in once the panels are mostly down
+const REVEAL = 0.34; // links start fading in once the panels are mostly down
 const FOCUSABLE = 'a[href],button:not([disabled]),[tabindex]:not([tabindex="-1"])';
 
-/** The menu's layer. While it plays its exit it is inert and click-through, so a link can't be hit or tabbed to during the ~0.4s it takes to leave. */
-function Layer({ pos, children }: { pos: string; children: ReactNode }) {
+/**
+ * The menu's layer. While it plays its exit it is inert and click-through, so a link can't be hit or tabbed to during the ~0.4s it takes to leave.
+ * Under reduced motion it is what fades, as one group: four translucent panels fading separately would blend into mud first.
+ */
+function Layer({ pos, reduce, children }: { pos: string; reduce: boolean; children: ReactNode }) {
   const present = useIsPresent();
   return (
-    <div inert={!present} className={`${pos} @container inset-0 z-[70] overflow-hidden ${present ? "" : "pointer-events-none"}`}>
+    <motion.div
+      inert={!present}
+      className={`${pos} @container inset-0 z-[70] overflow-hidden ${present ? "" : "pointer-events-none"}`}
+      initial={reduce ? { opacity: 0 } : false}
+      animate={{ opacity: 1 }}
+      exit={reduce ? { opacity: 0 } : undefined}
+      transition={{ duration: 0.2 }}
+    >
       {children}
-    </div>
+    </motion.div>
   );
 }
 
@@ -68,7 +78,7 @@ function Links({ links, size, blur, y, dur, base, step, onPick, reduce }: { link
           initial={{ opacity: 0, transform: `translateY(${reduce ? 0 : y}px)`, filter: `blur(${reduce ? 0 : blur}px)` }}
           animate={{ opacity: 1, transform: "translateY(0px)", filter: "blur(0px)" }}
           // check-ignore: duration the links settle after the panels land; stagger is what makes the list read as one move
-          transition={{ duration: dur, delay: reduce ? 0 : base + Math.min(i, 8) * step, ease: OUT }}
+          transition={{ duration: dur, delay: reduce ? 0 : base + Math.min(i, 5) * step, ease: OUT }}
         >
           <a href={l.href} onClick={onPick} className={`block [overflow-wrap:break-word] transition-opacity [@media(hover:hover)]:hover:opacity-80 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-current ${size}`}>
             {l.label}
@@ -83,7 +93,7 @@ function Links({ links, size, blur, y, dur, base, step, onPick, reduce }: { link
  * A burger that opens a full-frame menu built from four coloured panels dropping from the top, one after another, the
  * links fading up out of a blur on the front one. The burger turns into an X with a "Close" label. Escape or a link closes it;
  * focus moves into the menu and comes back to the burger, and Tab stays inside while it is open.
- * Reduced motion: the panels and links fade, nothing slides or blurs.
+ * Reduced motion: the menu fades in and out as one, and the links fade; nothing slides or blurs.
  */
 export function LayeredMenu({ primary, secondary = [], legal = [], colors = COLORS, logo, contained = false, defaultOpen = false, open, onOpenChange, delay = 0, color = "#F4F1DE", activeColor = "#F4F1DE", className, onKeyDown, ...rest }: LayeredMenuProps) {
   const reduce = useReducedMotion() ?? false;
@@ -165,7 +175,7 @@ export function LayeredMenu({ primary, secondary = [], legal = [], colors = COLO
         aria-label={isOpen ? "Close menu" : "Open menu"}
         onClick={() => set(!isOpen)}
         style={{ color: isOpen ? activeColor : color }}
-        className={cn("absolute top-5 left-5 z-[75] inline-flex h-12 items-center gap-3 rounded-full px-1 transition-[opacity,color] duration-300 motion-reduce:transition-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-current sm:top-7 sm:left-7 [@media(hover:hover)]:hover:opacity-85", className)}
+        className={cn("absolute top-5 left-5 z-[75] inline-flex h-12 items-center gap-3 rounded-full px-1 transition-[opacity,color] duration-300 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-current sm:top-7 sm:left-7 [@media(hover:hover)]:hover:opacity-85", className)}
       >
         <span className="relative block h-10 w-10 [--menu-line-width:2rem] sm:[--menu-line-width:3rem]">
           <span className={`${line} ${isOpen ? "translate-y-0 rotate-45" : "-translate-y-[5px]"}`}>
@@ -175,14 +185,14 @@ export function LayeredMenu({ primary, secondary = [], legal = [], colors = COLO
             <motion.span className="block h-full w-full origin-left rounded-full bg-current motion-reduce:!transform-none" {...draw(0.06)} />
           </span>
         </span>
-        {/* the label's width opens with it, as on Armour: shut, the button is just the burger (60px), not a wider invisible target. check-ignore: gpu-props a one-word label, and Armour's own motion */}
-        <span aria-hidden className={`hidden overflow-hidden text-sm tracking-tight transition-[max-width,opacity] duration-300 ease-[cubic-bezier(0.77,0,0.175,1)] motion-reduce:transition-none sm:block ${isOpen ? "max-w-20 opacity-100" : "max-w-0 opacity-0"}`}>Close</span>
+        {/* the label wipes open beside the burger, as on Armour. It sits outside the flow, so shut, the button is just the burger, not a wider invisible target */}
+        <span aria-hidden className={`absolute top-1/2 left-full ml-2 hidden -translate-y-1/2 text-sm tracking-tight transition-[clip-path,opacity] duration-300 ease-[cubic-bezier(0.77,0,0.175,1)] motion-reduce:transition-opacity sm:block ${isOpen ? "opacity-100 [clip-path:inset(0)]" : "pointer-events-none opacity-0 [clip-path:inset(0_100%_0_0)]"}`}>Close</span>
       </button>
 
       {/* a menu that starts open (defaultOpen) is drawn open, without the entrance: nothing to replay on page load, and the server HTML matches */}
       <AnimatePresence initial={false}>
         {isOpen && (
-          <Layer key="menu" pos={pos}>
+          <Layer key="menu" pos={pos} reduce={reduce}>
             {/* the strip of scrim under the panels closes it on click (Escape is the keyboard path). check-ignore: hardcoded-color a scrim dims whatever is behind, in either theme */}
             <motion.div aria-hidden onClick={close} className="absolute inset-0 bg-black/45" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.28, ease: OUT }} />
             {colors.map((c, i) => {
@@ -197,10 +207,11 @@ export function LayeredMenu({ primary, secondary = [], legal = [], colors = COLO
                   aria-label={front ? "Menu" : undefined}
                   className={`absolute inset-x-0 top-0 ${front ? tall[1] : tall[0]}`}
                   style={{ background: c }}
-                  initial={reduce ? { opacity: 0 } : { transform: "translateY(-100%)" }}
+                  // reduced motion: the panels stay put and opaque, the Layer fades them as one
+                  initial={reduce ? false : { transform: "translateY(-100%)" }}
                   // the reduced-motion target still names the resting transform: useReducedMotion only settles after the first render, so a panel can mount with the slide-in start state
-                  animate={reduce ? { opacity: 1, transform: "translateY(0%)", transition: { duration: 0.2 } } : { opacity: 1, transform: "translateY(0%)", transition: { duration: t.in[0], delay: t.in[1], ease: OUT } }}
-                  exit={reduce ? { opacity: 0, transition: { duration: 0.2 } } : { transform: "translateY(-100%)", transition: { duration: t.out[0], delay: t.out[1], ease: OUT } }}
+                  animate={reduce ? { opacity: 1, transform: "translateY(0%)", transition: { duration: 0 } } : { opacity: 1, transform: "translateY(0%)", transition: { duration: t.in[0], delay: t.in[1], ease: OUT } }}
+                  exit={reduce ? undefined : { transform: "translateY(-100%)", transition: { duration: t.out[0], delay: t.out[1], ease: OUT } }}
                 >
                   {front && (
                     <div className="flex h-full flex-col px-6 pt-6 pb-8 @2xl:px-10 @2xl:pt-7 @2xl:pb-10" style={{ color: activeColor }}>

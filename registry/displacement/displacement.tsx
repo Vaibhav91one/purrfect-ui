@@ -58,7 +58,8 @@ const K = 90; // trail spring stiffness; damping is critical, so it settles with
  * spring, the gap between them drags the pixels nearby, and the red and blue channels split along the drag with a little
  * grain. WebGL2, one full-screen triangle, no dependencies. It only draws while the trail is moving and stops while off
  * screen, so a still page costs nothing; props are read live. If WebGL2 is missing or the context is lost, the plain
- * image (or your painted canvas) shows instead. Reduced motion: a small bend (30% strength) with no colour split or grain.
+ * image (or your painted canvas) shows instead. Mouse and pen only: touch scrolls. Reduced motion: a small bend (30% strength)
+ * on a stiffer spring that settles fast, with no colour split or grain.
  */
 export function Displacement({ src, alt = "", paint, radius = 0.22, strength = 0.6, aberration = 0.5, grain = 0.08, className, ...rest }: DisplacementProps) {
   const root = useRef<HTMLDivElement>(null);
@@ -148,8 +149,9 @@ export function Displacement({ src, alt = "", paint, radius = 0.22, strength = 0
       const frame = (now: number) => {
         const dt = Math.min(0.05, last ? (now - last) / 1000 : 1 / 60);
         last = now;
+        const k = mq.matches ? 400 : K; // reduced motion: a stiffer spring, so the bend never lingers after the pointer stops
         for (const a of ["x", "y"] as const) {
-          vel[a] += ((mouse[a] - trail[a]) * K - vel[a] * 2 * Math.sqrt(K)) * dt;
+          vel[a] += ((mouse[a] - trail[a]) * k - vel[a] * 2 * Math.sqrt(k)) * dt;
           trail[a] += vel[a] * dt;
         }
         draw();
@@ -168,11 +170,15 @@ export function Displacement({ src, alt = "", paint, radius = 0.22, strength = 0
       glResize = size;
       const io = new IntersectionObserver(([e]) => { seen = e.isIntersecting; if (seen) kick(); });
       io.observe(box);
+      let top = NaN, left = NaN;
       const move = (e: PointerEvent) => {
+        if (e.pointerType === "touch") return; // a touch-drag is a scroll the browser takes over: only a twitch, never the effect
         const r = box.getBoundingClientRect();
         const s = box.offsetWidth / r.width || 1; // the rect is scaled by any transformed ancestor; w and h are not
         mouse.x = (e.clientX - r.left) * s; mouse.y = (e.clientY - r.top) * s;
-        if (e.type === "pointerenter") { trail.x = mouse.x; trail.y = mouse.y; vel.x = vel.y = 0; } // no sweep in from the last exit
+        // no sweep in from the last exit, or from where the pointer sat before the page scrolled under it
+        if (e.type === "pointerenter" || r.top !== top || r.left !== left) { trail.x = mouse.x; trail.y = mouse.y; vel.x = vel.y = 0; }
+        top = r.top; left = r.left;
         kick();
       };
       box.addEventListener("pointerenter", move);

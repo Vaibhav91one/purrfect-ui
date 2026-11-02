@@ -30,7 +30,7 @@ const SETTLE = 80;
  * (Web Animations, transform only), so it is seamless and never reads layout per frame. It pauses off screen, under the
  * mouse, after a tap (tap again to resume) and while something in it has focus. Screen readers and Tab get the line once;
  * the repeats are inert. Reduced motion: the line stands still and wraps so all of it is readable, and the strip fades
- * instead of sliding while its row closes, with no row collapse.
+ * instead of sliding, and its row closes once the fade ends.
  */
 export function AnnounceStrip({ children, duration = 40, open = true, onDismiss, hideOnScroll = true, container, className, ...rest }: AnnounceStripProps) {
   const root = useRef<HTMLDivElement>(null);
@@ -100,9 +100,15 @@ export function AnnounceStrip({ children, duration = 40, open = true, onDismiss,
     if (!hideOnScroll) return;
     const target: HTMLElement | Window = container?.current ?? window;
     const y = () => (target instanceof Window ? target.scrollY : target.scrollTop);
-    let last = y(), travelled = 0;
+    const h = () => root.current?.offsetHeight ?? 0;
+    // scroll anchoring moves the page by the strip's own height change as its row opens or closes: that is not the user,
+    // so positions are counted as if the row never changed
+    let lastH = h(), shift = 0, last = y(), travelled = 0;
     const onScroll = () => {
-      const now = y(), step = now - last;
+      const H = h();
+      shift += H - lastH;
+      lastH = H;
+      const now = y() - shift, step = now - last;
       last = now;
       if (step > 0 !== travelled > 0) travelled = 0;
       travelled += step;
@@ -123,12 +129,12 @@ export function AnnounceStrip({ children, duration = 40, open = true, onDismiss,
     <div
       ref={root}
       // the row closes as the strip slides, so the header below takes the space instead of leaving a gap
-      className={cn("grid bg-primary text-sm font-medium text-primary-foreground transition-[grid-template-rows] duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] motion-reduce:transition-none", className)}
+      className={cn("grid bg-primary text-sm font-medium text-primary-foreground transition-[grid-template-rows] duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] motion-reduce:duration-0", away && "motion-reduce:delay-200", className)}
       style={{ gridTemplateRows: away ? "0fr" : "1fr" }}
       onPointerEnter={(e) => e.pointerType === "mouse" && hold("hover", true)}
       onPointerLeave={() => hold("hover", false)}
-      // touch has no hover: a tap toggles the pause
-      onPointerDown={(e) => e.pointerType !== "mouse" && hold("tap", !held.current.tap)}
+      // touch has no hover: a tap toggles the pause (on up, so a finger-scroll that starts here, which cancels, does not)
+      onPointerUp={(e) => e.pointerType !== "mouse" && hold("tap", !held.current.tap)}
       onFocus={() => hold("focus", true)}
       onBlur={() => hold("focus", false)}
       {...rest}
@@ -136,7 +142,7 @@ export function AnnounceStrip({ children, duration = 40, open = true, onDismiss,
       <div className="min-h-0 overflow-hidden bg-inherit">
         <div
           inert={away || undefined}
-          className={cn("relative overflow-hidden bg-inherit transition-[translate,opacity] duration-300 ease-[cubic-bezier(0.23,1,0.32,1)]", away && "-translate-y-full motion-reduce:translate-y-0 motion-reduce:opacity-0")}
+          className={cn("relative overflow-hidden bg-inherit transition-[translate,opacity] duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] motion-reduce:duration-200", away && "-translate-y-full motion-reduce:translate-y-0 motion-reduce:opacity-0")}
         >
           <div ref={track} className={cn("flex w-max will-change-transform motion-reduce:w-auto", onDismiss && "motion-reduce:pr-12")}>
             {Array.from({ length: count * 2 }, (_, i) => (

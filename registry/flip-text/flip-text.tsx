@@ -14,11 +14,10 @@ const EASE = "cubic-bezier(0.23, 1, 0.32, 1)";
 const JOINED = /[\p{M}\p{Emoji_Modifier}\p{Regional_Indicator}\u{E0020}-\u{E007F}‍️\p{Script=Arabic}\p{Script=Syriac}\p{Script=Nko}\p{Script=Mongolian}]/u;
 
 /**
- * Text whose lines fade in one after another as it scrolls into view, and whose letters flip over on the X axis when
- * the pointer crosses them (a tap flips one on touch). When the text, or the link or button around it, gets keyboard
- * focus, every letter flips in a quick wave. One delegated listener on the root, the flips are Web Animations on
- * transform and opacity, and the text stays visible when JavaScript is off. Screen readers read the text, not letters.
- * Reduced motion: lines still fade in and letters blink their opacity instead of turning.
+ * Text whose lines rise and fade in one after another as it scrolls into view, and whose letters flip over on the X axis when
+ * the mouse crosses them (a tap flips one on touch; a swipe or keyboard focus flips nothing). One delegated listener on
+ * the root, the flips are Web Animations on transform and opacity, and the text stays visible when JavaScript is off. Screen readers read the text, not letters.
+ * Reduced motion: lines fade in without the rise and letters blink their opacity instead of turning.
  */
 export function FlipText({ text, className, ...rest }: FlipTextProps) {
   const ref = useRef<HTMLParagraphElement>(null);
@@ -42,16 +41,14 @@ export function FlipText({ text, className, ...rest }: FlipTextProps) {
       );
     };
     const onOver = (e: PointerEvent) => {
+      if (e.pointerType !== "mouse") return; // touch flips on a tap (pointerup) instead, so a scroll that starts on the text flips nothing
       const l = (e.target as Element).closest("[data-l]");
       // a turning letter shrinks under a still pointer and would retrigger itself: let a running flip finish
       if (l && !l.getAnimations().length) flip(l);
     };
-    const host = root.closest<HTMLElement>("a, button") ?? root;
-    const onFocus = (e: FocusEvent) => {
-      if (!(e.target as Element).matches(":focus-visible")) return;
-      const ls = root.querySelectorAll("[data-l]");
-      const step = Math.min(20, 200 / ls.length); // keyboard motion stays short: the whole wave is done in about 600ms
-      ls.forEach((l, i) => flip(l, i * step));
+    const onUp = (e: PointerEvent) => {
+      const l = e.pointerType !== "mouse" && (e.target as Element).closest("[data-l]");
+      if (l && !l.getAnimations().length) flip(l);
     };
     // lines are only known once laid out: group the words by their top edge, then let each line fade in after the last
     const io = new IntersectionObserver(
@@ -65,7 +62,7 @@ export function FlipText({ text, className, ...rest }: FlipTextProps) {
             line++;
             top = w.offsetTop;
           }
-          w.style.transitionDelay = `${Math.min(line, 8) * 120}ms`;
+          w.style.transitionDelay = `${Math.min(line, 8) * 60}ms`;
         });
         root.dataset.shown = "";
       },
@@ -74,11 +71,11 @@ export function FlipText({ text, className, ...rest }: FlipTextProps) {
     );
     io.observe(root);
     root.addEventListener("pointerover", onOver);
-    host.addEventListener("focusin", onFocus);
+    root.addEventListener("pointerup", onUp);
     return () => {
       io.disconnect();
       root.removeEventListener("pointerover", onOver);
-      host.removeEventListener("focusin", onFocus);
+      root.removeEventListener("pointerup", onUp);
     };
   }, []);
 
@@ -94,7 +91,7 @@ export function FlipText({ text, className, ...rest }: FlipTextProps) {
             {i > 0 && " "}
             {/* hidden only where scripts run, so the server HTML reads without JS; a long word wraps inside its own box */}
             {/* check-ignore: duration a once-per-page entrance, lines fading in as they arrive */}
-            <span data-w className="inline-block max-w-full transition-opacity duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] [@media(scripting:enabled)]:opacity-0 group-data-shown/flip:opacity-100">
+            <span data-w className="inline-block max-w-full transition-[opacity,translate] duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] [@media(scripting:enabled)]:opacity-0 motion-safe:[@media(scripting:enabled)]:translate-y-[0.25em] group-data-shown/flip:translate-y-0 group-data-shown/flip:opacity-100">
               {(JOINED.test(w) ? [w] : Array.from(w)).map((c, j) => (
                 <span key={j} data-l className="inline-block">
                   {c}

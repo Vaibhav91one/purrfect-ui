@@ -25,11 +25,15 @@ const FADE = { duration: 0.2, ease: [0.23, 1, 0.32, 1] as const };
 /**
  * A sticker image that pops in with a small springy overshoot and settles into its own tilt, only once it has actually
  * loaded (never an empty flash, cached images included). `out` plays the exit: it shrinks, tilts on and fades. Use
- * `delay` / `outDelay` to stagger a pile. Reduced motion: a plain fade at the final tilt, no scale or swing.
+ * `delay` / `outDelay` to stagger a pile; `delay` applies to the first pop only, so an exit turned back midway pops back at once. Reduced motion: a plain fade at the final tilt, no scale or swing.
  */
 export function StickerPop({ src, rotate = 0, delay = 0, out = false, outDelay = 0, alt = "", className, onLoad, ...rest }: StickerPopProps) {
   const reduce = useReducedMotion();
   const [loaded, setLoaded] = useState<string | null>(null);
+  // once it has left, `delay` is spent: an exit reversed midway turns back at once instead of waiting it out again
+  const [left, setLeft] = useState(false);
+  if (out && !left) setLeft(true);
+  const inDelay = left ? 0 : delay;
   const ready = loaded === src;
   // a cached image can finish before React attaches onLoad
   const check = useCallback((el: HTMLImageElement | null) => {
@@ -40,8 +44,8 @@ export function StickerPop({ src, rotate = 0, delay = 0, out = false, outDelay =
   const shown = { opacity: 1, scale: 1, rotate };
   const gone = reduce ? { opacity: 0, scale: 1, rotate } : { opacity: 0, scale: 0.8, rotate: rotate + 10 };
   const transition = reduce
-    ? { ...FADE, delay: out ? outDelay : delay, scale: { duration: 0 }, rotate: { duration: 0 } }
-    : { ...(out ? EXIT : POP), delay: out ? outDelay : delay };
+    ? { ...FADE, delay: out ? outDelay : inDelay, scale: { duration: 0 }, rotate: { duration: 0 } }
+    : { ...(out ? EXIT : POP), delay: out ? outDelay : inDelay };
 
   return (
     <motion.img

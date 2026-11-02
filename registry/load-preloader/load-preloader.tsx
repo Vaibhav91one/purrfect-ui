@@ -101,7 +101,8 @@ export function LoadPreloader({ ready, minDuration = 1.2, maxWait = 7, storageKe
     let raf = 0;
     let hold = 0;
     const tick = (now: number) => {
-      const target = over ? 100 : load.current * 100;
+      // a slow load still creeps (about 45 at 2s, 80 at 6s, never past 90 until it is ready), so the count never looks hung
+      const target = over ? 100 : Math.max(load.current * 100, 90 * (1 - 0.5 ** ((now - t0) / 2000)));
       // ease toward the load, but never outrun the minimum-time ramp, so the count always looks continuous
       const ramp = min ? Math.min(((now - t0) / min) * 100, 100) : 100;
       // never counts down, even when a new `ready` restarts the load
@@ -137,7 +138,7 @@ export function LoadPreloader({ ready, minDuration = 1.2, maxWait = 7, storageKe
       aria-live="polite"
       initial={false}
       animate={{ opacity: phase === "fade" ? 0 : 1 }}
-      transition={{ duration: reduce ? 0.3 : 0.6, ease: OUT }}
+      transition={{ duration: reduce ? 0.3 : 0.4, ease: OUT }}
       onAnimationComplete={() => {
         if (phase !== "fade") return;
         try {

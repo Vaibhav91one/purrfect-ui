@@ -1,10 +1,7 @@
-"use client";
-
-import { motion, useScroll, useTransform, type MotionStyle } from "motion/react";
-import { useRef, type ComponentProps, type CSSProperties, type RefObject } from "react";
+import type { ComponentProps, CSSProperties } from "react";
 import { cn } from "@/lib/utils";
 
-export interface PhotoWordmarkProps extends Omit<ComponentProps<"div">, "children" | "ref" | "onDrag" | "onDragStart" | "onDragEnd" | "onAnimationStart"> {
+export interface PhotoWordmarkProps extends Omit<ComponentProps<"div">, "children" | "ref"> {
   /** The word. One line, sized to fill the width. */
   text: string;
   /** The photo inside the letters. */
@@ -15,17 +12,18 @@ export interface PhotoWordmarkProps extends Omit<ComponentProps<"div">, "childre
   crop?: number;
   /** A blurred copy of the photo behind the word, as a glow. */
   glow?: boolean;
-  /** Follow a scrolling box instead of the page. */
-  container?: RefObject<HTMLElement | null>;
 }
 
-// the rise runs on a CSS view() timeline, so it is right from the first paint (no snap on hydration). The timeline is the
-// nearest scroll container, so an overflow-hidden ancestor stops it (use overflow-clip); without scroll-driven animations
-// the word just sits at its final crop
+// the rise and the drift share one CSS view timeline on the root (--pw), so they are right from the first paint (no snap on
+// hydration) and finish together as the root's bottom edge enters. The timeline follows the nearest scroll container, so an
+// overflow-hidden ancestor stops it (use overflow-clip); without scroll-driven animations the word just sits at its final crop
 const CSS =
   "@keyframes photo-wordmark-rise{from{translate:0 14%}to{translate:0 0}}" +
-  ".photo-wordmark-rise{animation:photo-wordmark-rise linear both;animation-timeline:view();animation-range:entry 0% entry 100%}" +
-  "@media (prefers-reduced-motion:reduce){.photo-wordmark-rise{animation:none}}";
+  "@keyframes photo-wordmark-drift{from{background-position:50% 20%}to{background-position:50% 100%}}" +
+  ".photo-wordmark-rise{animation:photo-wordmark-rise linear both}" +
+  ".photo-wordmark-drift{animation:photo-wordmark-drift linear both}" +
+  ".photo-wordmark-rise,.photo-wordmark-drift{animation-timeline:--pw;animation-range:entry 0% entry 100%}" +
+  "@media (prefers-reduced-motion:reduce){.photo-wordmark-rise,.photo-wordmark-drift{animation:none}}";
 
 /**
  * A huge wordmark filled with a photo (`background-clip: text`) and cropped at the bottom edge, with an optional blurred
@@ -34,27 +32,23 @@ const CSS =
  * font's average glyph width in em (0.75 suits a heavy sans; set `[--advance:0.9]` in className for a wide face or all wide
  * capitals like W and M, lower it for a narrow one). Every offset is in em, so it holds at any size; cap the size with a
  * `max-w-*` on className. Glyphs that still run past the width are clipped. As it scrolls into view the word rises a
- * little out of the crop (CSS scroll timeline: keep ancestors on overflow-clip, not overflow-hidden) and the photo drifts inside the letters (Motion), both tied to scroll
- * progress. If the photo fails to load, the word shows in the foreground colour.
+ * little out of the crop and the photo drifts inside the letters, both on one CSS view timeline (keep ancestors on
+ * overflow-clip, not overflow-hidden); it follows whichever box scrolls, the page or a scrolling container. If the photo fails to load, the word shows in the foreground colour.
  * Reduced motion: static, the word sits at its final crop and the photo stays put.
  */
-export function PhotoWordmark({ text, src, as = "p", crop = 0.3, glow = true, container, className, style, ...rest }: PhotoWordmarkProps) {
-  const root = useRef<HTMLDivElement>(null);
+export function PhotoWordmark({ text, src, as = "p", crop = 0.3, glow = true, className, style, ...rest }: PhotoWordmarkProps) {
   const Tag = as;
-  const { scrollYProgress } = useScroll({ target: root, container, offset: ["start end", "end end"] });
-  const drift = useTransform(scrollYProgress, [0, 1], ["20%", "100%"]);
-  // nothing to show, but useScroll still needs its target mounted
-  if (!text) return <div ref={root} hidden />;
+  if (!text) return null;
   const c = Math.min(Math.max(crop, 0), 0.8);
   // graphemes, not code points, so an emoji family counts as one character
   const chars = typeof Intl.Segmenter === "function" ? [...new Intl.Segmenter().segment(text)].length : Array.from(text).length;
 
   // JSON.stringify quotes and escapes the URL; the foreground colour shows through the letters if the photo fails
   const fill: CSSProperties = { backgroundImage: `url(${JSON.stringify(src)})`, WebkitBackgroundClip: "text" };
-  const word = "block whitespace-nowrap bg-foreground bg-cover bg-clip-text text-transparent [background-position:50%_var(--drift)]";
+  const word = "block whitespace-nowrap bg-foreground bg-cover bg-clip-text text-transparent [background-position:50%_100%] photo-wordmark-drift";
 
   return (
-    <div ref={root} className={cn("@container overflow-clip [--advance:0.75]", className)} style={{ "--chars": chars, ...style } as CSSProperties} {...rest}>
+    <div className={cn("@container overflow-clip [--advance:0.75] [view-timeline:--pw_block]", className)} style={{ "--chars": chars, ...style } as CSSProperties} {...rest}>
       {/* React 19 hoists this into <head> once, however many instances render */}
       <style href="photo-wordmark" precedence="default">
         {CSS}
@@ -62,10 +56,7 @@ export function PhotoWordmark({ text, src, as = "p", crop = 0.3, glow = true, co
       {/* room above for the glow; the box ends (1 - crop) em down, so the rest of the glyphs is clipped */}
       <div className="pt-[0.1em] text-[length:calc(100cqi/(var(--chars)*var(--advance)))] leading-none" style={{ height: `calc(0.1em + ${1 - c}em)` }}>
         {/* check-ignore: gpu-props background-position is the photo drift, a scroll-linked paint the source already pays for */}
-        <motion.div
-          style={{ "--drift": drift } as MotionStyle}
-          className="photo-wordmark-rise relative will-change-transform motion-reduce:[--drift:100%]!"
-        >
+        <div className="photo-wordmark-rise relative will-change-transform">
           {glow && (
             <span aria-hidden className={cn(word, "absolute inset-0 opacity-80 blur-[0.04em] select-none")} style={fill}>
               {text}
@@ -74,7 +65,7 @@ export function PhotoWordmark({ text, src, as = "p", crop = 0.3, glow = true, co
           <Tag className={cn(word, "relative")} style={fill}>
             {text}
           </Tag>
-        </motion.div>
+        </div>
       </div>
     </div>
   );

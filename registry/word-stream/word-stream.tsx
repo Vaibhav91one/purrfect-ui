@@ -13,7 +13,9 @@ export interface WordStreamProps extends Omit<ComponentProps<"p">, "children" | 
   onDone?: () => void;
 }
 
-const KEYFRAMES = "@keyframes word-stream-caret{0%,to{opacity:1}50%{opacity:0}}";
+const KEYFRAMES = "@keyframes word-stream-caret{0%,to{opacity:1}50%{opacity:0}}@keyframes word-stream-in{from{opacity:0}}";
+// -me-1 cancels the caret's 4px advance, so it never pushes the next word onto another line
+const CARET = "-me-1 ms-0.5 inline-block h-[0.8em] w-0.5 rounded-full bg-current align-[-0.05em] animate-[word-stream-caret_1s_step-end_infinite] motion-reduce:hidden";
 
 /**
  * Known text revealed one word at a time, with a caret pill riding the last shown word, then `onDone`.
@@ -22,8 +24,10 @@ const KEYFRAMES = "@keyframes word-stream-caret{0%,to{opacity:1}50%{opacity:0}}"
  * follows elapsed time, so a stream started in a background tab catches up. Long unbreakable tokens wrap (`wrap-anywhere`).
  * Spaces and newlines are kept as text (`whitespace-pre-wrap`).
  * The words are aria-hidden and the whole text sits once in an sr-only copy, so a live region announces it once, not per word.
- * The caret is a pseudo-element on the newest word; it blinks if the stream stalls, and goes when the text is complete.
- * Reduced motion: CSS shows the whole text at once with no caret (server HTML is the same either way), and `onDone` fires on mount.
+ * The caret is its own span moved after the newest word (outside the word's fade, so it stays solid); moving it restarts
+ * its blink, so it only blinks if the stream stalls, and it goes when the text is complete.
+ * Reduced motion: CSS shows the whole text at once in one 200ms fade with no caret (server HTML is the same either way),
+ * and `onDone` fires on mount.
  */
 export function WordStream({ text, interval = 45, onDone, className, ...rest }: WordStreamProps) {
   const ref = useRef<HTMLParagraphElement>(null);
@@ -35,10 +39,7 @@ export function WordStream({ text, interval = 45, onDone, className, ...rest }: 
   useEffect(() => {
     const words = ref.current?.querySelectorAll<HTMLElement>("[data-word]");
     if (!words) return;
-    words.forEach((w) => {
-      w.removeAttribute("data-on");
-      w.removeAttribute("data-caret");
-    });
+    words.forEach((w) => w.removeAttribute("data-on"));
     // check-ignore: reduced-motion-live only decides when onDone fires; the CSS (motion-reduce:opacity-100) shows every word live if the setting flips mid-stream
     if (!words.length || matchMedia("(prefers-reduced-motion: reduce)").matches) {
       done.current?.();
@@ -47,18 +48,21 @@ export function WordStream({ text, interval = 45, onDone, className, ...rest }: 
     // clocked by elapsed time, not by ticks: a throttled background tab catches up instead of crawling at 1 word/s
     const t0 = performance.now();
     let i = 0;
+    // made here, not by React, since it moves between React's nodes
+    const caret = document.createElement("span");
+    caret.className = CARET;
     const id = setInterval(() => {
       const n = Math.min(words.length, Math.floor((performance.now() - t0) / interval));
       if (n <= i) return;
-      words[i - 1]?.removeAttribute("data-caret");
       for (; i < n; i++) words[i].dataset.on = "";
-      if (i < words.length) words[i - 1].dataset.caret = "";
+      if (i < words.length) words[i - 1].after(caret);
       else {
+        caret.remove();
         clearInterval(id);
         done.current?.();
       }
     }, interval);
-    return () => clearInterval(id);
+    return () => (clearInterval(id), caret.remove());
   }, [text, interval]);
 
   return (
@@ -67,9 +71,8 @@ export function WordStream({ text, interval = 45, onDone, className, ...rest }: 
       className={cn(
         // wrap-anywhere: an unbreakable token (a hash, a long id) wraps instead of overflowing the bubble
         "whitespace-pre-wrap wrap-anywhere",
-        // -me-1 cancels the caret's 4px advance, so it never pushes the next word onto another line
-        "[&_[data-caret]]:after:-me-1 [&_[data-caret]]:after:ms-0.5 [&_[data-caret]]:after:inline-block [&_[data-caret]]:after:h-[0.8em] [&_[data-caret]]:after:w-0.5 [&_[data-caret]]:after:rounded-full [&_[data-caret]]:after:bg-current [&_[data-caret]]:after:align-[-0.05em] [&_[data-caret]]:after:content-['']",
-        "[&_[data-caret]]:after:animate-[word-stream-caret_1s_step-end_infinite] motion-reduce:[&_[data-caret]]:after:hidden",
+        // reduced motion: no per-word reveal, one gentle fade of the whole reply
+        "motion-reduce:animate-[word-stream-in_200ms_cubic-bezier(0.23,1,0.32,1)]",
         className,
       )}
       {...rest}
