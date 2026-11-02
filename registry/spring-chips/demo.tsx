@@ -16,7 +16,7 @@ const CHIPS: SpringChip[] = [
 export default function SpringChipsDemo() {
   const [run, setRun] = useState(0);
   return (
-    <div className="grid h-[560px] w-[520px] place-items-center">
+    <div className="grid h-[520px] w-[520px] place-items-center">
       <button type="button" onClick={() => setRun((n) => n + 1)} aria-label="Replay the chips">
         <SpringChips key={run} chips={CHIPS} className="grid h-[480px] w-[380px] place-items-center">
           <div className="relative h-[400px] w-[196px] -rotate-6 overflow-hidden rounded-[36px] border-[6px] border-neutral-900 bg-neutral-900 shadow-2xl">
