@@ -29,9 +29,12 @@ export type ComponentItem = {
   replay?: boolean;
   /** a scrolling stage: its width scales like any preview, its height stretches to the whole cell */
   fill?: boolean;
+  /** a loop with nothing to interact with (a loader, a shimmer): the dialog does not pause it while the pointer is over it */
+  ambient?: boolean;
 };
 
 const REPLAY = new Set(["notch", "hero-reveal", "inertia-gallery", "arrow-link", "flip-text"]);
+const AMBIENT = new Set(["pixel-wave", "shimmer-text", "spin-mark", "voice-bars"]);
 const FILL = new Set(["scroll-marquee", "photo-wordmark", "line-rise", "sticky-crossfade", "fan-out-cards"]);
 
 const item = (slug: string, name: string, category: string, description: string, nat: [number, number] = [420, 300], extras?: Extra[]): ComponentItem => ({
@@ -46,6 +49,7 @@ const item = (slug: string, name: string, category: string, description: string,
   clip: CLIPS[slug],
   replay: REPLAY.has(slug),
   fill: FILL.has(slug),
+  ambient: AMBIENT.has(slug),
 });
 
 // The slugs in registry.json are installable; the rest render a preview until they are ported.
