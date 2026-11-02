@@ -984,33 +984,6 @@ import { Mic, Banknote } from "lucide-react";
       "Reduced motion: the images still crossfade and the badge still inverts, but nothing zooms, turns or moves.",
     ],
   },
-  "stroke-replay": {
-    usage: `import { StrokeReplay } from "@/components/ui/stroke-replay";
-
-<StrokeReplay className="max-w-[520px]">
-  <svg viewBox="0 0 400 500">
-    <rect data-static width="400" height="500" fill="#efe6da" />
-    <circle cx="200" cy="220" r="90" fill="#d97a93" />
-    <ellipse cx="200" cy="240" rx="60" ry="76" fill="#f0c3a3" />
-  </svg>
-</StrokeReplay>`,
-    props: [
-      { name: "children", type: "ReactNode", description: "One inline <svg>. Its direct children are the shapes, replayed in order; mark a background or texture layer data-static to keep it always shown." },
-      { name: "duration", type: "number", default: "12000", description: "Milliseconds one replay takes, start to finished painting. The readout counts this time." },
-      { name: "hold", type: "number", default: "1600", description: "Milliseconds the finished painting holds before the replay loops." },
-      { name: "label", type: "ReactNode", default: '"Timelapse"', description: "Badge in the top start corner (top-right in RTL), one line, truncated; null hides it." },
-      { name: "className", type: "string", description: "Size it here; the box keeps a 4:5 aspect ratio." },
-    ],
-    behaviors: [
-      "Each shape scales up from 60% and fades in over 0.7s as the replay reaches it.",
-      "It starts the first time 40% of it is on screen, pauses when it leaves, and loops after the hold.",
-      "Play/pause button and a range scrubber (arrow keys work, screen readers hear the time); scrubbing or pausing stops autoplay, and scrubbed shapes follow the thumb in 150ms; a jump of more than 30 shapes at once (a track click, the loop reset) lands without transitions so large paintings keep their frame rate.",
-      "Below a 13rem-wide box the time readout hides so the scrubber keeps its width; the readout stays elapsed / total in RTL.",
-      "Changing the painting (children) re-collects its shapes at the current position.",
-      "Progress is written straight to the DOM, so playback never re-renders React.",
-      "Reduced motion: it shows the finished painting and does not autoplay; shapes fade without scaling when you play or scrub.",
-    ],
-  },
   "sticky-crossfade": {
     usage: `import { StickyCrossfade } from "@/components/ui/sticky-crossfade";
 

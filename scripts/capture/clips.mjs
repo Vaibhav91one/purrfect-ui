@@ -22,9 +22,6 @@ const NAV_MOUNTED = "(() => { const n = document.querySelector('nav[role=navigat
 // the notch clip starts once the hero has finished opening and the nav is still hidden, so it opens on the real page with no notch and the drop follows
 const NOTCH_NEXT = "(() => { const n = document.querySelector('nav[role=navigation]'); const h = document.querySelector('section .origin-center'); return !!n && getComputedStyle(n).opacity === '0' && !!h && (h.style.transform === 'none' || h.style.transform === ''); })()";
 
-const TL = 'div[class*="aspect-[4/5]"]:has(input[type=range])';
-// the timelapse hides the finished painting once it comes into view (a 0.7s fade): scroll it in, start a beat later on the blank paper
-const TL_STARTED = `(() => { const b = document.querySelector('${TL}'); if (!b || document.readyState !== "complete") return false; if (!window.__tl) { b.scrollIntoView({ block: "center" }); window.__tl = performance.now(); } return performance.now() - window.__tl > 900; })()`;
 const VB ="div.rounded-lg:nth-child(4):has(> div > div h2)";
 
 export const CLIPS = {
@@ -78,6 +75,5 @@ export const CLIPS = {
   // the live Poinu has no shop products and only real works (no placeholder timelapse): recorded from a local Poinu
   // (`pnpm dev -p 3155` in the poinu repo, its seeded database); href points at the live page
   "swap-card": { site: `${POINU_LOCAL}/shop`, href: `${POINU}/shop`, target: "main button.group", interact: "hover", realtime: true, stay: 2.4, session: PS, label: "poinu.vercel.app" },
-  "stroke-replay": { site: `${POINU_LOCAL}/work/1`, href: `${POINU}/work/1`, target: TL, interact: "load", realtime: true, start: TL_STARTED, zoom: 1.75, seconds: 10, poster: 9.5, session: PS, label: "poinu.vercel.app" },
   "scroll-reveal": { site: ARMOUR, target: 'p[class*="flex-wrap"][class*="leading-[1.1]"]', interact: "scroll", seconds: 4.5, endAt: 0.12, label: "armour.vaibhavtomar.com" },
 };
