@@ -20,7 +20,11 @@ export function NotchCat() {
   const [variant, setVariant] = useState(0);
 
   useEffect(() => {
-    if (reduce) return;
+    if (reduce) {
+      // no rise and no ducking: the cat is simply there (after mount, so the server HTML and first render agree)
+      const t = setTimeout(() => setHidden(false));
+      return () => clearTimeout(t);
+    }
     let t = setTimeout(() => setHidden(false), 400);
     const cycle = () => {
       t = setTimeout(() => {
@@ -36,7 +40,7 @@ export function NotchCat() {
 
   return (
     <div data-notch-cat data-variant={variant} className="absolute bottom-0 left-3.5 h-12 w-12 [clip-path:inset(-200px_-200px_0_-200px)]">
-      <motion.div initial={false} animate={{ y: hidden && !reduce ? HIDDEN_Y : 0 }} transition={SPRING} className="absolute top-0 -left-2">
+      <motion.div initial={false} animate={{ y: hidden ? HIDDEN_Y : 0 }} transition={reduce ? { duration: 0 } : SPRING} className="absolute top-0 -left-2">
         <GradientCat className="h-[88px]" outlineClass="text-white" variant={variant} />
       </motion.div>
     </div>
