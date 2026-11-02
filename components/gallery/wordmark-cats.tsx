@@ -187,31 +187,39 @@ export function SittingOnU() {
 }
 
 /**
- * The playing cat (`playing-cat.tsx`) in its play-bow on the second "r", facing the "f": hind paws on the r's stem,
- * chin over the r's arm, one front leg stretched along the f's crossbar to the foot of its stem. Every few seconds that
- * paw taps the stem. From the r's origin: r stem top 0.07-0.19em, r arm 0.31-0.37em, f crossbar to 0.44em, then the
- * f's stem rises from 0.439em; all of it tops out at 0.534em.
+ * The playing cat (`playing-cat.tsx`) in a play-bow across the "rr", facing the "f": back legs standing on the first
+ * r's arm, rump up with the reference's tail curving up from it, chest low over the second r, both front legs out
+ * along the f's crossbar under the head. Every few seconds the near paw taps the f's stem, twice. The head is the
+ * sleeping cat's (same ears, cheeks and two dot eyes), seated on the chest. From the second r's origin: first r's arm
+ * top -0.005-0.058em, r stem top 0.07-0.19em, r arm 0.31-0.37em, f crossbar to 0.44em, f stem from 0.439em; all at
+ * 0.534em.
  */
 export function PlayingOnR() {
-  const { BODY, HEAD, EYE, TAIL, HIND, BLOB_AT } = PLAYING;
-  // the stem's left edge (0.439em) is x 216, leaving a gap after the face (x 202) for the paw; the ground (y 125) is the
-  // letter tops
-  const k = 0.0028;
-  const leg = "M148 110 L212 122"; // the reference's front leg, stretched out along the crossbar
+  const { TAIL, BLOB_AT } = PLAYING;
+  const { HEAD, EYES: DOTS } = SLEEPING;
+  // in the playing cat's viewBox (ground y 125 = the letter tops); the f's stem (0.439em) is x 223
+  const k = 0.0026;
+  const body = "M44 98 C34 76 48 54 76 52 C106 50 138 74 160 96 C170 106 168 120 154 122 C140 124 128 116 116 108 C100 98 82 96 70 102 C60 106 50 106 44 98 Z";
+  const head = "translate(-25 -12)"; // the sleeping cat's head, skull now x 151-209, y 46-106, chin over the front legs
   const parts = (f: boolean) => (
     <>
       {stroke(TAIL, f, 10, "play-tail", "38px 90px")}
-      <path d={HIND} fill="none" stroke={f ? "white" : undefined} strokeWidth={12 + (f ? 0 : OUTLINE)} strokeLinecap="round" />
-      {part(BODY, f)}
-      {/* the leg goes before the head so the raised paw never fills in the eye cut */}
-      {stroke(leg, f, 11, "wm-tap", "148px 110px")}
-      <g className="play-head" style={{ transformOrigin: "160px 112px", transformBox: "view-box" }}>
-        {HEAD.map((d) => part(d, f))}
-        {f && <path d={EYE} fill="black" />}
+      {stroke("M52 96 L50 120 M67 98 L68 120", f, 11, "", "0 0")}
+      {part(body, f)}
+      {stroke("M142 115 L203 122", f, 11, "", "0 0")}
+      {/* legs before the head, so a raised paw never fills in the eye cuts */}
+      {stroke("M152 113 L219 121", f, 11, "wm-tap", "152px 113px")}
+      <g className="play-head" style={{ transformOrigin: "165px 100px", transformBox: "view-box" }}>
+        <g transform={head}>
+          {HEAD.map((d) => part(d, f))}
+          {f && DOTS.map(([cx, cy]) => <circle key={cx} cx={cx} cy={cy} r="2.8" fill="black" />)}
+        </g>
       </g>
     </>
   );
-  return <Cat id="play" i={1} variant={1} vb={[260, 140]} at={[0.439 - 216 * k, 0.534 - 15 * k, 260 * k]} blobs={BLOB_AT} blob={[70, 12]} spin={[130, 80]} parts={parts} />;
+  // a hairline along the near leg's underside so the two front legs read as two, not one thick band
+  const cuts = <path d="M164 120.5 L200 124.6" className="wm-tap" style={{ transformOrigin: "152px 113px" }} fill="none" stroke="black" strokeWidth="2.2" strokeLinecap="round" />;
+  return <Cat id="play" i={1} variant={1} vb={[260, 140]} at={[0.439 - 223 * k, 0.534 - 15 * k, 260 * k]} blobs={BLOB_AT} blob={[70, 12]} spin={[130, 80]} parts={parts} cuts={cuts} />;
 }
 
 /** The dot of the "i", as its own element (the letter itself is set as a dotless ı) so the cat can knock it. */
