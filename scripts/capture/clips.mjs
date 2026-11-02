@@ -48,7 +48,8 @@ export const CLIPS = {
   "inertia-gallery": { site: POINU, target: '[role=group][aria-label="Work view"] button:last-child', interact: "click", realtime: true, stay: 2.4, zoom: 1, session: PS, label: "poinu.vercel.app" },
   "fit-title": { site: `${POINU}/shop`, interact: "load", realtime: true, start: "!!document.querySelector('h1.ui-mk')", seconds: 2.5, session: PS, label: "poinu.vercel.app" },
   // Armour, batch 3
-  "fan-out-cards": { site: ARMOUR, target: 'article[class*="min-h-[104px]"]', interact: "scroll", seconds: 4, label: "armour.vaibhavtomar.com" },
+  // recorded centred on the phone (load with a target) so the cards fan out in place, the camera pushing in as they land
+  "fan-out-cards": { site: ARMOUR, target: 'div[class*="h-[430px]"] div[class*="max-w-[720px]"]', interact: "load", start: 'performance.now() > 3000 && document.readyState === "complete"', push: 0.1, zoom: 1.6, stay: 2.4, poster: 2.4, label: "armour.vaibhavtomar.com" },
   "shimmer-text": { site: ARMOUR, target: ".rounded-full > span.bg-clip-text", interact: "hover", label: "armour.vaibhavtomar.com" },
   "photo-wordmark": { site: ARMOUR, target: "footer h1:not([aria-hidden])", interact: "scroll", label: "armour.vaibhavtomar.com" },
   // batch 4-5 (drawer-menu has no clip: the portfolio shows its burger only at phone width)
