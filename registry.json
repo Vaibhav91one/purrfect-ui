@@ -294,7 +294,7 @@
       "name": "scroll-marquee",
       "type": "registry:ui",
       "title": "Scroll marquee",
-      "description": "A marquee that flips direction with the page scroll.",
+      "description": "A marquee that slides with the page scroll and flips its drift.",
       "dependencies": [
         "motion@^14.6.0"
       ],

@@ -262,7 +262,7 @@ function ParallaxLoop({ playing, speed }: DemoProps) {
   );
 }
 
-// the portfolio's hero: the name runs across the bottom; the box scrolls it up and back, and it flips each time the loop turns
+// the portfolio's hero: the name stays pinned while the box scrolls down and back, so it slides with the scroll and its drift flips each time the loop turns
 function MarqueeLoop({ playing, speed }: DemoProps) {
   const box = useRef<HTMLDivElement>(null);
   return (
@@ -270,10 +270,10 @@ function MarqueeLoop({ playing, speed }: DemoProps) {
       <ScrollBox playing={playing} speed={speed} boxRef={box} className="h-full max-w-none">
         <div className="h-[55%]" />
         {/* no pointer: the text fills the dialog's preview, and hovering it would ease the marquee to a stop while you watch or wheel the box */}
-        <ScrollMarquee container={box} className="pointer-events-none w-full">
+        <ScrollMarquee container={box} className="pointer-events-none sticky top-[55%] w-full">
           <p className="pr-16 text-8xl font-medium whitespace-nowrap text-foreground">Vaibhav Tomar —</p>
         </ScrollMarquee>
-        <div className="h-1/2" />
+        <div className="h-full" />
       </ScrollBox>
     </div>
   );
