@@ -105,7 +105,7 @@ function planFor(clip, m) {
     const stay = 1.0;
     const back = 2.0;
     const end = a + run + stay + back + 0.6;
-    return { end, y: (t) => m.from + (m.to - m.from) * (seg(t, a, run) - seg(t, a + run + stay, back)), cur: () => HIDDEN, press: () => false, cam: () => ({ z: 1, cx: W / 2, cy: H / 2 }) };
+    return { end, y: (t) => m.from + (m.to - m.from) * (seg(t, a, run) - seg(t, a + run + stay, back)), cur: () => HIDDEN, press: () => false, cam: () => ({ z: clip.zoom ?? 1, cx: W / 2, cy: H / 2 }) };
   }
   // hover / click
   const stay = clip.stay ?? T.stay;
@@ -217,7 +217,7 @@ async function render(slug, clip, base, browser) {
     await el.waitFor({ state: "attached", timeout: 15000 });
     if (mode === "scroll") {
       const docTop = await el.evaluate((n) => n.getBoundingClientRect().top + scrollY);
-      m.from = Math.max(0, docTop - H * 0.97); // the text is just below the fold
+      m.from = Math.max(0, docTop - H * (clip.startAt ?? 0.97)); // the text is just below the fold (startAt: a shorter run, its top lower on screen)
       m.to = Math.max(m.from + 1, docTop - H * (clip.endAt ?? 0.1)); // its top near the top of the screen
     } else {
       // where the camera will look, measured once the target is centred

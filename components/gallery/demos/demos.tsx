@@ -39,6 +39,7 @@ import { LineRiseScene } from "@/registry/line-rise/demo";
 import FlipTextDemo from "@/registry/flip-text/demo";
 import FadeLinesDemo from "@/registry/fade-lines/demo";
 import SpinMarkDemo from "@/registry/spin-mark/demo";
+import { AsteriskRowsScene } from "@/registry/asterisk-rows/demo";
 import ArrowLinkDemo from "@/registry/arrow-link/demo";
 import RollLinkDemo from "@/registry/roll-link/demo";
 import StickerPopDemo from "@/registry/sticker-pop/demo";
@@ -381,6 +382,18 @@ function LineRiseLoop({ playing, speed }: DemoProps) {
   );
 }
 
+// the rows stay pinned while the box scrolls down and back, so the marks turn with it and the drift speeds up and flips each time the loop turns
+function AsteriskRowsLoop({ playing, speed }: DemoProps) {
+  const box = useRef<HTMLDivElement>(null);
+  return (
+    <div className="relative size-full overflow-hidden rounded-2xl">
+      <ScrollBox playing={playing} speed={speed} boxRef={box} className="h-full max-w-none">
+        <AsteriskRowsScene container={box} />
+      </ScrollBox>
+    </div>
+  );
+}
+
 /** The preloader plays once and uncovers the photo, so the loop remounts it to play again: count, hold, fade, then the photo for a beat. The count shortens with speed so a whole run fits one step. */
 function LoadPreloaderLoop({ playing, speed }: DemoProps) {
   const n = useTick(playing, speed, 4000);
@@ -449,6 +462,7 @@ export const DEMOS: Record<string, (p: DemoProps) => ReactNode> = {
   "flip-text": FlipTextDemo,
   "fade-lines": FadeLinesDemo,
   "spin-mark": SpinMarkDemo,
+  "asterisk-rows": AsteriskRowsLoop,
   "arrow-link": ArrowLinkDemo,
   "cursor-follower": CursorLoop,
   "fill-button": FillButtonDemo,

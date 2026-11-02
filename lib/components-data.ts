@@ -35,7 +35,7 @@ export type ComponentItem = {
 
 const REPLAY = new Set(["notch", "hero-reveal", "inertia-gallery", "arrow-link", "fade-lines"]);
 const AMBIENT = new Set(["pixel-wave", "shimmer-text", "spin-mark", "voice-bars"]);
-const FILL = new Set(["scroll-marquee", "photo-wordmark", "line-rise", "sticky-crossfade"]);
+const FILL = new Set(["scroll-marquee", "asterisk-rows", "photo-wordmark", "line-rise", "sticky-crossfade"]);
 
 const item = (slug: string, name: string, category: string, description: string, nat: [number, number] = [420, 300], extras?: Extra[]): ComponentItem => ({
   slug,
@@ -98,6 +98,7 @@ export const COMPONENTS: ComponentItem[] = [
   item("flip-text", "Flip text", "Text", "Text whose letters flip over on the X axis under the pointer.", [560, 300]),
   item("fade-lines", "Fade lines", "Text", "Text whose lines rise and fade in one after another as it scrolls into view.", [560, 300]),
   item("spin-mark", "Spin mark", "Display", "A mark that pops in with a spring, then spins forever or turns as you scroll.", [448, 320]),
+  item("asterisk-rows", "Asterisk rows", "Display", "Rows of big asterisks that pop in, drift both ways with the scroll and turn as you go.", [1000, 620]),
   item("arrow-link", "Arrow link", "Navigation", "A big arrow link that rises from a mask on first view; on hover or focus the arrow slides and the label rolls over.", [480, 180]),
   item("fill-button", "Fill button", "Input", "An outlined pill whose fill sweeps in from the left and out to the right."),
 ];

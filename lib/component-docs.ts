@@ -806,6 +806,30 @@ const box = useRef<HTMLDivElement>(null);
       "Reduced motion: it fades in (no scale, no bounce) and does not turn.",
     ],
   },
+  "asterisk-rows": {
+    usage: `import { AsteriskRows } from "@/components/ui/asterisk-rows";
+
+<section className="bg-foreground py-24 text-background">
+  <AsteriskRows />
+</section>`,
+    props: [
+      { name: "children", type: "ReactNode", description: "The mark: any SVG, image or text. Defaults to an asterisk in the current text colour." },
+      { name: "rows", type: "number", default: "2", description: "How many rows. They alternate direction: the first runs left while you scroll down, the next right." },
+      { name: "count", type: "number", default: "5", description: "Marks in one copy of a row; the copy repeats to fill the width." },
+      { name: "speed", type: "number", default: "43", description: "Pixels per second each row drifts at rest." },
+      { name: "turns", type: "number", default: "3", description: "Full turns every mark makes from the top of the page (or container) to the bottom." },
+      { name: "container", type: "RefObject<HTMLElement | null>", description: "Follow a scrolling box instead of the page." },
+      { name: "markClassName", type: "string", default: '"size-42"', description: "Classes for each mark's box, mainly its size." },
+    ],
+    behaviors: [
+      "Each row is a marquee that wraps by exactly one copy and renders as many copies as the width needs. It only runs while on screen.",
+      "Scrolling down runs the first row left and the second right; scrolling up flips both. Scroll speed adds to the drift: 1000px/s of scroll makes it 6x faster (smoothed with a spring).",
+      "Every mark pops in on a spring (scale 0 to 1, slight overshoot) with a 200ms fade the first time it comes into view, including when it drifts in from the side. Without JavaScript the marks are simply visible.",
+      "Marks turn with the scroll progress, 0 to turns x 360 degrees. For the page it is a CSS scroll-driven animation on the compositor where supported; a container (or an older browser) writes the rotation from JavaScript.",
+      "Decorative: the whole thing is aria-hidden. Rows lay out left to right even in RTL.",
+      "Reduced motion: marks fade in (no scale, no bounce); rows do not drift and marks do not turn.",
+    ],
+  },
   "arrow-link": {
     usage: `import { ArrowLink } from "@/components/ui/arrow-link";
 

@@ -61,6 +61,9 @@ export const CLIPS = {
   "grid-disclosure": { site: BOUNTYDESK, target: "section#faq ul li:nth-child(3) button", interact: "click", label: "bountydesk.vaibhav.quest" },
   "flip-text": { target: 'nav p[class*="leading-relaxed"]', interact: "hover", label: "vaibhavtomar.com" },
   "spin-mark": { site: MAPINLY, target: "footer .origin-center svg", interact: "scroll", session: { "mapinly-intro": "1" }, local: ML, label: "mapinly.vaibhavtomar.com" },
+  // a short scroll with the band held in the middle of a pushed-in camera (startAt/endAt: where its top starts and ends on
+  // screen, zoom: the camera), so the marks turn and the rows flip without the sections around it
+  "asterisk-rows": { site: MAPINLY, target: "section.bg-black.py-24", interact: "scroll", startAt: 0.32, endAt: 0.07, zoom: 1.5, session: { "mapinly-intro": "1" }, local: ML, label: "mapinly.vaibhavtomar.com" },
   "arrow-link": { site: `${POINU}/work/31`, target: 'small + a[href^="/work/"]', interact: "hover", realtime: true, stay: 2.2, zoom: 1, session: PS, label: "poinu.vercel.app" },
   "fill-button": { target: '[class*="isolate"][class*="rounded-full"]', interact: "hover", label: "vaibhavtomar.com" },
   // the "Multi-channel" card, recorded centred (load with a target) while its meter loops; the card has nothing to hover
