@@ -270,7 +270,8 @@ function MarqueeLoop({ playing, speed }: DemoProps) {
     <div className="relative size-full overflow-hidden rounded-2xl">
       <ScrollBox playing={playing} speed={speed} boxRef={box} className="h-full max-w-none">
         <div className="h-[55%]" />
-        <ScrollMarquee container={box} className="w-full">
+        {/* no pointer: the text fills the dialog's preview, and hovering it would ease the marquee to a stop while you watch or wheel the box */}
+        <ScrollMarquee container={box} className="pointer-events-none w-full">
           <p className="pr-16 text-8xl font-medium whitespace-nowrap text-foreground">Vaibhav Tomar —</p>
         </ScrollMarquee>
         <div className="h-1/2" />
