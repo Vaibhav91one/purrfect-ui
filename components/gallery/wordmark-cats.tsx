@@ -1,9 +1,9 @@
 import type { CSSProperties, ReactNode, SVGProps } from "react";
-import { OUTLINE, SITTING, SLEEPING } from "./cat-shapes";
+import { OUTLINE, PLAYING, SITTING, SLEEPING } from "./cat-shapes";
 import { EYES, VARIANTS } from "./cat-variants";
 
-// The cats on the footer wordmark are the site's own cats in new poses: the hero's sitting cat (gradient-cat.tsx) and
-// the sleeping cat (sleeping-cat.tsx), with the same shapes (cat-shapes.ts), the same thin outline in the text colour
+// The cats on the footer wordmark are the site's own cats in new poses: the hero's sitting cat (gradient-cat.tsx), the
+// sleeping cat (sleeping-cat.tsx) and the playing cat (playing-cat.tsx), with the same shapes (cat-shapes.ts), the same thin outline in the text colour
 // and the same gradient blobs. Each keeps its own viewBox and is pinned to its letter in em by `At`, so it stays put at
 // any wordmark size. Motion is CSS; the client `Wordmark` turns the heads (`[data-head]`) and moves the peeking eyes
 // (`[data-look]`) toward the pointer. Glyph numbers in em are Geist 600, measured.
@@ -114,18 +114,20 @@ export function SleepingOnP() {
  */
 export function PeekOverC() {
   const { HEAD, EYES: DOTS } = SLEEPING;
-  // head centre (x 205) over the c's crown (0.30em), chin (y 118) tucked behind the arc at 0.4576em so the paws (y 96)
-  // land on its top (0.55em); below the arc's inner edge (0.47em) the c has a hole, so the head is clipped there
+  // head centre (x 205) over the c's crown (0.30em), sunk so only the eyes (y 85) and up clear the arc's top (0.546em):
+  // its widest part stays behind the letter. Below the arc's inner edge (0.47em) the c has a hole, so the head is clipped
+  // there. The paws grip the arc either side of the face, where its top is about 0.525em (y 93).
   const k = 0.0042;
-  const chin = 0.4576;
+  const chin = 0.428;
   const at: [number, number, number] = [0.3 - 205 * k, chin - 22 * k, 260 * k];
+  // pink and violet up in the ears, rose and amber low across the face, so the paws on the edge share the face's colours
   const blobs = [
-    [178, 96],
-    [234, 64],
-    [206, 112],
-    [214, 40],
+    [180, 40],
+    [232, 40],
+    [205, 72],
+    [205, 100],
   ] as const;
-  const paws = "M183 96 a9 6 0 1 0 18 0 a9 6 0 1 0 -18 0Z M213 96 a9 6 0 1 0 18 0 a9 6 0 1 0 -18 0Z";
+  const paws = "M170 93 a7.5 5 0 1 0 15 0 a7.5 5 0 1 0 -15 0Z M225 93 a7.5 5 0 1 0 15 0 a7.5 5 0 1 0 -15 0Z";
   return (
     <>
       <Cat
@@ -135,8 +137,8 @@ export function PeekOverC() {
         vb={[260, 140]}
         at={at}
         blobs={blobs}
-        blob={[40, 10]}
-        spin={[205, 85]}
+        blob={[44, 10]}
+        spin={[205, 72]}
         clip={118 - (0.47 - chin) / k}
         parts={(f) => <g className="wm-peek">{HEAD.map((d) => part(d, f))}</g>}
         cuts={
@@ -148,7 +150,7 @@ export function PeekOverC() {
         }
         className="-z-1"
       />
-      <Cat id="peek-paws" i={1} variant={2} vb={[260, 140]} at={at} blobs={blobs} blob={[40, 10]} spin={[205, 85]} parts={(f) => part(paws, f)} />
+      <Cat id="peek-paws" i={1} variant={2} vb={[260, 140]} at={at} blobs={blobs} blob={[44, 10]} spin={[205, 72]} parts={(f) => part(paws, f)} />
     </>
   );
 }
@@ -182,6 +184,34 @@ export function SittingOnU() {
     </>
   );
   return <Cat id="sit" i={2} variant={4} vb={[240, 250]} at={[0.462 - 140 * k, 0.534 - 6 * k, 240 * k]} blobs={BLOB_AT} blob={[62, 12]} spin={[120, 130]} parts={parts} mirror />;
+}
+
+/**
+ * The playing cat (`playing-cat.tsx`) in its play-bow on the second "r", facing the "f": hind paws on the r's stem,
+ * chin over the r's arm, one front leg stretched along the f's crossbar to the foot of its stem. Every few seconds that
+ * paw taps the stem. From the r's origin: r stem top 0.07-0.19em, r arm 0.31-0.37em, f crossbar to 0.44em, then the
+ * f's stem rises from 0.439em; all of it tops out at 0.534em.
+ */
+export function PlayingOnR() {
+  const { BODY, HEAD, EYE, TAIL, HIND, BLOB_AT } = PLAYING;
+  // the stem's left edge (0.439em) is x 216, leaving a gap after the face (x 202) for the paw; the ground (y 125) is the
+  // letter tops
+  const k = 0.0028;
+  const leg = "M148 110 L212 122"; // the reference's front leg, stretched out along the crossbar
+  const parts = (f: boolean) => (
+    <>
+      {stroke(TAIL, f, 10, "play-tail", "38px 90px")}
+      <path d={HIND} fill="none" stroke={f ? "white" : undefined} strokeWidth={12 + (f ? 0 : OUTLINE)} strokeLinecap="round" />
+      {part(BODY, f)}
+      {/* the leg goes before the head so the raised paw never fills in the eye cut */}
+      {stroke(leg, f, 11, "wm-tap", "148px 110px")}
+      <g className="play-head" style={{ transformOrigin: "160px 112px", transformBox: "view-box" }}>
+        {HEAD.map((d) => part(d, f))}
+        {f && <path d={EYE} fill="black" />}
+      </g>
+    </>
+  );
+  return <Cat id="play" i={1} variant={1} vb={[260, 140]} at={[0.439 - 216 * k, 0.534 - 15 * k, 260 * k]} blobs={BLOB_AT} blob={[70, 12]} spin={[130, 80]} parts={parts} />;
 }
 
 /** The dot of the "i", as its own element (the letter itself is set as a dotless ı) so the cat can knock it. */

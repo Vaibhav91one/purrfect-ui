@@ -46,3 +46,23 @@ export const SLEEPING = {
     [150, 70],
   ],
 } as const;
+
+/** The cat in a play-bow (`playing-cat.tsx`), side on, face to the right, rump up, chin low. viewBox 0 0 260 140. */
+export const PLAYING = {
+  BODY: "M36 96 C30 70 56 56 86 60 C118 64 142 82 150 104 C152 116 140 122 124 122 L56 122 C42 122 38 112 36 96 Z",
+  HEAD: [
+    "M154 82 L152 62 L168 74 Z", // ears
+    "M178 76 L190 60 L196 80 Z",
+    "M150 100 C148 84 160 76 176 78 C194 80 202 92 198 106 C194 118 178 122 166 120 C156 118 151 110 150 100 Z", // skull
+  ],
+  EYE: "M178 96 a4.4 4.8 0 1 0 8.8 0 a4.4 4.8 0 1 0 -8.8 0Z",
+  TAIL: "M38 90 C16 86 8 62 22 44",
+  HIND: "M60 120 H98", // back paws on the ground
+  PAW: "M146 108 L170 122", // front leg; swats about its shoulder
+  BLOB_AT: [
+    [60, 90],
+    [180, 90],
+    [120, 118],
+    [150, 70],
+  ],
+} as const;

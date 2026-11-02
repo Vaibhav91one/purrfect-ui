@@ -3,7 +3,7 @@ import { CATEGORIES, categorySlug, COMPONENTS } from "@/lib/components-data";
 import { sectionBaseClasses } from "@/lib/layout-classes";
 import { GITHUB_URL } from "@/lib/site";
 import { Wordmark } from "@/components/gallery/wordmark";
-import { At, IDot, PeekOverC, SittingOnU, SleepingOnP } from "@/components/gallery/wordmark-cats";
+import { At, IDot, PeekOverC, PlayingOnR, SittingOnU, SleepingOnP } from "@/components/gallery/wordmark-cats";
 
 const columns = [
   { title: "Components", links: COMPONENTS.slice(0, 6).map((c) => ({ label: c.name, href: `/components/${c.slug}` })) },
@@ -71,11 +71,15 @@ export function FooterSection() {
           <At>
             <SleepingOnP />
           </At>
-          purrfe
+          pur
+          <At>
+            <PlayingOnR />
+          </At>
+          rfe
           <At>
             <PeekOverC />
           </At>
-          ct
+          ct{" "}
           <At>
             <SittingOnU />
           </At>
