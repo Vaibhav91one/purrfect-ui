@@ -28,8 +28,8 @@ const EASE = [0.22, 1, 0.36, 1] as const;
 const SPRING = { type: "spring", stiffness: 210, damping: 20, mass: 0.75 } as const;
 
 /**
- * Cards that start stacked in the centre and spring out to their own spots, tilted, when the group scrolls into view,
- * one after another. Offsets are percentages of the container (each card rides a zero-size point in the centre that moves
+ * Cards that start stacked behind the centre, each already at its own height and tilt, and spring sideways out to their
+ * spots when the group scrolls into view, one after another. Offsets are percentages of the container (each card rides a zero-size point in the centre that moves
  * in container units, so no empty layer box ever widens the page), which means the fan scales with whatever box it is in:
  * no pixel offsets, no media queries.
  * Give the root a height. Cards are at most 40% of the box wide, so keep |x| within 30 to keep them inside it (further
@@ -38,17 +38,17 @@ const SPRING = { type: "spring", stiffness: 210, damping: 20, mass: 0.75 } as co
  */
 export function FanOutCards({ cards, center, stagger = 0.08, cardClassName, className, ...rest }: FanOutCardsProps) {
   const layer: Variants = {
-    hidden: { x: "0cqw", y: "0cqh" },
+    hidden: (c: { y: number }) => ({ x: "0cqw", y: `${c.y}cqh` }),
     shown: (c: { x: number; y: number; delay: number }) => ({ x: `${c.x}cqw`, y: `${c.y}cqh`, transition: { ...SPRING, delay: c.delay } }),
   };
   const card: Variants = {
-    hidden: { opacity: 0, scale: 0.92, rotate: 0 },
+    hidden: (c: { rotate: number }) => ({ opacity: 0, scale: 0.88, rotate: c.rotate }),
     shown: (c: { rotate: number; delay: number }) => ({
       opacity: 1,
       scale: 1,
       rotate: c.rotate,
       // check-ignore: duration a one-off entrance that plays once on scroll, not a response to input
-      transition: { opacity: { duration: 0.4, ease: EASE, delay: c.delay }, scale: { duration: 0.55, ease: EASE, delay: c.delay }, rotate: { ...SPRING, delay: c.delay } },
+      transition: { opacity: { duration: 0.4, ease: EASE, delay: c.delay }, scale: { duration: 0.55, ease: EASE, delay: c.delay } },
     }),
   };
 

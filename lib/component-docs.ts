@@ -602,7 +602,7 @@ const [ready] = useState(() => heroImage.decode());
       "Plays once, when 30% of the group is in view.",
       "Offsets are container-relative, so the fan scales with its box; give the root a height (480px by default).",
       "Cards are at most 40% of the box wide and wrap long words, so keep |x| within 30 to keep them inside a narrow box. A card placed further out leaves the box; give a parent overflow-x-clip if you want that.",
-      "Each card springs out from the centre, tilting as it goes, while its opacity and scale ease in.",
+      "Each card starts behind the centre at its own height and tilt and springs sideways out to its spot, while its opacity and scale ease in.",
       "Reduced motion: the cards are already in place and tilted, and only fade in.",
     ],
   },
