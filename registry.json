@@ -556,7 +556,7 @@
       "name": "fan-out-cards",
       "type": "registry:ui",
       "title": "Fan-out cards",
-      "description": "Cards that start stacked in the centre and spring out to their own tilted spots when scrolled into view.",
+      "description": "Cards that start stacked behind the centre and spring sideways out to their own tilted spots when scrolled into view.",
       "dependencies": [
         "motion@^14.6.0"
       ],

@@ -35,7 +35,7 @@ export type ComponentItem = {
 
 const REPLAY = new Set(["notch", "hero-reveal", "inertia-gallery", "arrow-link", "flip-text"]);
 const AMBIENT = new Set(["pixel-wave", "shimmer-text", "spin-mark", "voice-bars"]);
-const FILL = new Set(["scroll-marquee", "photo-wordmark", "line-rise", "sticky-crossfade", "fan-out-cards"]);
+const FILL = new Set(["scroll-marquee", "photo-wordmark", "line-rise", "sticky-crossfade"]);
 
 const item = (slug: string, name: string, category: string, description: string, nat: [number, number] = [420, 300], extras?: Extra[]): ComponentItem => ({
   slug,
@@ -78,7 +78,7 @@ export const COMPONENTS: ComponentItem[] = [
   item("peek-card", "Peek card", "Display", "A card whose image zooms and info panel slides up on hover, with a wide row variant.", [1000, 760]),
   item("inertia-gallery", "Inertia gallery", "Layout", "An endless strip of frames you push with the wheel or a drag; it coasts, snaps by intent and morphs between list and slider.", [900, 560]),
   item("fit-title", "Fit title", "Text", "One line of display type sized to exactly fill its container, rising out of a mask on first view.", [480, 260]),
-  item("fan-out-cards", "Fan-out cards", "Layout", "Cards that start stacked in the centre and spring out to their own tilted spots when scrolled into view.", [900, 520]),
+  item("fan-out-cards", "Fan-out cards", "Layout", "Cards that start stacked behind the centre and spring sideways out to their own tilted spots when scrolled into view.", [900, 660]),
   item("shimmer-text", "Shimmer text", "Text", "Text with a light band sweeping across it, for labels that say something is running.", [420, 300]),
   item("photo-wordmark", "Photo wordmark", "Text", "A huge wordmark filled with a photo, cropped at the bottom and rising out of the crop as it scrolls in.", [800, 320]),
   item("drawer-menu", "Drawer menu", "Navigation", "A round burger that crosses into an X and slides a full-height link panel in from the right.", [390, 640]),

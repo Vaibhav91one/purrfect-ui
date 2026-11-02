@@ -16,19 +16,19 @@ const insight = (text: string, meta: string, colors: string) => (
   </div>
 );
 
+// placed as on armour.vaibhavtomar.com: the top pair high up the phone, the bottom pair level with the pill
 const CARDS: FanOutCard[] = [
-  { x: -28, y: -12, rotate: 6, content: insight("Your AAPL position is up 12%", "Live market", "#22c55e, #10b981, #14b8a6, #4ade80") },
-  { x: 28, y: -12, rotate: -6, content: insight("You're on track to save $400 this month", "2 min ago", "#6366f1, #8b5cf6, #a78bfa, #818cf8") },
-  { x: -30, y: 20, rotate: -6, content: insight("Rebalancing opportunity detected", "1 hour ago", "#f97316, #fb923c, #fbbf24, #f59e0b") },
-  { x: 30, y: 20, rotate: 6, content: insight("Portfolio hit a new all-time high", "3 hours ago", "#0ea5e9, #38bdf8, #6366f1, #818cf8") },
+  { x: -27, y: -7.7, rotate: 6, content: insight("Your AAPL position is up 12%", "Live market", "#22c55e, #10b981, #14b8a6, #4ade80") },
+  { x: 27, y: -7.7, rotate: -6, content: insight("You're on track to save $400 this month", "2 min ago", "#6366f1, #8b5cf6, #a78bfa, #818cf8") },
+  { x: -27, y: 16, rotate: -6, content: insight("Rebalancing opportunity detected", "1 hour ago", "#f97316, #fb923c, #fbbf24, #f59e0b") },
+  { x: 27, y: 16, rotate: 6, content: insight("Portfolio hit a new all-time high", "3 hours ago", "#0ea5e9, #38bdf8, #6366f1, #818cf8") },
 ];
 
 const phone = (
-  // the phone sits above the cards, so they tuck behind it as they land; its top fades out and the box's bottom edge cuts it
-  // off mid-body, like the original's (its bottom always runs 140px past the box, whatever height the preview stretches it to)
-  <div className="relative z-10 mt-[34cqh] h-[calc(66cqh+140px)] w-[290px] self-start overflow-hidden rounded-[48px] border-[7px] border-neutral-900 bg-neutral-900 shadow-2xl [mask-image:linear-gradient(to_bottom,transparent,black_30%)]">
+  // the phone sits above the cards, so they slide out from behind it; its top fades out and its rounded bottom shows, like the original's
+  <div className="relative z-10 h-[449px] w-[290px] overflow-hidden rounded-[48px] border-[7px] border-neutral-900 bg-neutral-900 shadow-2xl ring-[3px] ring-neutral-300 [mask-image:linear-gradient(to_bottom,transparent,black_30%)]">
     <img src="/demo/field.jpg" alt="" className="absolute inset-0 size-full rounded-[40px] object-cover" />
-    <div className="dark absolute inset-x-0 top-[50%] flex justify-center">
+    <div className="dark absolute inset-x-0 top-[75.5%] flex -translate-y-1/2 justify-center">
       <div className="rounded-full bg-card px-5 py-2 shadow-lg">
         <ShimmerText className="text-base">
           <span className="font-semibold">Armour</span> is listening
@@ -41,12 +41,11 @@ const phone = (
 export default function FanOutCardsDemo() {
   const [run, setRun] = useState(0);
   return (
-    // h-full: the preview stretches the demo to its box's height, so the phone is always cut by the box's bottom edge
-    <div className="relative grid h-full min-h-[400px] w-[900px] place-items-center overflow-hidden rounded-3xl">
+    <div className="relative grid h-[660px] w-[900px] place-items-center overflow-hidden rounded-3xl">
       {/* the replay button sits behind the cards, not around them: the cards' text stays readable to screen readers */}
       <button type="button" onClick={() => setRun((n) => n + 1)} aria-label="Replay the fan-out" className="absolute inset-0" />
-      {/* pointer-events-none lets clicks around the cards reach the replay button */}
-      <FanOutCards key={run} cards={CARDS} cardClassName="w-80 p-2 text-left shadow-xl" className="pointer-events-none size-full" center={phone} />
+      {/* pointer-events-none lets clicks around the cards reach the replay button; borderless like the original's, but outlined in dark, where the card would vanish into the page */}
+      <FanOutCards key={run} cards={CARDS} stagger={0.1} cardClassName="w-80 border-0 p-4 dark:border text-left shadow-xl" className="pointer-events-none size-full" center={phone} />
     </div>
   );
 }
