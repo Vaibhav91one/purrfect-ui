@@ -44,7 +44,6 @@ import ArrowLinkDemo from "@/registry/arrow-link/demo";
 import RollLinkDemo from "@/registry/roll-link/demo";
 import StickerPopDemo from "@/registry/sticker-pop/demo";
 import SwapCardDemo from "@/registry/swap-card/demo";
-import StrokeReplayDemo from "@/registry/stroke-replay/demo";
 import SpringChipsDemo from "@/registry/spring-chips/demo";
 import VoiceBarsDemo from "@/registry/voice-bars/demo";
 import AnnounceStripDemo from "@/registry/announce-strip/demo";
@@ -440,7 +439,6 @@ export const DEMOS: Record<string, (p: DemoProps) => ReactNode> = {
   "sticker-pop": ({ playing, speed }: DemoProps) => <StickerPopDemo playing={playing} speed={speed} />,
   "swap-card": SwapCardDemo,
   "sticky-crossfade": StickyCrossfadeLoop,
-  "stroke-replay": StrokeReplayDemo,
   "spring-chips": SpringChipsDemo,
   "voice-bars": ({ playing, speed }: DemoProps) => <VoiceBarsDemo playing={playing} speed={speed} />,
   "announce-strip": AnnounceStripDemo,

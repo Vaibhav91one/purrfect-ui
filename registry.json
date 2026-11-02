@@ -877,26 +877,6 @@
       }
     },
     {
-      "name": "stroke-replay",
-      "type": "registry:ui",
-      "title": "Stroke replay",
-      "description": "Replays an SVG painting shape by shape, like a drawing-app timelapse, with play, pause and a scrubber.",
-      "registryDependencies": [
-        "utils"
-      ],
-      "files": [
-        {
-          "path": "registry/stroke-replay/stroke-replay.tsx",
-          "type": "registry:ui"
-        }
-      ],
-      "meta": {
-        "react": ">=19",
-        "tailwindcss": ">=4",
-        "tokens": "shadcn (background, foreground, muted, border, ...): run shadcn init first"
-      }
-    },
-    {
       "name": "spring-chips",
       "type": "registry:ui",
       "title": "Spring chips",
