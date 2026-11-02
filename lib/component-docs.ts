@@ -527,59 +527,6 @@ const [ready] = useState(() => heroImage.decode());
       "Reduced motion: no fade-up travel, no zoom, no spin, and the panel's details fade in place instead of sliding.",
     ],
   },
-  "counter-loader": {
-    usage: `import { CounterLoader } from "@/components/ui/counter-loader";
-
-// in your root layout, once
-<CounterLoader />
-<CounterLoader stickers={[<img key="a" src="/a.webp" alt="" />, <img key="b" src="/b.webp" alt="" />]} steps={[0, 42, 100]} onDone={() => console.log("in")} />`,
-    props: [
-      { name: "stickers", type: "ReactNode[]", default: "4 token-coloured shapes", description: "Popped one by one into a fanned pile while the counter runs; [] for none." },
-      { name: "steps", type: "number[]", default: "[0, 27, 64, 100]", description: "The numbers the counter rolls through." },
-      { name: "duration", type: "number", default: "1.4", description: "Seconds the counter takes, before the block wipes up." },
-      { name: "storageKey", type: "string | false", default: '"counter-loader-seen"', description: "sessionStorage key that makes it play once per tab; false plays it every load." },
-      { name: "onDone", type: "() => void", description: "Called once the page is uncovered (right away when already seen)." },
-      { name: "contained", type: "boolean", default: "false", description: "Fill the nearest relative parent and leave page scroll alone: for a card or preview." },
-    ],
-    behaviors: [
-      "The counter rolls through the steps while the stickers pop into a fanned pile; they pop back out, a block wipes up, and the loader lifts away (transforms only).",
-      "Click, tap or Escape skips it with a quicker 0.45s lift (Escape only full screen; a contained one skips on click or tap). It locks page scroll while it covers the page, padding for the scrollbar.",
-      "The number scales down to fit a small contained box and is grouped (12,345). Pops and the exit are staggered to fit the count, however many stickers.",
-      "On a repeat visit an inline script hides it before the first paint; with no JavaScript it uncovers the page by itself.",
-      "Reduced motion: the number jumps from step to step, the stickers appear without the pop, and the loader fades out.",
-    ],
-  },
-  "sticker-cover": {
-    usage: `import { StickerCover, type StickerCoverHandle } from "@/components/ui/sticker-cover";
-
-const cover = useRef<StickerCoverHandle>(null);
-<StickerCover ref={cover} sticker={<img src="/sticker.webp" alt="" className="size-40" />}>{page}</StickerCover>
-<button onClick={() => cover.current?.play(() => setPage("about"))}>About</button>
-
-// Next App Router (in a client layout): resolve once the new route has committed
-const router = useRouter();
-const path = usePathname();
-const done = useRef<() => void>(undefined);
-useEffect(() => done.current?.(), [path]);
-const go = (href: string) => href !== path && cover.current?.play(() => new Promise<void>((r) => { done.current = r; router.push(href); }));`,
-    props: [
-      { name: "ref", type: "Ref<StickerCoverHandle>", description: "ref.current.play(change, { instant }) plays the cover; resolves once it has lifted." },
-      { name: "sticker", type: "ReactNode", description: "Pops in at the centre once the sheet is up. None: the sheet lifts as soon as the new content has painted." },
-      { name: "duration", type: "number", default: "0.5", description: "Seconds the sheet takes to rise; the lift takes 1.2x." },
-      { name: "contained", type: "boolean", default: "false", description: "Cover the nearest relative parent (give it overflow-hidden) instead of the screen." },
-      { name: "className", type: "string", default: '"bg-foreground"', description: "Classes for the sheet, e.g. its colour (bg-primary)." },
-      { name: "pageClassName", type: "string", description: "Classes for the box around children: the page that drifts up and goes inert." },
-    ],
-    behaviors: [
-      "Reduced motion: a quick crossfade, no drift and no sticker.",
-      "The sheet rises while the page drifts up 7rem, your change runs, two frames paint, the sticker pops, then the sheet lifts as the sticker leaves.",
-      "A play() while the sheet is up runs under the same cover (latest wins); one during the lift reverses the sheet from where it is. { instant: true } drops it in place for back/forward.",
-      "A change whose promise has not settled after 8s is given up on, so the page never stays inert and covered.",
-      "The page box is isolate (its own stacking context), so a sticky or z-indexed header inside it never paints over the sheet.",
-      "The sheet is aria-hidden, the page is inert while covered, and focus returns to where it was (or the page box if that element is gone).",
-      "No router dependency and no global attributes; React never re-renders while it plays.",
-    ],
-  },
   "inertia-gallery": {
     usage: `import { InertiaGallery } from "@/components/ui/inertia-gallery";
 

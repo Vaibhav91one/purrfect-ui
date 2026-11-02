@@ -26,8 +26,6 @@ import LoadPreloaderDemo from "@/registry/load-preloader/demo";
 import StarRiseDemo from "@/registry/star-rise/demo";
 import MarqueeRowsDemo from "@/registry/marquee-rows/demo";
 import PeekCardDemo from "@/registry/peek-card/demo";
-import CounterLoaderDemo from "@/registry/counter-loader/demo";
-import StickerCoverDemo from "@/registry/sticker-cover/demo";
 import InertiaGalleryDemo from "@/registry/inertia-gallery/demo";
 import FitTitleDemo from "@/registry/fit-title/demo";
 import FanOutCardsDemo from "@/registry/fan-out-cards/demo";
@@ -423,8 +421,6 @@ export const DEMOS: Record<string, (p: DemoProps) => ReactNode> = {
   "star-rise": StarRiseLoop,
   "marquee-rows": MarqueeRowsDemo,
   "peek-card": PeekCardDemo,
-  "counter-loader": CounterLoaderDemo,
-  "sticker-cover": StickerCoverDemo,
   "inertia-gallery": InertiaGalleryDemo,
   "fit-title": FitTitleDemo,
   "fan-out-cards": FanOutCardsDemo,
