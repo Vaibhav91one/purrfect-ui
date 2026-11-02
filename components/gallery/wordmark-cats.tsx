@@ -1,5 +1,5 @@
 import type { CSSProperties, ReactNode, SVGProps } from "react";
-import { OUTLINE, PLAYING, SITTING, SLEEPING } from "./cat-shapes";
+import { OUTLINE, SITTING, SLEEPING } from "./cat-shapes";
 import { EYES, VARIANTS } from "./cat-variants";
 
 // The cats on the footer wordmark are the site's own cats in new poses: the hero's sitting cat (gradient-cat.tsx), the
@@ -187,36 +187,34 @@ export function SittingOnU() {
 }
 
 /**
- * The playing cat (`playing-cat.tsx`), drawn exactly as it is there (same shapes, strokes and motion), crouched along
- * the tops of the "rr" facing the "f", with its ball resting on the f's crossbar: it swats, the ball hops and rolls to
- * the stem and back. From the second r's origin: f crossbar's left arm ~0.37-0.44em, f stem from 0.439em; all at 0.534em.
+ * The sleeping cat's shapes (same body, ears grown into the head, two dot eyes), awake and crouched along the tops of
+ * the "rr", watching its ball on the f's crossbar. A front paw swats, the ball hops and rolls to the stem and back, the
+ * tail flicks: the playing cat's motion (`play-*` in globals.css). From the second r's origin: f crossbar's left arm
+ * ~0.37-0.44em, f stem from 0.439em; all at 0.534em.
  */
 export function PlayingOnR() {
-  const { BODY, HEAD, EYE, TAIL, HIND, PAW, BLOB_AT } = PLAYING;
-  const BALL = { x: 228, y: 112, r: 11 }; // as in playing-cat.tsx; ground (paws, ball shadow) is y 126
-  const k = 0.0028; // about the sleeping cat's size; the ball (x 228) rests on the f's crossbar, its roll ends at the stem
+  const { BODY, TAIL, HEAD, EYES, NECK, TAIL_PIVOT, BLOB_AT } = SLEEPING;
+  const BALL = { x: 262, y: 112, r: 11 }; // ground (belly, paw, ball shadow) is y 124
+  const k = 0.0026;
   const ballAt = 0.388; // em: the middle of the crossbar's left arm
-  const vb = (x: number, y: number) => ({ transformOrigin: `${x}px ${y}px`, transformBox: "view-box" }) as CSSProperties;
-  const line = (d: string, f: boolean, w: number, cls: string, origin?: [number, number]) => (
-    <path d={d} fill="none" stroke={f ? "white" : undefined} strokeWidth={w + (f ? 0 : OUTLINE)} strokeLinecap="round" className={cls} style={origin ? vb(...origin) : undefined} />
-  );
+  const vb = (o: string) => ({ transformOrigin: o, transformBox: "view-box" }) as CSSProperties;
   const parts = (f: boolean) => (
     <>
-      {line(TAIL, f, 10, "play-tail", [38, 90])}
-      {line(HIND, f, 12, "", undefined)}
+      <path d={TAIL} fill="none" stroke={f ? "white" : undefined} strokeWidth={12 + (f ? 0 : OUTLINE)} strokeLinecap="round" className="play-tail" style={vb(TAIL_PIVOT)} />
       {part(BODY, f)}
-      <g className="play-head" style={vb(160, 112)}>
+      <g className="play-head" style={vb(NECK)}>
         {HEAD.map((d) => part(d, f))}
-        {f && <path d={EYE} fill="black" />}
+        {/* awake: the two dot eyes, glancing toward the ball */}
+        {f && EYES.map(([cx, cy]) => <circle key={cx} cx={cx + 3} cy={cy + 1} r="2.8" fill="black" />)}
       </g>
-      {line(PAW, f, 11, "play-paw", [146, 108])}
+      <path d="M196 116 L238 120" fill="none" stroke={f ? "white" : undefined} strokeWidth={12 + (f ? 0 : OUTLINE)} strokeLinecap="round" className="play-paw" style={vb("196px 116px")} />
     </>
   );
   const look = VARIANTS[1];
   return (
-    <Cat id="play" i={1} variant={1} vb={[260, 140]} at={[ballAt - BALL.x * k, 0.534 - 14 * k, 260 * k]} blobs={BLOB_AT} blob={[70, 12]} spin={[130, 80]} parts={parts}>
-      <ellipse cx={BALL.x} cy="126" rx="12" ry="2.5" fill="currentColor" fillOpacity="0.25" className="play-shadow text-foreground" style={vb(BALL.x, 126)} />
-      <g className="play-ball" style={vb(BALL.x, BALL.y + BALL.r)}>
+    <Cat id="play" i={1} variant={1} vb={[260, 140]} at={[ballAt - BALL.x * k, 0.534 - 16 * k, 260 * k]} blobs={BLOB_AT} blob={[70, 12]} spin={[130, 80]} parts={parts}>
+      <ellipse cx={BALL.x} cy="124" rx="12" ry="2.5" fill="currentColor" fillOpacity="0.25" className="play-shadow text-foreground" style={vb(`${BALL.x}px 124px`)} />
+      <g className="play-ball" style={vb(`${BALL.x}px ${BALL.y + BALL.r}px`)}>
         <circle cx={BALL.x} cy={BALL.y} r={BALL.r} fill={look.blobs[0]} className="text-foreground" stroke="currentColor" strokeWidth="3" />
         <path d={`M${BALL.x - 8} ${BALL.y - 4} Q${BALL.x} ${BALL.y - 10} ${BALL.x + 8} ${BALL.y - 4}`} fill="none" stroke="white" strokeOpacity="0.7" strokeWidth="2" strokeLinecap="round" />
       </g>
