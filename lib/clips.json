@@ -202,5 +202,11 @@
     "href": "https://mapinly.vaibhavtomar.com",
     "w": 960,
     "h": 704
+  },
+  "parallax-photo": {
+    "label": "mapinly.vaibhavtomar.com",
+    "href": "https://mapinly.vaibhavtomar.com/events/startup-pitch-night",
+    "w": 960,
+    "h": 704
   }
 }

@@ -1018,6 +1018,29 @@
         "tailwindcss": ">=4",
         "tokens": "shadcn (background, foreground, muted, border, ...): run shadcn init first"
       }
+    },
+    {
+      "name": "parallax-photo",
+      "type": "registry:ui",
+      "title": "Parallax photo",
+      "description": "A full-bleed photo the page scrolls over: the frame moves while the picture stays nearly still.",
+      "dependencies": [
+        "motion@^14.6.0"
+      ],
+      "registryDependencies": [
+        "utils"
+      ],
+      "files": [
+        {
+          "path": "registry/parallax-photo/parallax-photo.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "meta": {
+        "react": ">=19",
+        "tailwindcss": ">=4",
+        "tokens": "shadcn (background, foreground, muted, border, ...): run shadcn init first"
+      }
     }
   ]
 }

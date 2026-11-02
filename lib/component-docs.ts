@@ -730,6 +730,30 @@ const [ready] = useState(() => heroImage.decode());
       "Reduced motion: no sink, rise or collapse; the card fades out and straight back in (150ms each).",
     ],
   },
+  "parallax-photo": {
+    usage: `import { ParallaxPhoto } from "@/components/ui/parallax-photo";
+
+<ParallaxPhoto src="/cover.jpg" alt="The venue at night" className="min-h-[60vh] md:aspect-[16/10]" aspect="16 / 9" />
+
+// inside a scrolling box: follow its scroll instead of the page
+const box = useRef<HTMLDivElement>(null);
+<div ref={box} className="h-96 overflow-y-auto">
+  <ParallaxPhoto src="/cover.jpg" alt="" container={box} />
+</div>`,
+    props: [
+      { name: "src", type: "string", description: "The photo." },
+      { name: "alt", type: "string", description: "Describe the photo, or \"\" when it is decoration." },
+      { name: "aspect", type: "CSSProperties[\"aspectRatio\"]", default: '"16 / 10"', description: "The frame's aspect ratio; a height or min-height in className wins over it." },
+      { name: "container", type: "RefObject<HTMLElement | null>", description: "Follow a scrolling box instead of the page." },
+      { name: "className", type: "string", description: "Merged onto the frame: size, rounding, a fallback background." },
+    ],
+    behaviors: [
+      "The photo slides from -100% to +100% of the frame's height, linearly, while the frame crosses the screen from entering at the bottom to leaving at the top, so the picture stays nearly still and the page scrolls over it.",
+      "Only a transform moves, written straight to the element by motion (no React render per frame); the frame keeps its size, so nothing shifts.",
+      "The photo starts in place in the server HTML and takes its scroll position once scrolling is measured, so a cover at the top of the page never flashes empty before hydration.",
+      "Reduced motion: no slide; the photo sits still in its frame.",
+    ],
+  },
   "line-rise": {
     usage: `import { LineRise } from "@/components/ui/line-rise";
 
