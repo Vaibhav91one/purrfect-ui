@@ -41,13 +41,10 @@ export const CLIPS = {
   "star-rise": { site: MAPINLY, interact: "load", fresh: true, start: "(() => { const e = document.querySelector('main > section:first-of-type [data-intro]'); if (!e) return false; const t = getComputedStyle(e).transform; return t !== 'none' && new DOMMatrix(t).m42 < innerHeight * 0.98; })()", seconds: 4.2, local: ML, label: "mapinly.vaibhavtomar.com" },
   "marquee-rows": { site: MAPINLY, target: 'div.cursor-pointer[class*="h-[8rem]"]', interact: "hover", session: { "mapinly-intro": "1" }, local: ML, label: "mapinly.vaibhavtomar.com" },
   "peek-card": { site: MAPINLY, target: "[data-slot=carousel-item]:first-child", interact: "hover", session: { "mapinly-intro": "1" }, local: ML, label: "mapinly.vaibhavtomar.com" },
-  // Poinu: the intro skipped (session) except for counter-loader, which plays its own; on / it hands off into the gallery,
-  // so it is recorded landing on /about, where it wipes and lifts like the component
-  "counter-loader": { site: `${POINU}/about`, interact: "load", fresh: true, realtime: true, start: "!!document.querySelector('.ui-ld')", seconds: 3.4, label: "poinu.vercel.app" },
-  // the same intro, framed on its sticker pile: the stickers pop in one by one while the counter runs, then leave in reverse;
+  // Poinu: the intro skipped (session) except for sticker-pop, which plays its own on /about (on / it hands off into the gallery),
+  // framed on its sticker pile: the stickers pop in one by one while the counter runs, then leave in reverse;
   // it ends before the loader wipes up, and its still is the full pile (poster: seconds into the clip)
   "sticker-pop": { site: `${POINU}/about`, interact: "load", fresh: true, realtime: true, start: "!!document.querySelector('.ui-ld')", focus: ".ui-ld > div.absolute", zoom: 1.8, seconds: 1.4, poster: 1.2, label: "poinu.vercel.app" },
-  "sticker-cover": { site: POINU, target: 'nav[aria-label="Primary"] a:not([aria-current])', interact: "click", realtime: true, stay: 2.2, zoom: 1, session: PS, label: "poinu.vercel.app" },
   "inertia-gallery": { site: POINU, target: '[role=group][aria-label="Work view"] button:last-child', interact: "click", realtime: true, stay: 2.4, zoom: 1, session: PS, label: "poinu.vercel.app" },
   "fit-title": { site: `${POINU}/shop`, interact: "load", realtime: true, start: "!!document.querySelector('h1.ui-mk')", seconds: 2.5, session: PS, label: "poinu.vercel.app" },
   // Armour, batch 3
