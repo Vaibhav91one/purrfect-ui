@@ -4,64 +4,43 @@ import { useEffect, useRef, useState, type ComponentProps, type ReactNode } from
 import { cn } from "@/lib/utils";
 
 export interface InertiaGalleryItem {
-  /** Image shown in the frame (cover-fit). */
   src?: string;
-  /** Anything else to draw in the frame instead of an image. */
   node?: ReactNode;
   alt?: string;
-  /** Clicking the centred frame follows it; clicking any other frame brings it to the centre first. */
   href?: string;
-  /** Shown in the bar and announced when the frame is centred. */
   title?: ReactNode;
 }
 
 export type InertiaGalleryLayout = "slider" | "list";
+type L = InertiaGalleryLayout;
 
 export interface InertiaGalleryProps extends Omit<ComponentProps<"div">, "children" | "ref"> {
   items: InertiaGalleryItem[];
-  /** Controlled layout. Pair with onLayoutChange. */
   layout?: InertiaGalleryLayout;
-  /** Uncontrolled starting layout. */
   defaultLayout?: InertiaGalleryLayout;
-  /** Called when the bar's List / Slider buttons ask for a layout. */
   onLayoutChange?: (layout: InertiaGalleryLayout) => void;
-  /** Called with the centred item's index whenever it changes. */
   onActiveChange?: (index: number) => void;
-  /** Play the squares intro the first time the gallery scrolls into view. */
   intro?: boolean;
-  /** How much velocity survives each 60fps frame (0-1). Higher coasts further. Touch coasts shorter. */
   friction?: number;
-  /** Largest list-mode frame, in px; it also sets the frame shape. Slider frames are twice as big. Both shrink to fit. */
   frameWidth?: number;
   frameHeight?: number;
-  /** Show the bottom bar (title, counter, List / Slider buttons). */
   bar?: boolean;
-  /** Accessible name of the gallery. */
   label?: string;
 }
 
-type St = { x: number; y: number; w: number; h: number; black: number; zoom: number; op: number };
-type Frame = { el: HTMLElement; im: HTMLElement; bk: HTMLElement; st: St; cw: number; ch: number; T?: string; I?: string; B?: number; O?: number; off?: boolean };
 type Tw = { o: Record<string, number>; k: string; b: number; a?: number; t0: number; d: number; e: (t: number) => number; done?: () => void };
 
 const clamp = (v: number, a: number, b: number) => Math.max(a, Math.min(b, v));
-const wrap = (x: number, n: number) => x - n * Math.floor((x + n / 2) / n); // into [-n/2, n/2)
+const wrap = (x: number, n: number) => x - n * Math.floor((x + n / 2) / n);
 const mod = (x: number, n: number) => ((x % n) + n) % n;
 const pad = (n: number) => String(n).padStart(2, "0");
+const str = (v: unknown) => (typeof v === "string" ? v : undefined);
 const out2 = (t: number) => 1 - (1 - t) ** 3; // gsap power2.out
-const out4 = (t: number) => 1 - (1 - t) ** 5; // gsap power4.out, for key presses
+const out4 = (t: number) => 1 - (1 - t) ** 5; // gsap power4.out
 const inOut3 = (t: number) => (t < 0.5 ? 8 * t ** 4 : 1 - (-2 * t + 2) ** 4 / 2); // gsap power3.inOut
+const SQ = { x: 0, y: 0, w: 8, h: 8, black: 1, zoom: 0.4 };
 
-/**
- * An endless strip of frames you push with the wheel or by dragging: it coasts, then settles by intent (a nudge returns,
- * anything more moves at least one frame) and every image drifts inside its frame. "list" stacks the frames in a column,
- * "slider" lays them out in a row at twice the size; switching moves every frame to its new spot over 1.5s, outer frames
- * first. With `intro` the frames start as small foreground squares that spread out, take on colour and grow into place.
- * Arrow keys move one frame and Home / End jump to the first and last item while the strip has focus. Touch only takes
- * horizontal swipes (touch-action: pan-y), so the page still scrolls on phones. One frame loop writes transforms straight
- * to the nodes, runs only while something moves and pauses off screen. It fills its parent, so give the parent a height.
- * Reduced motion: no parallax or coasting (it jumps to the settled frame), layout switches crossfade, no intro.
- */
+/** Fills its parent: give the parent a height. */
 export function InertiaGallery({
   items,
   layout,
@@ -82,13 +61,10 @@ export function InertiaGallery({
   const mode = layout ?? own;
   const [active, setActive] = useState(0);
   const n = items.length;
-  // copies on the strip so the loop always overfills the box (one item stays a single, still frame)
   const [need, setNeed] = useState(12);
   const M = n <= 1 ? n : n * Math.ceil(need / n);
-  const frames = Array.from({ length: M }, (_, i) => items[i % n]);
-  // per instance: survives the engine restarting (new copy count) so the centred frame, layout and intro stay put
   const keep = useRef({ k: 0, mode, played: false });
-  const api = useRef<{ setMode: (m: InertiaGalleryLayout) => void } | null>(null);
+  const api = useRef<{ setMode: (m: L) => void } | null>(null);
   const emit = useRef(onActiveChange);
   useEffect(() => {
     emit.current = onActiveChange;
@@ -98,22 +74,27 @@ export function InertiaGallery({
     const box = root.current;
     const kp = keep.current;
     if (!box || !n) return;
-    const F: Frame[] = [...box.querySelectorAll<HTMLElement>("[data-fr]")].map((el) => ({
+    const F = [...box.querySelectorAll<HTMLElement>("[data-fr]")].map((el) => ({
       el,
       im: el.querySelector<HTMLElement>("[data-im]")!,
       bk: el.querySelector<HTMLElement>("[data-bk]")!,
       st: { x: 0, y: 0, w: 1, h: 1, black: 0, zoom: 0.9, op: 1 },
       cw: 1,
       ch: 1,
+      T: "",
+      I: "",
+      B: -1,
+      O: -1,
+      off: false,
     }));
+    const ac = new AbortController(), signal = ac.signal;
     const mq = matchMedia("(prefers-reduced-motion: reduce)");
     let reduce = mq.matches;
-    const onMq = (e: MediaQueryListEvent) => { reduce = e.matches; };
-    mq.addEventListener("change", onMq);
+    mq.addEventListener("change", (e) => { reduce = e.matches; }, { signal });
 
     const G = {
       mode: kp.mode, off: 0, vel: 0, W: 0, H: 0, act: -1, trans: false, intro: false, want: kp.mode,
-      touch: false, visible: false, raf: 0, last: 0, snapT: undefined as ReturnType<typeof setTimeout> | undefined,
+      touch: false, visible: false, raf: 0, last: 0, snapT: 0,
       g0: null as null | { off: number; k: number },
       drag: null as null | { id: number; x: number; y: number; dist: number; touch: boolean },
       dragged: 0,
@@ -121,7 +102,7 @@ export function InertiaGallery({
     let tws: Tw[] = [];
     const tween = (o: object, to: Record<string, number>, d: number, e: Tw["e"], delay = 0, done?: () => void) => {
       const t0 = performance.now() + delay * 1000, ks = Object.keys(to);
-      ks.forEach((k, j) => tws.push({ o: o as Record<string, number>, k, b: to[k], t0, d: d * 1000, e, done: j === ks.length - 1 ? done : undefined }));
+      ks.forEach((k, j) => tws.push({ o: o as Tw["o"], k, b: to[k], t0, d: d * 1000, e, done: j === ks.length - 1 ? done : undefined }));
       kick();
     };
     const stepTweens = (now: number) => {
@@ -130,7 +111,7 @@ export function InertiaGallery({
         if (now < t.t0) return true;
         if (t.a === undefined) {
           t.a = t.o[t.k];
-          // a newer tween on the same value takes over (gsap overwrite: "auto")
+          // gsap overwrite: "auto"
           tws.forEach((u) => { if (u !== t && u.o === t.o && u.k === t.k && u.a !== undefined) u.d = -1; });
         }
         if (t.d < 0) return false;
@@ -142,111 +123,110 @@ export function InertiaGallery({
       });
       fin.forEach((f) => f());
     };
-    const snapping = () => tws.some((t) => t.o === (G as unknown as Record<string, number>) && t.k === "off");
-    const killSnap = () => { tws = tws.filter((t) => !(t.o === (G as unknown as Record<string, number>) && t.k === "off")); };
+    const isSnap = (t: Tw) => t.o === (G as object) && t.k === "off";
+    const snapping = () => tws.some(isSnap);
+    const killSnap = () => { tws = tws.filter((t) => !isSnap(t)); };
 
-    // sizes: list frames are frameWidth x frameHeight at most, slider frames twice that; both shrink to fit the box
-    const sizeOf = (m: InertiaGalleryLayout) => {
-      const f = m === "slider" ? 2 : 1, cap = m === "slider" ? 0.8 : 0.42;
-      const s = Math.min(f, (G.H * cap) / frameHeight, (G.W * 0.9) / frameWidth);
+    const sizeOf = (m: L) => {
+      const sl = m === "slider", s = Math.min(sl ? 2 : 1, (G.H * (sl ? 0.8 : 0.42)) / frameHeight, (G.W * 0.9) / frameWidth);
       return { w: frameWidth * s, h: frameHeight * s };
     };
-    const unitOf = (m: InertiaGalleryLayout) => { const s = sizeOf(m); return m === "list" ? s.h : s.w; };
-    const k0 = () => Math.round(G.off); // off is in frames, so a resize or a layout switch keeps the centred frame
-    const coord = (i: number) => wrap(i - G.off, M) * unitOf(G.mode);
+    const unitOf = (m: L) => sizeOf(m)[m === "list" ? "h" : "w"];
+    const k0 = () => Math.round(G.off);
+    const g0 = () => ({ off: G.off, k: k0() });
+    const coord = (i: number) => (M === 1 ? 0 : wrap(i - G.off, M) * unitOf(G.mode));
     const place = (m: InertiaGalleryLayout, c: number) => {
-      const s = sizeOf(m);
-      return { x: m === "list" ? 0 : c, y: m === "list" ? c : 0, w: s.w, h: s.h };
+      const s = sizeOf(m), l = m === "list";
+      return { x: l ? 0 : c, y: l ? c : 0, ...s };
     };
-    const setBase = (m: InertiaGalleryLayout) => {
+    const setBase = (m: L) => {
       const s = sizeOf(m);
       F.forEach((f) => { f.cw = s.w; f.ch = s.h; f.el.style.width = s.w + "px"; f.el.style.height = s.h + "px"; });
     };
-    const layoutWrite = () => F.forEach((f, i) => Object.assign(f.st, place(G.mode, M === 1 ? 0 : coord(i))));
+    const layoutWrite = () => F.forEach((f, i) => Object.assign(f.st, place(G.mode, coord(i))));
     const render = () => {
-      const { W, H } = G, cx = W / 2, cy = H / 2;
+      const { W, H } = G, fx = (v: number) => v.toFixed(1), f4 = (v: number) => v.toFixed(4);
       F.forEach((f) => {
-        const s = f.st, l = cx + s.x - s.w / 2, t = cy + s.y - s.h / 2;
+        const s = f.st, l = W / 2 + s.x - s.w / 2, t = H / 2 + s.y - s.h / 2;
         const off = l > W + 40 || l + s.w < -40 || t > H + 40 || t + s.h < -40;
         if (off !== f.off) { f.off = off; f.el.style.visibility = off ? "hidden" : ""; }
         if (off) return;
-        const T = `translate3d(${l.toFixed(1)}px,${t.toFixed(1)}px,0) scale(${(s.w / f.cw).toFixed(4)},${(s.h / f.ch).toFixed(4)})`;
-        if (T !== f.T) { f.T = T; f.el.style.transform = T; }
-        // parallax: the image is zoomed past its frame and slides against the frame's distance from the centre
+        const T = `translate3d(${fx(l)}px,${fx(t)}px,0) scale(${f4(s.w / f.cw)},${f4(s.h / f.ch)})`;
+        if (T !== f.T) f.el.style.transform = f.T = T;
         const z = s.zoom, mx = (f.cw * (1 / z - 1)) / 2, my = (f.ch * (1 / z - 1)) / 2;
         const tx = reduce ? 0 : clamp((-0.4 * clamp(s.x / W, -1, 1) * f.cw) / z, -mx, mx);
         const ty = reduce ? 0 : clamp((-0.6 * clamp(s.y / H, -1, 1) * f.ch) / z, -my, my);
-        const I = `translate3d(${tx.toFixed(1)}px,${ty.toFixed(1)}px,0) scale(${(1 / z).toFixed(4)})`;
-        if (I !== f.I) { f.I = I; f.im.style.transform = I; }
-        if (s.black !== f.B) { f.B = s.black; f.bk.style.opacity = String(s.black); }
-        if (s.op !== f.O) { f.O = s.op; f.el.style.opacity = String(s.op); }
+        const I = `translate3d(${fx(tx)}px,${fx(ty)}px,0) scale(${f4(1 / z)})`;
+        if (I !== f.I) f.im.style.transform = f.I = I;
+        if (s.black !== f.B) f.bk.style.opacity = String((f.B = s.black));
+        if (s.op !== f.O) f.el.style.opacity = String((f.O = s.op));
       });
     };
+    const busy = () => G.trans || G.intro;
     const announce = () => {
-      if (G.trans || G.intro) return;
       const a = mod(k0(), M) % n;
-      if (a === G.act) return;
-      G.act = a;
-      setActive(a); // only when the centred item changes, never per frame
+      if (busy() || a === G.act) return;
+      setActive((G.act = a));
       emit.current?.(a);
     };
 
+    const fr = () => (G.touch ? friction ** 2.7 : friction);
     const tick = (now: number) => {
       G.raf = 0;
       if (!G.visible || !G.W) { G.last = 0; return; }
       const k = Math.min(4, (now - (G.last || now)) / 16.667);
       G.last = now;
       stepTweens(now);
-      if (!G.trans && !G.intro) {
-        if (!snapping() && !reduce) G.off += (G.vel * k) / (unitOf(G.mode) || 1);
-        if (!reduce) G.vel *= (G.touch ? friction ** 2.7 : friction) ** k;
+      if (!busy()) {
+        if (!reduce) {
+          if (!snapping()) G.off += (G.vel * k) / (unitOf(G.mode) || 1);
+          G.vel *= fr() ** k;
+        }
         if (Math.abs(G.vel) < 0.01) G.vel = 0;
         layoutWrite();
       }
       render();
       announce();
       if (tws.length || (G.vel && !reduce)) G.raf = requestAnimationFrame(tick);
-      else G.last = 0; // settled: the loop sleeps until the next input
+      else G.last = 0;
     };
     function kick() { if (!G.raf && G.visible) G.raf = requestAnimationFrame(tick); }
 
-    // a key press answers at once (0.25s strong ease-out); drags and clicks keep the source's 0.8s glide
     const snapTo = (k: number, key = false) => {
       killSnap(); clearTimeout(G.snapT); G.vel = 0; G.g0 = null;
       if (reduce) { G.off = k; kick(); }
       else tween(G, { off: k }, key ? 0.25 : 0.8, key ? out4 : out2);
     };
-    // settle by intent: a nudge (< 15% of a frame) goes back, anything more moves at least one frame that way
+    // a nudge goes back, more moves at least one frame
     const scheduleSnap = (ms: number) => {
       clearTimeout(G.snapT);
-      G.snapT = setTimeout(() => {
-        if (G.trans || G.intro) return;
-        const u = unitOf(G.mode), fr = G.touch ? friction ** 2.7 : friction;
-        const g = G.g0 ?? { off: G.off, k: k0() };
-        const moved = G.off + G.vel / (1 - fr) / u - g.off; // in frames, including the coast still to come
+      G.snapT = window.setTimeout(() => {
+        if (busy()) return;
+        const g = G.g0 ?? g0();
+        const moved = G.off + G.vel / (1 - fr()) / unitOf(G.mode) - g.off;
         let b = reduce ? Math.round(g.off + moved) : k0();
         if (Math.abs(moved) < 0.15) b = g.k;
         else if (b === g.k) b = g.k + Math.sign(moved);
         snapTo(b);
       }, reduce ? 120 : ms);
     };
-    const locked = () => G.trans || G.intro || M <= 1;
+    const locked = () => busy() || M <= 1;
 
-    const onWheel = (e: WheelEvent) => {
+    box.addEventListener("wheel", (e) => {
       if (e.ctrlKey || locked()) return;
-      e.preventDefault(); // only over the strip: the rest of the page keeps native, passive scrolling
+      e.preventDefault();
       const d = G.mode === "slider" && Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
-      killSnap(); G.touch = false; G.g0 ??= { off: G.off, k: k0() }; G.vel += d * 0.03 * (e.deltaMode ? 16 : 1);
+      killSnap(); G.touch = false; G.g0 ??= g0(); G.vel += d * 0.03 * (e.deltaMode ? 16 : 1);
       kick(); scheduleSnap(500);
-    };
-    const onDown = (e: PointerEvent) => {
+    }, { passive: false, signal });
+    box.addEventListener("pointerdown", (e) => {
       G.dragged = 0;
       if (locked() || e.button !== 0 || (e.target as Element).closest("[data-bar]")) return;
       G.drag = { id: e.pointerId, x: e.clientX, y: e.clientY, dist: 0, touch: e.pointerType === "touch" };
-      G.g0 ??= { off: G.off, k: k0() };
+      G.g0 ??= g0();
       clearTimeout(G.snapT);
-    };
-    const onMove = (e: PointerEvent) => {
+    }, { signal });
+    box.addEventListener("pointermove", (e) => {
       const d = G.drag;
       if (!d || e.pointerId !== d.id) return;
       const dx = e.clientX - d.x, dy = e.clientY - d.y;
@@ -254,11 +234,11 @@ export function InertiaGallery({
       if (d.dist > 5) {
         if (!box.hasPointerCapture(e.pointerId)) box.setPointerCapture(e.pointerId);
         killSnap(); G.touch = d.touch;
-        // touch drives either layout with horizontal swipes: vertical pans belong to the page
+        // touch swipes horizontally; vertical pans scroll the page
         G.vel -= (G.mode === "list" && !d.touch ? dy : dx) * (d.touch ? 0.2 : 0.1);
         kick();
       }
-    };
+    }, { signal });
     const onUp = (e: PointerEvent) => {
       const d = G.drag;
       if (!d || e.pointerId !== d.id) return;
@@ -266,41 +246,40 @@ export function InertiaGallery({
       if (d.dist > 5) scheduleSnap(1000);
       else G.g0 = null;
     };
-    const onClick = (e: MouseEvent) => {
+    box.addEventListener("pointerup", onUp, { signal });
+    box.addEventListener("pointercancel", onUp, { signal });
+    box.addEventListener("click", (e) => {
       if (G.dragged > 5) { e.preventDefault(); e.stopPropagation(); G.dragged = 0; return; }
       const a = (e.target as Element).closest<HTMLElement>("[data-fr]");
       if (!a || locked()) return;
       const i = Number(a.dataset.i), here = mod(k0(), M);
-      // a side frame comes to the centre first; the settled centre one follows its link
       if (i !== here || snapping() || Math.abs(G.vel) > 0.05) { e.preventDefault(); snapTo(k0() + wrap(i - here, M)); }
-    };
-    const onKey = (e: KeyboardEvent) => {
+    }, { capture: true, signal });
+    box.addEventListener("keydown", (e) => {
       if (e.target !== box || e.metaKey || e.ctrlKey || e.altKey || locked()) return;
-      const k = Math.round(snapping() ? tws.find((t) => t.k === "off")!.b : G.off);
-      const to = (j: number) => k + wrap(j - mod(k, n), n); // nearest copy of item j
+      const k = Math.round(tws.find(isSnap)?.b ?? G.off);
+      const to = (j: number) => snapTo(k + wrap(j - mod(k, n), n), true);
       const m = ({ ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 } as Record<string, number>)[e.key];
       if (m) snapTo(k + m, true);
-      else if (e.key === "Home") snapTo(to(0), true);
-      else if (e.key === "End") snapTo(to(n - 1), true);
-      else if (e.key === "Enter") { F[mod(k, M)]?.el.click(); return; }
+      else if (e.key === "Home") to(0);
+      else if (e.key === "End") to(n - 1);
+      else if (e.key === "Enter") return F[mod(k, M)]?.el.click();
       else return;
       e.preventDefault();
-    };
+    }, { signal });
 
-    // List <-> Slider: every frame tweens to the other layout over 1.5s, outer frames first
-    const setMode = (m: InertiaGalleryLayout) => {
+    const setMode = (m: L) => {
       G.want = m;
-      if (m === G.mode || G.trans || G.intro) return;
+      if (m === G.mode || busy()) return;
       killSnap(); clearTimeout(G.snapT); G.vel = 0;
-      const a = k0(), ia = mod(a, M), h = Math.floor(M / 2);
+      const a = k0(), ia = mod(a, M);
       const finish = () => {
-        G.mode = m; kp.mode = m; setBase(m); G.off = a; layoutWrite(); G.trans = false;
+        G.mode = kp.mode = m; setBase(m); G.off = a; layoutWrite(); G.trans = false;
         if (G.want !== m) setMode(G.want);
       };
       G.trans = true;
       if (reduce) {
-        // crossfade instead of moving; the fade-in is queued before finish(), so a switch queued in the meantime fades
-        // out after it (and wins) instead of being cancelled by it, which would leave G.trans stuck
+        // fade in before finish(), so a queued switch can't leave G.trans stuck
         F.forEach((f, i) => tween(f.st, { op: 0 }, 0.15, out2, 0, i ? undefined : () => {
           F.forEach((g) => tween(g.st, { op: 1 }, 0.2, out2));
           finish();
@@ -310,86 +289,58 @@ export function InertiaGallery({
       let left = F.length;
       F.forEach((f, i) => {
         const d = wrap(i - ia, M);
-        // check-ignore: duration the layout switch is a page-level move, kept at the source's 1.5s
-        // the outer-first stagger covers the five frames either side of the centre, so many copies don't add idle time
-        tween(f.st, place(m, d * unitOf(m)), 1.5, inOut3, 0.06 * Math.max(0, Math.min(h, 5) - Math.abs(d)), () => { if (!--left) finish(); });
+        tween(f.st, place(m, d * unitOf(m)), 1.5, inOut3, 0.06 * Math.max(0, Math.min(M >> 1, 5) - Math.abs(d)), () => { if (!--left) finish(); });
       });
     };
     api.current = { setMode };
 
-    // Intro: small foreground squares in a row spread out, take on colour, then grow into place
     const playIntro = () => {
-      kp.played = true;
-      G.intro = true;
+      kp.played = G.intro = true;
       const ia = mod(k0(), M), sp = Math.min(32, (G.W * 0.9) / M);
       F.forEach((f, i) => {
-        const d = wrap(i - ia, M), to = place(G.mode, M === 1 ? 0 : coord(i));
-        Object.assign(f.st, { x: 0, y: 0, w: 8, h: 8, black: 1, zoom: 0.4, op: 1 });
-        // check-ignore: duration a first-view intro, the source's timing
-        tween(f.st, { x: d * sp }, 1.75, inOut3, 0.5);
-        // check-ignore: duration a first-view intro, the source's timing
+        const to = place(G.mode, coord(i));
+        Object.assign(f.st, SQ, { op: 1 });
+        tween(f.st, { x: wrap(i - ia, M) * sp }, 1.75, inOut3, 0.5);
         tween(f.st, { black: 0 }, 2, inOut3, 0.5);
-        // check-ignore: duration a first-view intro, the source's timing
-        tween(f.st, { ...to, zoom: 0.9 }, 2.5, inOut3, 2, i ? undefined : () => { G.intro = false; G.act = -1; if (G.want !== G.mode) setMode(G.want); });
+        tween(f.st, { ...to, zoom: 0.9 }, 2.5, inOut3, 2, i ? undefined : () => { G.intro = false; G.act = -1; setMode(G.want); });
       });
     };
 
+    let stale = false, measured = false;
+    const show = () => { render(); kick(); };
     const measure = () => {
       G.W = box.clientWidth; G.H = box.clientHeight;
       if (!G.W) return;
-      // enough copies to overfill the longer of the two layouts, plus a few off each end
       const nd = Math.max(12, Math.ceil(Math.max(G.H / unitOf("list"), G.W / unitOf("slider"))) + 4);
-      // a new copy count restarts the engine: hold the intro for that run instead of cutting it short
       if (n > 1 && n * Math.ceil(nd / n) !== M) { stale = true; setNeed(nd); return; }
       measured = true;
-      if (G.trans || G.intro) return;
-      setBase(G.mode); layoutWrite(); render(); kick();
+      if (busy()) return;
+      setBase(G.mode); layoutWrite(); show();
       start();
     };
-    // first view, once measured with the final copy count: play the intro or just show the frames
     const start = () => {
       if (stale || !measured || !G.visible || kp.played) return;
       if (intro && !reduce) playIntro();
       else kp.played = true;
-      render(); kick();
+      show();
     };
     G.W = box.clientWidth; G.H = box.clientHeight;
     G.off = kp.k;
     if (G.W) { setBase(G.mode); layoutWrite(); }
-    const pending = intro && !kp.played && M > 0;
-    if (pending && !reduce) F.forEach((f) => Object.assign(f.st, { x: 0, y: 0, w: 8, h: 8, black: 1, zoom: 0.4, op: 0 }));
-    let stale = false, measured = false;
+    if (intro && !kp.played && !reduce) F.forEach((f) => Object.assign(f.st, SQ, { op: 0 }));
     const ro = new ResizeObserver(measure);
     ro.observe(box);
     const io = new IntersectionObserver(([en]) => {
-      G.visible = en.isIntersecting;
-      if (!G.visible) return;
-      start();
-      render(); kick();
+      if ((G.visible = en.isIntersecting)) { start(); show(); }
     });
     io.observe(box);
-
-    box.addEventListener("wheel", onWheel, { passive: false });
-    box.addEventListener("pointerdown", onDown);
-    box.addEventListener("pointermove", onMove);
-    box.addEventListener("pointerup", onUp);
-    box.addEventListener("pointercancel", onUp);
-    box.addEventListener("click", onClick, true);
-    box.addEventListener("keydown", onKey);
     return () => {
       kp.k = k0();
       cancelAnimationFrame(G.raf);
       clearTimeout(G.snapT);
       ro.disconnect();
       io.disconnect();
-      mq.removeEventListener("change", onMq);
-      box.removeEventListener("wheel", onWheel);
-      box.removeEventListener("pointerdown", onDown);
-      box.removeEventListener("pointermove", onMove);
-      box.removeEventListener("pointerup", onUp);
-      box.removeEventListener("pointercancel", onUp);
-      box.removeEventListener("click", onClick, true);
-      box.removeEventListener("keydown", onKey);
+      ac.abort();
       api.current = null;
     };
   }, [n, M, friction, frameWidth, frameHeight, intro]);
@@ -398,7 +349,7 @@ export function InertiaGallery({
     api.current?.setMode(mode);
   }, [mode]);
 
-  const pick = (m: InertiaGalleryLayout) => {
+  const pick = (m: L) => {
     if (layout === undefined) setOwn(m);
     onLayoutChange?.(m);
   };
@@ -417,17 +368,16 @@ export function InertiaGallery({
       )}
       {...rest}
     >
-      {frames.map((it, i) => {
-        const clone = i >= n;
+      {Array.from({ length: M }, (_, i) => {
+        const it = items[i % n], clone = i >= n;
         const body = (
           <>
             <div data-im className="absolute inset-0 origin-center">
-              {/* hover zoom on its own layer: the engine writes the parent's transform */}
               {/* check-ignore: duration a slow hover drift on artwork, the source's 0.9s */}
               <div className="size-full transition-[scale] duration-900 ease-out group-hover/fr:scale-[1.06] motion-reduce:transition-none motion-reduce:group-hover/fr:scale-100">
                 {it.node ??
                   (it.src ? (
-                    // eslint-disable-next-line @next/next/no-img-element -- a registry file cannot assume next/image
+                    // eslint-disable-next-line @next/next/no-img-element
                     <img src={it.src} alt={clone ? "" : (it.alt ?? "")} draggable={false} loading="lazy" decoding="async" onError={(e) => { e.currentTarget.style.visibility = "hidden"; }} className="block size-full object-cover" />
                   ) : null)}
               </div>
@@ -438,10 +388,10 @@ export function InertiaGallery({
         const common = {
           "data-fr": "",
           "data-i": i,
-          // hidden until the engine's first layout, so hydration never shows the frames piled in a corner
           style: { opacity: 0 },
           className: "group/fr absolute top-0 left-0 block origin-top-left overflow-hidden bg-muted [contain:strict]",
-          ...(clone ? { "aria-hidden": true, tabIndex: -1 } : { "aria-label": it.alt ?? (typeof it.title === "string" ? it.title : `${i + 1} of ${n}`), tabIndex: -1 }),
+          tabIndex: -1,
+          ...(clone ? { "aria-hidden": true } : { "aria-label": it.alt ?? str(it.title) ?? `${i + 1} of ${n}` }),
         };
         return it.href ? (
           <a key={i} href={it.href} draggable={false} {...common}>{body}</a>
@@ -458,7 +408,7 @@ export function InertiaGallery({
         <div data-bar className="absolute inset-x-3 bottom-3 flex items-center justify-between gap-3 text-xs">
           <span className="flex min-w-0 gap-1 rounded-full bg-background/80 px-3 py-1.5 text-foreground">
             <span className="shrink-0 tabular-nums">{pad(active + 1)} / {pad(n)}</span>
-            {cur?.title ? <span title={typeof cur.title === "string" ? cur.title : undefined} className="min-w-0 truncate text-muted-foreground">· {cur.title}</span> : null}
+            {cur?.title ? <span title={str(cur.title)} className="min-w-0 truncate text-muted-foreground">· {cur.title}</span> : null}
           </span>
           <div role="group" aria-label="Layout" className="flex shrink-0 gap-1 rounded-full bg-background/80 p-1">
             {(["list", "slider"] as const).map((m) => (

@@ -149,6 +149,9 @@ async function render(slug, clip, base, browser) {
   const page = await ctx.newPage();
   const mixer = await ctx.newPage(); // blank page that composes frames
   await mixer.goto("about:blank");
+  // the mixer opened last and is the visible tab: on the real clock a hidden tab barely paints (a few screencast frames a
+  // second) and does not repaint after a scroll, so the recorded page comes to the front
+  if (clip.realtime) await page.bringToFront();
   const cdp = await ctx.newCDPSession(page);
   const evalIn = async (expression) => (await cdp.send("Runtime.evaluate", { expression, returnByValue: true })).result.value;
   const centreOf = (sel) => evalIn(`(() => { const n = document.querySelector(${JSON.stringify(sel)}); if (!n) return null; const r = n.getBoundingClientRect(); return [r.left + r.width / 2, r.top + r.height / 2, r.width, r.height]; })()`);
@@ -203,7 +206,9 @@ async function render(slug, clip, base, browser) {
       if (i % 20 === 0) process.stdout.write(`\r  waiting for the entrance ${i} ${await evalIn("document.readyState + ' ' + (document.querySelector('nav')?.style.cssText ?? 'no nav')")}  `);
     }
     if (!started) throw new Error(`"${slug}": the entrance never started (clip.start: ${clip.start})`);
-    const f = clip.focus ? await centreOf(clip.focus) : null;
+    // a target below the fold (a looping card): record it centred instead of the page top; the camera aims at it too
+    if (clip.target) top = await evalIn(`(() => { const r = document.querySelector(${JSON.stringify(clip.target)}).getBoundingClientRect(); scrollTo({ top: r.top + scrollY + r.height / 2 - innerHeight / 2, behavior: "instant" }); return scrollY; })()`);
+    const f = clip.focus ?? clip.target ? await centreOf(clip.focus ?? clip.target) : null;
     m.focus = f ? [f[0], f[1]] : [W / 2, H / 2];
   } else {
     await page.goto(base, { waitUntil: "load" });
@@ -276,6 +281,8 @@ async function render(slug, clip, base, browser) {
       await new Promise((r) => setTimeout(r, 8));
     }
     await cdp.send("Page.stopScreencast");
+    // the screencast opens with the last frame it had, from before the jump to the target: drop it
+    if (mode === "load" && clip.target && shots.length > 1) shots.shift();
     const jpgW = Buffer.from(shots[0].data, "base64");
     let o = 2; // the frame's pixel size, from its JPEG header
     while (o < jpgW.length && !(jpgW[o] === 0xff && jpgW[o + 1] >= 0xc0 && jpgW[o + 1] <= 0xc3)) o += 2 + jpgW.readUInt16BE(o + 2);
@@ -355,9 +362,10 @@ try {
     const base = baseArg ?? clip.site ?? SITE;
     console.log(`rendering ${slug} from ${base}`);
     const rec = await render(slug, clip, base, browser);
+    if (clip.poster != null) rec.poster = `c${String(Math.round(clip.poster * FPS)).padStart(5, "0")}.jpg`; // the still at that second
     encode(slug, rec);
     rmSync(rec.dir, { recursive: true, force: true });
-    manifest[slug] = { label: clip.label, href: clip.site ?? base, w: OUT_W, h: OUT_H };
+    manifest[slug] = { label: clip.label, href: clip.href ?? clip.site ?? base, w: OUT_W, h: OUT_H };
     console.log(`  ${OUT}/${slug}.mp4 / .webm / .jpg`);
   }
 } finally {
