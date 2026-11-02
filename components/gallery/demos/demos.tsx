@@ -381,6 +381,12 @@ function LineRiseLoop({ playing, speed }: DemoProps) {
   );
 }
 
+/** The preloader plays once and uncovers the photo, so the loop remounts it to play again: count, hold, fade, then the photo for a beat. The count shortens with speed so a whole run fits one step. */
+function LoadPreloaderLoop({ playing, speed }: DemoProps) {
+  const n = useTick(playing, speed, 4000);
+  return <LoadPreloaderDemo key={n} minDuration={1.2 / speed} />;
+}
+
 // the box scrolls the about page, so the sticky picture crossfades as each block passes its middle
 function StickyCrossfadeLoop({ playing, speed }: DemoProps) {
   const box = useRef<HTMLDivElement>(null);
@@ -423,7 +429,7 @@ export const DEMOS: Record<string, (p: DemoProps) => ReactNode> = {
   "roll-link": RollLinkDemo,
   "curtain-reveal": CurtainLoop,
   preloader: PreloaderDemo,
-  "load-preloader": LoadPreloaderDemo,
+  "load-preloader": LoadPreloaderLoop,
   // a grid card draws the plain mark: the shader's one-off image pass is ~0.5s of main thread, so it runs only in the dialog
   "star-rise": ({ opts }: DemoProps) => <StarRiseDemo shader={!opts.card} />,
   "marquee-rows": MarqueeRowsDemo,
