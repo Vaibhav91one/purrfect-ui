@@ -7,7 +7,7 @@ import { ParallaxPhoto } from "./parallax-photo";
 export function ParallaxPhotoScene({ container }: { container: RefObject<HTMLElement | null> }) {
   return (
     <>
-      <section className="flex h-full flex-col justify-between bg-foreground p-10 text-background">
+      <section className="flex h-full flex-col justify-between bg-foreground p-8 text-background">
         <p className="text-2xl">/ Events</p>
         <div className="flex items-end justify-between gap-8">
           <dl className="grid shrink-0 gap-4 text-lg">
@@ -20,13 +20,13 @@ export function ParallaxPhotoScene({ container }: { container: RefObject<HTMLEle
               <dd>@Palazzo dei Congressi, Lugano</dd>
             </div>
           </dl>
-          <h2 className="text-right text-7xl leading-tight tracking-tight">Startup Pitch Night</h2>
+          <h2 className="text-right text-6xl leading-none tracking-tight">Startup Pitch Night</h2>
         </div>
       </section>
       <ParallaxPhoto src="/demo/coast.jpg" alt="Sea cliffs around a rocky cove" container={container} />
-      <section className="grid h-full grid-cols-[1fr_3fr] gap-16 p-10">
+      <section className="grid h-full grid-cols-[1fr_3fr] gap-10 p-8">
         <p className="text-2xl">About</p>
-        <p className="text-3xl leading-snug tracking-tight">
+        <p className="text-2xl leading-snug tracking-tight">
           Five teams, five minutes each, one room of founders and investors. Stay after for drinks on the terrace over the lake.
         </p>
       </section>
@@ -37,7 +37,7 @@ export function ParallaxPhotoScene({ container }: { container: RefObject<HTMLEle
 export default function ParallaxPhotoDemo() {
   const box = useRef<HTMLDivElement>(null);
   return (
-    <div ref={box} className="h-[560px] w-[1000px] overflow-y-auto overscroll-contain rounded-2xl bg-background text-foreground">
+    <div ref={box} className="h-[560px] w-[760px] overflow-y-auto overscroll-contain rounded-2xl bg-background text-foreground">
       <ParallaxPhotoScene container={box} />
     </div>
   );

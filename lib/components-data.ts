@@ -69,7 +69,7 @@ export const COMPONENTS: ComponentItem[] = [
   item("hover-preview", "Hover preview", "Navigation", "A list of links where hovering a row floats a preview card that trails the pointer.", [760, 420]),
   item("scroll-marquee", "Scroll marquee", "Text", "A marquee that slides with the page scroll and flips its drift.", [1000, 320]),
   item("roll-link", "Roll link", "Navigation", "A link whose label rolls over on a 3D axis on hover."),
-  item("parallax-photo", "Parallax photo", "Layout", "A full-bleed photo the page scrolls over: the frame moves while the picture stays nearly still.", [1000, 560]),
+  item("parallax-photo", "Parallax photo", "Layout", "A full-bleed photo the page scrolls over: the frame moves while the picture stays nearly still.", [760, 560]),
   item("curtain-reveal", "Curtain reveal", "Layout", "A panel the page lifts away from as you scroll, like a curtain.", [560, 420]),
   item("preloader", "Preloader", "Display", "A full-screen intro whose words swap in turn before the panel lifts off with a curved edge.", [480, 320]),
   item("cursor-follower", "Cursor follower", "Display", "A dot that follows the mouse and inverts what is under it."),

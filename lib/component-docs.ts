@@ -733,7 +733,7 @@ const [ready] = useState(() => heroImage.decode());
   "parallax-photo": {
     usage: `import { ParallaxPhoto } from "@/components/ui/parallax-photo";
 
-<ParallaxPhoto src="/cover.jpg" alt="The venue at night" className="min-h-[60vh] md:aspect-[16/10]" aspect="16 / 9" />
+<ParallaxPhoto src="/cover.jpg" alt="The venue at night" className="min-h-[60vh]" aspect="16 / 9" />
 
 // inside a scrolling box: follow its scroll instead of the page
 const box = useRef<HTMLDivElement>(null);
@@ -743,7 +743,7 @@ const box = useRef<HTMLDivElement>(null);
     props: [
       { name: "src", type: "string", description: "The photo." },
       { name: "alt", type: "string", description: "Describe the photo, or \"\" when it is decoration." },
-      { name: "aspect", type: "CSSProperties[\"aspectRatio\"]", default: '"16 / 10"', description: "The frame's aspect ratio; a height or min-height in className wins over it." },
+      { name: "aspect", type: "CSSProperties[\"aspectRatio\"]", default: '"16 / 10"', description: "The frame's aspect ratio, set inline, so an aspect-* class in className does not override it; a height or min-height in className wins over it." },
       { name: "container", type: "RefObject<HTMLElement | null>", description: "Follow a scrolling box instead of the page." },
       { name: "className", type: "string", description: "Merged onto the frame: size, rounding, a fallback background." },
     ],
