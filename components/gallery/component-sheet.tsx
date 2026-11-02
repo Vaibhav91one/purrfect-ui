@@ -105,7 +105,8 @@ export function ComponentSheet({ item, origin, onClose }: { item: ComponentItem;
   const playing = pick ?? !reduce;
   const [speed, setSpeed] = useState(1);
   const [run, setRun] = useState(0); // Replay bumps it, which remounts the preview or restarts the clip
-  // the loop yields while the person is hovering or focused in the preview, and picks up again 2s after they leave
+  // the loop yields while the person is hovering or focused in the preview, and picks up again 2s after they leave (not an
+  // `ambient` loop: there is nothing to take over, and the dialog opens under the pointer, so it would read as stuck)
   const [engaged, setEngaged] = useState(false);
   const resume = useRef<ReturnType<typeof setTimeout>>(undefined);
   const opening = useRef(false);
@@ -202,7 +203,7 @@ export function ComponentSheet({ item, origin, onClose }: { item: ComponentItem;
         <section data-sheet-preview className="relative min-h-0 overflow-hidden rounded-3xl bg-card">
           {tab === "preview" ? (
             <div data-hover-sound="off" className="absolute inset-0 max-lg:inset-y-16" onPointerEnter={engage} onPointerLeave={release} onFocus={engage} onBlur={release}>
-              <Preview key={run} item={item} inert={false} max={1.4} playing={!item.replay && playing && !engaged} speed={speed} opts={opts} />
+              <Preview key={run} item={item} inert={false} max={1.4} playing={!item.replay && playing && (item.ambient || !engaged)} speed={speed} opts={opts} />
             </div>
           ) : tab === "wild" && item.clip ? (
             <div className="absolute inset-0 bg-card">
