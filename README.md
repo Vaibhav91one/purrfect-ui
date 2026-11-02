@@ -49,7 +49,7 @@ Browse every component with a live preview (installable ones also show their sou
 
 ## MCP (Claude Code, Cursor, VS Code)
 
-Tested end to end in Claude Code. Cursor and VS Code get the same server config but have not been tried in the editors yet.
+Tested end to end in Claude Code and Cursor. VS Code gets the same server config but has not been tried in the editor yet.
 
 In your project, add this to `components.json`:
 
