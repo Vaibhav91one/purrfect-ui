@@ -1114,24 +1114,4 @@ const [open, setOpen] = useState(true);
       "Reduced motion: the whole text shows at once in one 200ms fade with no caret (CSS, so server HTML is unchanged) and onDone fires on mount.",
     ],
   },
-  "location-pill": {
-    usage: `import { LocationPill } from "@/components/ui/location-pill";
-
-<LocationPill className="absolute left-0 top-1/2" />
-<LocationPill label="Based in Berlin" icon={<Globe size={30} />} drift={0.3} />`,
-    props: [
-      { name: "label", type: "ReactNode", default: '"Located in India"', description: "The text before the icon. One line; a label wider than its parent truncates." },
-      { name: "icon", type: "ReactNode", description: "Spins inside the grey circle. Defaults to an inline globe SVG; size it like a 30px icon." },
-      { name: "duration", type: "number", default: "10", description: "Seconds per full turn of the icon." },
-      { name: "drift", type: "number", default: "0.2", description: "How far it drifts up as it scrolls out, as a fraction of its own height. 0 turns the drift off." },
-      { name: "container", type: "RefObject<HTMLElement | null>", description: "Follow a scrolling box instead of the page." },
-    ],
-    behaviors: [
-      "Square on the left, round on the right: made to sit flush against the left edge of a hero.",
-      "The icon turns with a linear CSS animation, paused with animation-play-state while off screen, so it costs no JavaScript per frame.",
-      "From the moment its bottom edge passes the middle of the viewport (or container) until it reaches the top, it moves up by drift x its height, through a spring so it trails the scroll slightly.",
-      "Reduced motion: the icon holds still and the drift is off.",
-      "The corners are logical (square at the start, round at the end), so a right-to-left page mirrors it; the gap halves on phones.",
-    ],
-  },
 };
