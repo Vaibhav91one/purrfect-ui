@@ -8,10 +8,10 @@ const place = (where: string) => (
   </span>
 );
 
-// the source's events carousel (cards edge to edge, numbered) over its events list (rows; a past one dimmed)
+// the source's events carousel: three cards edge to edge, numbered
 export default function PeekCardDemo() {
   return (
-    <div className="relative grid h-[760px] w-[1000px] content-center gap-4 overflow-hidden rounded-3xl p-8">
+    <div className="relative grid h-[760px] w-[1000px] content-center overflow-hidden rounded-3xl p-8">
       <div className="relative grid grid-cols-3">
         <PeekCard
           index={1}
@@ -53,16 +53,6 @@ export default function PeekCardDemo() {
           href="#three"
         />
       </div>
-      <PeekCard
-        variant="row"
-        index="12 Oct"
-        image="/demo/field.jpg"
-        title="Language Exchange Night"
-        description="Practice a new language over coffee with native speakers."
-        meta={<span>@Old Town Café</span>}
-        href="#row"
-      />
-      <PeekCard variant="row" muted title="Spring Cultural Walk" description="This one is over. Thanks for coming." meta={<span>Past</span>} href="#past" />
     </div>
   );
 }
