@@ -88,8 +88,6 @@ export function SiteClip({ slug, playing = true, speed = 1, hover = false, class
     else v.pause();
   }, [active, armed, blocked, hover, over, ready, rest]);
 
-  if (hover && blocked) return null;
-
   const reset = () => {
     const v = ref.current;
     if (!v) return;
