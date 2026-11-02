@@ -33,7 +33,7 @@ const EASE = "ease-[cubic-bezier(0.23,1,0.32,1)]";
  * keyboard focus (`:focus-visible`) swaps the image and inverts the badge without the zoom, turn or nudge, and a tap
  * gets only the press scale (no flash of the hover state). Reduced motion:
  * the images still crossfade and the badge still inverts, but nothing zooms, turns or moves. A `disabled` card dims and
- * plays no hover. Content sits at the top, so images line up in a grid row of mixed title lengths; the badge scales with
+ * plays no hover. `data-hover="true"` shows the hover state without a pointer (for a looping demo). Content sits at the top, so images line up in a grid row of mixed title lengths; the badge scales with
  * a narrow card (22% of its width, 36-56px).
  */
 export function SwapCard({ image, hoverImage, title, subtitle, badge = true, type = "button", className, ...rest }: SwapCardProps) {
@@ -51,7 +51,7 @@ export function SwapCard({ image, hoverImage, title, subtitle, badge = true, typ
         {badge && (
           <span
             className={cn(
-              "absolute top-[3%] right-[4%] z-[2] aspect-square w-[22%] min-w-9 max-w-14 text-background transition-colors duration-200 group-hover:text-foreground group-focus-visible:text-foreground",
+              "absolute top-[3%] right-[4%] z-[2] aspect-square w-[22%] min-w-9 max-w-14 text-background transition-colors duration-200 group-hover:text-foreground group-focus-visible:text-foreground group-data-[hover=true]:text-foreground",
               EASE,
             )}
           >
@@ -61,7 +61,7 @@ export function SwapCard({ image, hoverImage, title, subtitle, badge = true, typ
                 fill="currentColor"
                 className={cn(
                   // check-ignore: duration the ring turns slowly on purpose, like the source (600ms)
-                  "origin-center transition-[rotate] duration-[600ms] [transform-box:fill-box] group-hover:rotate-30 motion-reduce:!rotate-0",
+                  "origin-center transition-[rotate] duration-[600ms] [transform-box:fill-box] group-hover:rotate-30 group-data-[hover=true]:rotate-30 motion-reduce:!rotate-0",
                   EASE,
                 )}
               />
@@ -71,7 +71,7 @@ export function SwapCard({ image, hoverImage, title, subtitle, badge = true, typ
                 strokeWidth="1.8"
                 strokeLinejoin="round"
                 className={cn(
-                  "stroke-foreground transition-[stroke] duration-200 group-hover:stroke-background group-focus-visible:stroke-background",
+                  "stroke-foreground transition-[stroke] duration-200 group-hover:stroke-background group-focus-visible:stroke-background group-data-[hover=true]:stroke-background",
                   EASE,
                 )}
               />
@@ -81,7 +81,7 @@ export function SwapCard({ image, hoverImage, title, subtitle, badge = true, typ
         <div
           className={cn(
             // check-ignore: duration the zoom is a slow 900ms drift under a 400ms fade, like the source
-            "absolute inset-0 transition-[opacity,scale] duration-[400ms,900ms] group-hover:scale-105 motion-reduce:!scale-100",
+            "absolute inset-0 transition-[opacity,scale] duration-[400ms,900ms] group-hover:scale-105 group-data-[hover=true]:scale-105 motion-reduce:!scale-100",
             EASE,
           )}
         >
@@ -90,7 +90,7 @@ export function SwapCard({ image, hoverImage, title, subtitle, badge = true, typ
         <div
           className={cn(
             // check-ignore: duration the zoom is a slow 900ms drift under a 400ms fade, like the source
-            "absolute inset-0 scale-[1.08] opacity-0 transition-[opacity,scale] duration-[400ms,900ms] group-hover:scale-100 group-hover:opacity-100 group-focus-visible:opacity-100 motion-reduce:!scale-100",
+            "absolute inset-0 scale-[1.08] opacity-0 transition-[opacity,scale] duration-[400ms,900ms] group-hover:scale-100 group-hover:opacity-100 group-focus-visible:opacity-100 group-data-[hover=true]:scale-100 group-data-[hover=true]:opacity-100 motion-reduce:!scale-100",
             EASE,
           )}
         >
@@ -100,7 +100,7 @@ export function SwapCard({ image, hoverImage, title, subtitle, badge = true, typ
       <div className="pt-2">
         <span
           className={cn(
-            "inline-block max-w-full break-words transition-[translate] duration-300 group-hover:translate-x-1.5 rtl:group-hover:-translate-x-1.5 motion-reduce:!translate-x-0",
+            "inline-block max-w-full break-words transition-[translate] duration-300 group-hover:translate-x-1.5 rtl:group-hover:-translate-x-1.5 group-data-[hover=true]:translate-x-1.5 rtl:group-data-[hover=true]:-translate-x-1.5 motion-reduce:!translate-x-0",
             EASE,
           )}
         >
