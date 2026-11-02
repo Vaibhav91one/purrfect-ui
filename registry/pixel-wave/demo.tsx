@@ -1,4 +1,3 @@
-/* eslint-disable @next/next/no-img-element */
 import { ArrowLeft, ArrowUp, Bot, ListChecks, Search, ShieldCheck, Wrench } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ShimmerText } from "@/registry/shimmer-text/shimmer-text";
@@ -16,7 +15,6 @@ const PROMPTS = [
 export default function PixelWaveDemo({ playing, speed = 1 }: { playing?: boolean; speed?: number }) {
   return (
     <div className={cn("relative grid h-[700px] w-[600px] place-items-center overflow-hidden rounded-3xl", playing === false && "[&_*]:![animation-play-state:paused]")}>
-      <img src="/demo/canal.jpg" alt="" className="absolute inset-0 size-full object-cover" />
       <section className="relative flex h-[600px] w-[520px] flex-col overflow-hidden rounded-2xl bg-card text-card-foreground shadow-2xl ring-1 ring-border/50">
         <header className="grid grid-cols-3 items-center border-b border-border/50 px-4 py-3">
           <span className="flex items-center gap-1.5 justify-self-start rounded-md px-2 py-1 text-sm text-muted-foreground">

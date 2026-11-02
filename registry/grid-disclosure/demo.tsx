@@ -40,8 +40,6 @@ export const FAQ: GridDisclosureItem[] = [
 export default function GridDisclosureDemo() {
   return (
     <div className="relative grid h-[680px] w-[880px] place-items-center overflow-hidden">
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src="/demo/dunes.jpg" alt="" className="absolute inset-0 size-full object-cover" />
       <section className="relative grid w-[820px] grid-cols-[200px_1fr] gap-8 rounded-3xl bg-background p-8 shadow-2xl">
         <div className="flex flex-col gap-3">
           <h2 className="text-[26px] leading-tight font-medium tracking-[-0.02em] text-foreground">

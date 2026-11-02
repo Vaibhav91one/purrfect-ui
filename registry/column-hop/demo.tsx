@@ -95,8 +95,6 @@ const HOP = "Weak JWT signing key on the login endpoint";
 export default function ColumnHopDemo() {
   return (
     <div className="relative grid h-[560px] w-[800px] place-items-center overflow-hidden rounded-3xl">
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src="/demo/canyon.jpg" alt="" className="absolute inset-0 size-full object-cover" />
       <div className="relative w-[720px] rounded-xl border border-border/50 bg-card p-4 text-card-foreground">
         <ColumnHop
           columns={COLUMNS}

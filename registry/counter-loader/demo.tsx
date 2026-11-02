@@ -18,7 +18,6 @@ export default function CounterLoaderDemo() {
   const [run, setRun] = useState(0);
   return (
     <div className="relative h-[320px] w-[480px] overflow-hidden rounded-2xl">
-      <img src="/demo/fjord.jpg" alt="" className="absolute inset-0 size-full object-cover" />
       <button
         type="button"
         aria-label="Replay the loader"

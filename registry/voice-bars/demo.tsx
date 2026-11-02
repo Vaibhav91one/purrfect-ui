@@ -1,4 +1,3 @@
-/* eslint-disable @next/next/no-img-element */
 import { cn } from "@/lib/utils";
 import { VoiceBars } from "./voice-bars";
 
@@ -9,7 +8,6 @@ const ORB =
 export default function VoiceBarsDemo({ playing = true, speed = 1 }: { playing?: boolean; speed?: number }) {
   return (
     <div className="relative grid h-[640px] w-[600px] place-items-center overflow-hidden rounded-3xl">
-      <img src="/demo/dunes.jpg" alt="" className="absolute inset-0 size-full object-cover" />
       <div className="relative flex h-[480px] w-[448px] flex-col overflow-hidden rounded-xl bg-card text-card-foreground shadow-lg">
         <div className="px-6 pt-6">
           <div className="mx-auto grid size-70 place-items-center p-8">

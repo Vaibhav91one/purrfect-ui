@@ -58,7 +58,7 @@ const PAGES = {
 };
 type Page = keyof typeof PAGES;
 
-/** A site window on a wallpaper: header nav, three pages swapped under the cover. Shared with worst-case.tsx. */
+/** A site window: header nav, three pages swapped under the cover. Shared with worst-case.tsx. */
 export function CoverBox({ sticker: st = sticker, sheetClassName = "bg-muted", body, contained = true }: { sticker?: ReactNode; sheetClassName?: string; body?: ReactNode; contained?: boolean }) {
   const cover = useRef<StickerCoverHandle>(null);
   const [page, setPage] = useState<Page>("Work");
@@ -66,7 +66,6 @@ export function CoverBox({ sticker: st = sticker, sheetClassName = "bg-muted", b
   const link = "relative after:absolute after:inset-x-0 after:-bottom-0.5 after:h-px after:origin-left after:scale-x-0 after:bg-current after:transition-transform after:duration-300 hover:after:scale-x-100 aria-[current=page]:after:scale-x-100";
   return (
     <div className="relative h-[320px] w-[480px] overflow-hidden rounded-2xl">
-      <img src="/demo/valley.jpg" alt="" className="absolute inset-0 size-full object-cover" />
       <div className="absolute inset-4 overflow-hidden rounded-xl bg-background text-foreground shadow-xl">
         {/* the header is part of the page, as on the source: it drifts up and goes inert under the cover too */}
         <StickerCover ref={cover} contained={contained} sticker={st} className={sheetClassName} pageClassName={cn("flex h-full flex-col overflow-auto", page === "Shop" && "bg-muted")}>

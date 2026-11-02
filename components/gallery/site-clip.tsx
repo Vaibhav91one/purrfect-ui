@@ -104,7 +104,7 @@ export function SiteClip({ slug, playing = true, speed = 1, hover = false, class
       muted
       loop={!hover}
       playsInline
-      preload={armed ? "auto" : "none"}
+      preload={!armed ? "none" : hover && !over && !ready ? "metadata" : "auto"} // a card near the screen fetches only the header; the whole clip loads once it is hovered
       poster={!hover || armed ? `/previews/${slug}.jpg` : undefined} // a card's clip is invisible until it plays, so its poster waits until the card is near the screen
       aria-hidden
       data-shown={hover ? over && !rest && (loaded || ready) : undefined}

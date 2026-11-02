@@ -96,7 +96,6 @@ function ButtonLoop({ playing, speed, opts }: DemoProps) {
   const n = useTick(playing, speed, 1500) % 2;
   return (
     <div className="relative grid h-[300px] w-[420px] place-items-center overflow-hidden rounded-2xl">
-      {photo(PHOTOS.indexOf("dunes"), "absolute inset-0")}
       <Button variant={opts.variant === "Ghost" ? "ghost" : "solid"} size={opts.size === "Large" ? "lg" : "md"} data-hover={n === 1 ? "true" : undefined} data-cuelume-tap="" icon={<Rocket className="size-4" />}>
         Ship it
       </Button>
@@ -109,7 +108,7 @@ const SCENERY = "/demo/scenery.jpg"; // the Armour hero's photo; the live clip s
 const PHOTOS = ["fjord", "canyon", "cliffs", "storm", "valley", "coast", "city", "jellyfish", "field", "canal", "hiker", "dunes"];
 // eslint-disable-next-line @next/next/no-img-element -- demo art; the registry components take plain <img> too
 const photo = (i: number, className = "") => <img src={`/demo/${PHOTOS[i % PHOTOS.length]}.jpg`} alt="" className={`size-full object-cover ${className}`} />;
-const frame = "relative h-[282px] w-96 overflow-hidden rounded-2xl bg-[#0E7DDA] bg-[url(/demo/valley.jpg)] bg-cover bg-center"; // a photo over Armour's blue (shown while it loads); 1.364 is the clip stage's ratio
+const frame = "relative h-[282px] w-96 overflow-hidden rounded-2xl bg-muted"; // a surface for the notch to drop onto; 1.364 is the clip stage's ratio
 const pageFrame = "relative size-full overflow-hidden rounded-[64px] bg-white"; // a full-page demo is drawn at a page's size and scaled down; the card's stage supplies the padding
 
 /** Notch drops in once on mount, so the loop remounts it to replay the drop. */
@@ -117,8 +116,8 @@ function NotchLoop({ playing, speed }: DemoProps) {
   const n = useTick(playing, speed, 3200);
   return (
     <div className={frame}>
-      <Notch key={n} delay={0.15} color="#fff">
-        <span className="text-2xl font-medium text-[#1B1B1B]">ARMOUR</span>
+      <Notch key={n} delay={0.15}>
+        <span className="text-2xl font-medium text-foreground">ARMOUR</span>
       </Notch>
     </div>
   );
@@ -233,8 +232,6 @@ function RevealLoop({ playing, speed, opts }: DemoProps) {
   const chars = opts.mode === "Letters";
   return (
     <div className="relative grid h-[300px] w-[420px] place-items-center overflow-hidden rounded-3xl">
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src="/demo/fjord.jpg" alt="" className="absolute inset-0 size-full object-cover" />
       <div className="relative h-[236px] w-[372px] overflow-hidden rounded-2xl bg-background">
         <ScrollBox playing={playing} speed={speed} boxRef={box} className="h-full max-w-none px-6">
           <div className="h-56" />
@@ -265,17 +262,15 @@ function ParallaxLoop({ playing, speed }: DemoProps) {
   );
 }
 
-// the portfolio's hero: the name runs across the bottom of a photo; the box scrolls it up and back, and it flips each time the loop turns
+// the portfolio's hero: the name runs across the bottom; the box scrolls it up and back, and it flips each time the loop turns
 function MarqueeLoop({ playing, speed }: DemoProps) {
   const box = useRef<HTMLDivElement>(null);
   return (
     <div className="relative size-full overflow-hidden rounded-2xl">
-      {photo(PHOTOS.indexOf("storm"), "absolute inset-0")}
       <ScrollBox playing={playing} speed={speed} boxRef={box} className="h-full max-w-none">
         <div className="h-[55%]" />
         <ScrollMarquee container={box} className="w-full">
-          {/* check-ignore: hardcoded-color white type over a photo, in either theme */}
-          <p className="pr-16 text-8xl font-medium whitespace-nowrap text-white">Vaibhav Tomar —</p>
+          <p className="pr-16 text-8xl font-medium whitespace-nowrap text-foreground">Vaibhav Tomar —</p>
         </ScrollMarquee>
         <div className="h-1/2" />
       </ScrollBox>
@@ -283,16 +278,14 @@ function MarqueeLoop({ playing, speed }: DemoProps) {
   );
 }
 
-// the box scrolls the footer in, so the word rises out of its crop and the photo drifts, then back
+// the box scrolls the footer in, so the word rises out of its crop and its photo fill drifts, then back
 function WordmarkLoop({ playing, speed }: DemoProps) {
   const box = useRef<HTMLDivElement>(null);
   return (
     <div className="h-full py-16">
       <div className="relative h-full overflow-hidden rounded-3xl">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/demo/storm.jpg" alt="" className="absolute inset-0 size-full object-cover" />
         <ScrollBox playing={playing} speed={speed} boxRef={box} className="h-full max-w-none px-6">
-          <div className="grid h-full place-items-center text-3xl text-white">↓ Scroll</div>
+          <div className="grid h-full place-items-center text-3xl text-muted-foreground">↓ Scroll</div>
           <div className="h-1/3" />
           <ArmourFooter />
           <div className="h-6" />
@@ -356,11 +349,7 @@ function CursorLoop() {
   }, []);
   return (
     <div ref={stage} className="relative grid h-64 w-96 place-items-center overflow-hidden rounded-2xl">
-      {photo(PHOTOS.indexOf("dunes"), "absolute inset-0")}
-      <div className="relative rounded-2xl bg-background px-10 py-8 text-center text-foreground">
-        <h2 data-cursor-scale="8" className="text-5xl italic">Projects</h2>
-        <p className="mt-3 text-sm text-muted-foreground">Design is thinking made visual. — Saul Bass</p>
-      </div>
+      <h2 data-cursor-scale="8" className="relative text-5xl italic text-foreground">Follow me</h2>
       {host ? createPortal(<CursorFollower />, host) : <span className="absolute top-[42%] left-[44%] size-20 -translate-1/2 rounded-full bg-white mix-blend-difference" />}
     </div>
   );
@@ -373,8 +362,6 @@ function DrawerLoop({ playing, speed }: DemoProps) {
   const open = pick?.at === n ? pick.open : n % 2 === 1;
   return (
     <div className="relative h-[640px] w-[390px] overflow-hidden rounded-3xl bg-background">
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src="/demo/coast.jpg" alt="" className="absolute inset-0 size-full object-cover" />
       <DrawerMenu contained active="#projects" open={open} onOpenChange={(o) => setPick({ at: n, open: o })} links={drawerLinks} footer={drawerFooter} />
     </div>
   );
@@ -385,8 +372,6 @@ function LineRiseLoop({ playing, speed }: DemoProps) {
   const box = useRef<HTMLDivElement>(null);
   return (
     <div className="relative h-full w-full overflow-hidden rounded-3xl">
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src="/demo/cliffs.jpg" alt="" className="absolute inset-0 size-full object-cover" />
       <ScrollBox playing={playing} speed={speed} boxRef={box} className="absolute inset-4 h-auto max-w-none rounded-2xl bg-background text-foreground">
         <LineRiseScene container={box} />
       </ScrollBox>
@@ -399,8 +384,6 @@ function StickyCrossfadeLoop({ playing, speed }: DemoProps) {
   const box = useRef<HTMLDivElement>(null);
   return (
     <div className="relative h-full w-full overflow-hidden rounded-3xl">
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src="/demo/dunes.jpg" alt="" className="absolute inset-0 size-full object-cover" />
       <ScrollBox playing={playing} speed={speed} boxRef={box} className="absolute inset-x-4 top-20 bottom-4 h-auto max-w-none rounded-2xl bg-background text-foreground">
         <StickyCrossfadeScene container={box} />
       </ScrollBox>
@@ -413,8 +396,6 @@ function LocationPillLoop({ playing, speed }: DemoProps) {
   const box = useRef<HTMLDivElement>(null);
   return (
     <div className="relative h-full w-full overflow-hidden rounded-3xl">
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src="/demo/fjord.jpg" alt="" className="absolute inset-0 size-full object-cover" />
       <ScrollBox playing={playing} speed={speed} boxRef={box} className="absolute inset-x-4 top-20 bottom-4 h-auto max-w-none overflow-hidden rounded-2xl">
         <LocationPillScene container={box} />
       </ScrollBox>
@@ -456,7 +437,7 @@ export const DEMOS: Record<string, (p: DemoProps) => ReactNode> = {
   "quote-cycle": QuoteCycleDemo,
   "column-hop": ColumnHopDemo,
   "line-rise": LineRiseLoop,
-  "sticker-pop": StickerPopDemo,
+  "sticker-pop": ({ playing, speed }: DemoProps) => <StickerPopDemo playing={playing} speed={speed} />,
   "swap-card": SwapCardDemo,
   "sticky-crossfade": StickyCrossfadeLoop,
   "stroke-replay": StrokeReplayDemo,

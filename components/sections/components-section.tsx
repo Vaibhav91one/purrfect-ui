@@ -11,9 +11,9 @@ import { ScrollReveal } from "@/registry/scroll-reveal/scroll-reveal";
 const card = `${cardBase} block`;
 
 export function ComponentsSection() {
-  // deal the components out to three columns; the "view all" tile closes the last one
+  // three rows: deal the first 8 out to three columns; the "view all" tile closes the last one
   const cols: [React.ReactNode[], React.ReactNode[], React.ReactNode[]] = [[], [], []];
-  COMPONENTS.forEach((c, i) =>
+  COMPONENTS.slice(0, 8).forEach((c, i) =>
     cols[i % 3].push(
       <CardLink key={c.slug} item={c} className={card} />,
     ),

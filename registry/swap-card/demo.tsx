@@ -11,12 +11,10 @@ const ITEMS = [
   { title: "Folded wolf", type: "Sticker sheet", image: "canyon", hover: "dunes" },
 ];
 
-// a slice of poinu.vercel.app/shop: nav, the "shop" title row and the product grid, as a page over a photo
+// a slice of poinu.vercel.app/shop: nav, the "shop" title row and the product grid, as a page
 export default function SwapCardDemo() {
   return (
     <div className="relative grid h-[680px] w-[800px] place-items-center overflow-hidden rounded-2xl">
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src="/demo/valley.jpg" alt="" className="absolute inset-0 size-full object-cover" />
       <div className="relative w-[720px] rounded-2xl bg-background px-7 pt-5 pb-7 text-sm text-foreground">
         <nav className="flex items-center justify-between">
           <span>©KhushiChanu</span>

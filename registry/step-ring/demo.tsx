@@ -32,8 +32,6 @@ export default function StepRingDemo() {
   const next = () => setStage((s) => (s + 1) % STAGES.length);
   return (
     <div className="relative grid h-[560px] w-[800px] place-items-center overflow-hidden">
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src="/demo/valley.jpg" alt="" className="absolute inset-0 size-full object-cover" />
       <section className="relative flex w-[560px] flex-col gap-4 rounded-xl border border-border/50 bg-card pt-5 shadow-2xl">
         <header className="px-5">
           <h2 className="text-xs text-muted-foreground">Lifecycle</h2>

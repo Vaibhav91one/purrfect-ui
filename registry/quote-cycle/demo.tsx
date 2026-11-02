@@ -17,8 +17,6 @@ export default function QuoteCycleDemo() {
   const [i, setI] = useState(0);
   return (
     <div className="relative grid h-[320px] w-[480px] place-items-center overflow-hidden rounded-3xl">
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src="/demo/field.jpg" alt="" className="absolute inset-0 size-full object-cover" />
       <div className="relative grid h-[200px] w-[400px] place-items-center rounded-2xl bg-background px-12">
         <button type="button" onClick={() => setI((n) => n + 1)} className="w-full">
           {/* visually hidden, so the button's name is "Next quote" plus the quote itself */}
