@@ -486,123 +486,131 @@ svg[data-awake="true"] .cat-eye-ball {
   background: #6d28d9;
 }
 
-/* footer wordmark cats (components/gallery/wordmark-cats.tsx): hidden until the wordmark scrolls into view, then settle in one by one */
-.wm-eyes-on [fill="black"] {
-  fill: white;
-}
-
+/* footer wordmark cats (components/gallery/wordmark-cats.tsx): the site's cats in new poses. Hidden until the wordmark
+   scrolls into view, then they settle in one by one. Breathing, tails, blinks and the blob spin reuse the cat-* rules. */
 .wm-cat {
   opacity: 0;
-  translate: 0 0.06em;
+  translate: 0 0.04em;
 }
 
 [data-in] .wm-cat {
   opacity: 1;
   translate: 0 0;
-  transition: opacity 0.7s cubic-bezier(0.23, 1, 0.32, 1) var(--i, 0ms), translate 0.8s cubic-bezier(0.23, 1, 0.32, 1) var(--i, 0ms);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .wm-cat {
-    opacity: 1;
-    translate: 0 0;
-    transition: none !important;
-  }
-}
-
-@keyframes wm-look {
-  0%, 20% {
-    transform: rotate(-7deg);
-  }
-
-  45%, 70% {
-    transform: rotate(7deg);
-  }
-
-  100% {
-    transform: rotate(-7deg);
-  }
-}
-
-@keyframes wm-tail {
-  to {
-    transform: rotate(14deg);
-  }
-}
-
-@keyframes wm-breathe {
-  to {
-    transform: scaleY(1.04) translateY(-1px);
-  }
-}
-
-@keyframes wm-stretch {
-  0%, 70%, 100% {
-    transform: scale(1);
-  }
-
-  80%, 90% {
-    transform: scale(1.1, .94);
-  }
+  transition: opacity 0.6s cubic-bezier(0.23, 1, 0.32, 1) var(--i, 0ms), translate 0.7s cubic-bezier(0.23, 1, 0.32, 1) var(--i, 0ms);
 }
 
 @keyframes wm-z {
-  0% { opacity: 0; transform: translate(0, 4px); }
+  0% { opacity: 0; translate: 0 4px; }
   30% { opacity: 0.9; }
-  100% { opacity: 0; transform: translate(6px, -16px); }
+  100% { opacity: 0; translate: 8px -18px; }
 }
 
-@keyframes wm-blink {
-  0%, 94%, 100% {
-    transform: scaleY(1);
-  }
-
-  97% {
-    transform: scaleY(.1);
-  }
+/* the peeking head rises a little higher over the c now and then */
+@keyframes wm-peek {
+  0%, 55%, 100% { translate: 0 0; }
+  65%, 85% { translate: 0 -5px; }
 }
 
-.wm-look, .wm-head-rest {
-  transform-box: fill-box;
-  transform-origin: 50% 100%;
-  animation: 7s ease-in-out infinite wm-look;
+/* the bat: paw tucked down for a while, a quick swipe out into the dot, back down; the dot flinches on the same clock */
+@keyframes wm-bat {
+  0%, 56%, 82%, 100% { rotate: -48deg; }
+  62% { rotate: 6deg; }
+  66% { rotate: -2deg; }
+  70% { rotate: 2deg; }
 }
 
-.wm-head-rest {
-  animation: none;
+@keyframes wm-dot {
+  0%, 62%, 90%, 100% { translate: 0 0; rotate: 0deg; }
+  65% { translate: 0.018em 0; rotate: 12deg; }
+  72% { translate: 0.006em 0; rotate: -4deg; }
+  80% { translate: 0 0; rotate: 1deg; }
 }
 
-.wm-tail, .wm-tail-curl {
-  transform-box: fill-box;
-  transform-origin: 0 100%;
-  animation: 2.6s ease-in-out infinite alternate wm-tail;
-}
-
-.wm-breathe {
-  transform-box: fill-box;
-  transform-origin: 50% 100%;
-  animation: 3.6s ease-in-out infinite alternate wm-breathe;
-}
-
-.wm-stretch {
-  transform-box: fill-box;
-  transform-origin: 50% 100%;
-  animation: 6s ease-in-out infinite wm-stretch;
+@keyframes wm-watch {
+  0%, 50%, 86%, 100% { rotate: 0deg; }
+  58%, 76% { rotate: -14deg; }
 }
 
 .wm-z {
   animation: wm-z 4s ease-out infinite;
 }
 
-.wm-blink {
-  animation: 5s ease-in-out infinite wm-blink;
-  animation-delay: inherit;
-  transform-box: fill-box;
-  transform-origin: 50%;
+.wm-peek {
+  animation: 7s ease-in-out infinite wm-peek;
+}
+
+/* head turn and eyes toward the pointer (set by Wordmark), eased like the hero's spring */
+.wm-head {
+  transition: rotate 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.wm-look {
+  transition: translate 0.35s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.wm-watch {
+  transform-box: view-box;
+  transform-origin: 92px 118px;
+}
+
+.wm-paw-bat {
+  rotate: -48deg;
+}
+
+.wm-dot {
+  transform-origin: 100% 100%;
+}
+
+[data-in] .wm-paw-bat {
+  animation: 5s cubic-bezier(0.23, 1, 0.32, 1) infinite wm-bat;
+}
+
+[data-in] .wm-dot {
+  animation: 5s cubic-bezier(0.23, 1, 0.32, 1) infinite wm-dot;
+}
+
+[data-in] .wm-watch {
+  animation: 5s ease-in-out infinite wm-watch;
+}
+
+/* pointing at the sleeping cat wakes it, the same way the sleeping cat elsewhere wakes */
+@media (hover: hover) and (pointer: fine) {
+  .wm-sleep:hover {
+    --amp: 20deg;
+  }
+
+  .wm-sleep:hover .cat-head {
+    translate: 0 -5px;
+    rotate: -9deg;
+  }
+
+  .wm-sleep:hover .cat-eye-ball {
+    animation: 2.6s 0.5s cat-eye-blink;
+  }
+}
+
+/* reduced motion: the cats still fade in, but sit still */
+@media (prefers-reduced-motion: reduce) {
+  .wm-cat {
+    translate: 0 0;
+  }
+
+  [data-in] .wm-cat {
+    transition: opacity 0.4s ease var(--i, 0ms);
+  }
+
+  [data-in] .wm-paw-bat, [data-in] .wm-dot, [data-in] .wm-watch, .wm-sleep:hover .cat-eye-ball {
+    animation: none;
+  }
+
+  .wm-sleep:hover .cat-head {
+    translate: none;
+    rotate: none;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .wm-z, .wm-look, .wm-tail, .wm-tail-curl, .wm-breathe, .wm-stretch, .wm-blink, .galaxy .star-tw, .cat-spin, .cat-tail, .cat-blink, .cat-breathe, .cat-tail-sleep {
+  .wm-z, .wm-peek, .galaxy .star-tw, .cat-spin, .cat-tail, .cat-blink, .cat-breathe, .cat-tail-sleep {
     animation: none;
   }
 }
