@@ -64,8 +64,8 @@ export const CLIPS = {
   "fill-button": { target: '[class*="isolate"][class*="rounded-full"]', interact: "hover", label: "vaibhavtomar.com" },
   // the "Multi-channel" card, recorded centred (load with a target) while its meter loops; the card has nothing to hover
   "voice-bars": { site: ARMOUR, target: VB, interact: "load", realtime: true, start: `performance.now() > 5000 && document.readyState === "complete" && !!document.querySelector('${VB} canvas')`, zoom: 2.2, seconds: 4, label: "armour.vaibhavtomar.com" },
-  // the hero's phone, jumped to once the page has loaded: the chips spring in as it comes into view, under the camera
-  "spring-chips": { site: ARMOUR, target: 'div:has(> div[class*="shadow-[0_14px_35px"])', interact: "load", start: 'performance.now() > 6000 && document.readyState === "complete"', zoom: 1.35, seconds: 2.6, label: "armour.vaibhavtomar.com" },
+  // the hero's phone, jumped to once the page has loaded: the chips spring in as it comes into view, under the camera; zoom 2 is the least that centres it (the phone sits right of centre, a smaller zoom clamps at the page edge)
+  "spring-chips": { site: ARMOUR, target: 'div:has(> div[class*="shadow-[0_14px_35px"])', interact: "load", start: 'performance.now() > 6000 && document.readyState === "complete"', zoom: 2, seconds: 2.6, label: "armour.vaibhavtomar.com" },
   // /about: the pictures crossfade as each block crosses the middle; the section itself starts at the page top (nothing to
   // scroll), so the target is the fifth block (third in the clients grid) and the scroll runs over the blocks above it
   "sticky-crossfade": { site: `${POINU}/about`, target: 'section[aria-label="About"] div[class*="mt-[90px]"] > [data-pic-block]:nth-child(3)', interact: "scroll", realtime: true, seconds: 4.5, session: PS, label: "poinu.vercel.app" },
