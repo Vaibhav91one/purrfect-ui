@@ -187,16 +187,16 @@ export function SittingOnU() {
 }
 
 /**
- * The sleeping cat's shapes (same body, ears grown into the head, two dot eyes), awake and crouched along the tops of
- * the "rr", watching its ball on the f's crossbar. A front paw swats, the ball hops and rolls to the stem and back, the
- * tail flicks: the playing cat's motion (`play-*` in globals.css). From the second r's origin: f crossbar's left arm
- * ~0.37-0.44em, f stem from 0.439em; all at 0.534em.
+ * The sleeping cat's shapes (same body, ears grown into the head, two dot eyes), awake and curled on the baseline in
+ * the nook under the second r's arm, with its ball against the f. It has shoved the f over, which leans away (`.wm-f`)
+ * and rocks each time the ball rolls into it. The playing cat's motion (`play-*` in globals.css): the paw swats, the
+ * ball hops and rolls, the tail flicks. From the second r's origin: r stem to 0.19em; the f, moved over by
+ * `.wm-f`'s margin, has its stem from 0.619em.
  */
 export function PlayingOnR() {
   const { BODY, TAIL, HEAD, EYES, NECK, TAIL_PIVOT, BLOB_AT } = SLEEPING;
-  const BALL = { x: 262, y: 112, r: 11 }; // ground (belly, paw, ball shadow) is y 124
-  const k = 0.0026;
-  const ballAt = 0.388; // em: the middle of the crossbar's left arm
+  const BALL = { x: 262, y: 112, r: 11 }; // ground (belly, paw, ball shadow) is y 124; the roll (+14) ends at the f
+  const k = 0.00166; // back (x 30) just off the r's stem (0.205em), the rolled ball's edge (x 288.5) at the f's stem
   const vb = (o: string) => ({ transformOrigin: o, transformBox: "view-box" }) as CSSProperties;
   const parts = (f: boolean) => (
     <>
@@ -212,7 +212,7 @@ export function PlayingOnR() {
   );
   const look = VARIANTS[1];
   return (
-    <Cat id="play" i={1} variant={1} vb={[260, 140]} at={[ballAt - BALL.x * k, 0.534 - 16 * k, 260 * k]} blobs={BLOB_AT} blob={[70, 12]} spin={[130, 80]} parts={parts}>
+    <Cat id="play" i={1} variant={1} vb={[260, 140]} at={[0.205 - 30 * k, -16 * k, 260 * k]} blobs={BLOB_AT} blob={[70, 12]} spin={[130, 80]} parts={parts}>
       <ellipse cx={BALL.x} cy="124" rx="12" ry="2.5" fill="currentColor" fillOpacity="0.25" className="play-shadow text-foreground" style={vb(`${BALL.x}px 124px`)} />
       <g className="play-ball" style={vb(`${BALL.x}px ${BALL.y + BALL.r}px`)}>
         <circle cx={BALL.x} cy={BALL.y} r={BALL.r} fill={look.blobs[0]} className="text-foreground" stroke="currentColor" strokeWidth="3" />

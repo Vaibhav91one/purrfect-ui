@@ -75,7 +75,7 @@ export function FooterSection() {
           <At>
             <PlayingOnR />
           </At>
-          rfe
+          r<span className="wm-f">f</span>e
           <At>
             <PeekOverC />
           </At>

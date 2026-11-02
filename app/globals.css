@@ -526,6 +526,13 @@ svg[data-awake="true"] .cat-eye-ball {
   70% { translate: 0.004em 0; rotate: -3deg; }
 }
 
+/* the f the rr cat shoved over: it leans away, and rocks when the ball rolls into it (the ball's roll, play-ball 82-92%) */
+@keyframes wm-f {
+  0%, 84%, 100% { rotate: 6deg; }
+  89% { rotate: 9deg; }
+  95% { rotate: 5deg; }
+}
+
 @keyframes wm-watch {
   0%, 50%, 86%, 100% { rotate: 0deg; }
   58%, 76% { rotate: -14deg; }
@@ -555,6 +562,14 @@ svg[data-awake="true"] .cat-eye-ball {
 
 .wm-paw-bat {
   rotate: -48deg;
+}
+
+.wm-f {
+  display: inline-block;
+  margin-left: 0.14em;
+  rotate: 6deg;
+  transform-origin: 62% 100%; /* the foot of the stem, so the f tips on it and stays on the baseline */
+  animation: wm-f 2.4s ease-in-out infinite;
 }
 
 .wm-dot {
@@ -599,7 +614,7 @@ svg[data-awake="true"] .cat-eye-ball {
     transition: opacity 0.4s ease var(--i, 0ms);
   }
 
-  [data-in] .wm-paw-bat, [data-in] .wm-dot, [data-in] .wm-watch, .wm-sleep:hover .cat-eye-ball {
+  [data-in] .wm-paw-bat, [data-in] .wm-dot, [data-in] .wm-watch, .wm-f, .wm-sleep:hover .cat-eye-ball {
     animation: none;
   }
 
