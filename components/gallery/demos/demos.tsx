@@ -140,18 +140,14 @@ function HeroLoop({ playing, speed }: DemoProps) {
   );
 }
 
-/** The menu fills a full page, so it is drawn at a full page's size (see `nat`), on a white page with some text. The loop opens and shuts it while nobody is around; a click on the burger is the person's and the loop stays out of the way. A still card keeps it closed. */
+/** The menu fills a full page, so it is drawn at a full page's size (see `nat`), over the valley photo (Armour's blue while it loads). The loop opens and shuts it while nobody is around; a click on the burger is the person's and the loop stays out of the way. A still card keeps it closed. */
 function MenuLoop({ playing, speed }: DemoProps) {
   const n = useTick(playing, speed, 4200);
   const [pick, setPick] = useState<{ at: number; open: boolean } | null>(null); // the person's last click, good until the loop's next step
   const open = pick?.at === n ? pick.open : n % 2 === 1;
   return (
-    <div className={`${pageFrame} !bg-[#F4F1DE]`}>
-      <div className="absolute inset-0 grid place-content-center gap-6 px-40 text-center text-neutral-900">
-        <p className="text-8xl font-medium tracking-tight">Your wealth,<br />finally working.</p>
-        <p className="mx-auto max-w-3xl text-3xl text-neutral-500">The AI finance app that tracks your spending and tells you what to do next.</p>
-      </div>
-      <LayeredMenu contained delay={0.2} color="#171717" open={open} onOpenChange={(o) => setPick({ at: n, open: o })} logo={<span className="font-medium tracking-tight">ARMOUR</span>} primary={[{ label: "Experience", href: "#a" }, { label: "Technology", href: "#b" }, { label: "Company", href: "#c" }]} secondary={[{ label: "Features", href: "#d" }, { label: "FAQ", href: "#e" }]} />
+    <div className={`${pageFrame} !bg-[#0E7DDA] bg-[url(/demo/valley.jpg)] bg-cover bg-center`}>
+      <LayeredMenu contained delay={0.2} open={open} onOpenChange={(o) => setPick({ at: n, open: o })} logo={<span className="font-medium tracking-tight">ARMOUR</span>} primary={[{ label: "Experience", href: "#a" }, { label: "Technology", href: "#b" }, { label: "Company", href: "#c" }]} secondary={[{ label: "Features", href: "#d" }, { label: "FAQ", href: "#e" }]} />
     </div>
   );
 }
