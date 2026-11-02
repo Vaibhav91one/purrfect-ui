@@ -340,7 +340,7 @@ function PathLoop({ playing, speed }: DemoProps) {
 
 /**
  * The follower is position: fixed, and the preview is scaled to fit (a scaled parent traps fixed children), so the real one
- * is portalled out: into the dialog (top layer) or the page. A card is inert, so it shows a still dot instead.
+ * is portalled out: into the dialog (top layer) or the page. A card is inert, so it shows just the text.
  */
 function CursorLoop() {
   const stage = useRef<HTMLDivElement>(null);
@@ -352,7 +352,7 @@ function CursorLoop() {
   return (
     <div ref={stage} className="relative grid h-64 w-96 place-items-center overflow-hidden rounded-2xl">
       <h2 data-cursor-scale="8" className="relative text-5xl italic text-foreground">Follow me</h2>
-      {host ? createPortal(<CursorFollower />, host) : <span className="absolute top-[42%] left-[44%] size-20 -translate-1/2 rounded-full bg-white mix-blend-difference" />}
+      {host && createPortal(<CursorFollower />, host)}
     </div>
   );
 }
