@@ -52,7 +52,6 @@ import { StickyCrossfadeScene } from "@/registry/sticky-crossfade/demo";
 import StepRingDemo from "@/registry/step-ring/demo";
 import PixelWaveDemo from "@/registry/pixel-wave/demo";
 import WordStreamDemo from "@/registry/word-stream/demo";
-import { LocationPillScene } from "@/registry/location-pill/demo";
 import { useTick } from "./use-tick";
 
 /** What the dialog hands every demo: the Loop switch, the Speed slider and the component's own extras. `playing` undefined = a still card. */
@@ -401,18 +400,6 @@ function StickyCrossfadeLoop({ playing, speed }: DemoProps) {
   );
 }
 
-// the box scrolls the portfolio hero, so the pill drifts up the way it does on the page
-function LocationPillLoop({ playing, speed }: DemoProps) {
-  const box = useRef<HTMLDivElement>(null);
-  return (
-    <div className="relative h-full w-full overflow-hidden rounded-3xl">
-      <ScrollBox playing={playing} speed={speed} boxRef={box} className="absolute inset-x-4 top-20 bottom-4 h-auto max-w-none overflow-hidden rounded-2xl">
-        <LocationPillScene container={box} />
-      </ScrollBox>
-    </div>
-  );
-}
-
 export const DEMOS: Record<string, (p: DemoProps) => ReactNode> = {
   "roll-button": ButtonLoop,
   magnetic: MagneticLoop,
@@ -455,7 +442,6 @@ export const DEMOS: Record<string, (p: DemoProps) => ReactNode> = {
   "announce-strip": AnnounceStripDemo,
   "grid-disclosure": GridDisclosureDemo,
   "step-ring": StepRingDemo,
-  "location-pill": LocationPillLoop,
   "pixel-wave": PixelWaveDemo,
   "word-stream": WordStreamDemo,
   "flip-text": FlipTextDemo,

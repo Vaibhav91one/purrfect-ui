@@ -32,7 +32,7 @@ export type ComponentItem = {
 };
 
 const REPLAY = new Set(["notch", "hero-reveal", "inertia-gallery", "arrow-link", "flip-text"]);
-const FILL = new Set(["scroll-marquee", "photo-wordmark", "line-rise", "sticky-crossfade", "location-pill", "fan-out-cards"]);
+const FILL = new Set(["scroll-marquee", "photo-wordmark", "line-rise", "sticky-crossfade", "fan-out-cards"]);
 
 const item = (slug: string, name: string, category: string, description: string, nat: [number, number] = [420, 300], extras?: Extra[]): ComponentItem => ({
   slug,
@@ -91,7 +91,6 @@ export const COMPONENTS: ComponentItem[] = [
   item("announce-strip", "Announce strip", "Navigation", "A thin announcement strip whose line loops seamlessly; it slides away as you scroll down or dismiss it."),
   item("grid-disclosure", "Grid disclosure", "Layout", "A one-open-at-a-time list whose panels open to their own height through grid rows, with no measuring.", [880, 680]),
   item("step-ring", "Step ring", "Display", "A numbered step badge: a quarter-arc spins for the current step, a tick for done, a dash for skipped.", [800, 560]),
-  item("location-pill", "Location pill", "Display", "A hero-edge pill with a slowly spinning globe that drifts up as you scroll.", [800, 560]),
   item("pixel-wave", "Pixel wave", "Text", "A 3x3 pixel loader whose cells fade on staggered delays, so a wavefront sweeps across the grid.", [240, 240]),
   item("word-stream", "Word stream", "Text", "A chat reply that types in word by word behind a caret, then hands back when done.", [800, 560]),
   item("flip-text", "Flip text", "Text", "Text whose lines fade in on scroll and whose letters flip over under the pointer.", [560, 300]),
