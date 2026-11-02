@@ -47,9 +47,9 @@ npx shadcn@latest add https://purrfectui.com/r/roll-button.json
 
 Browse every component with a live preview (installable ones also show their source and props) at [purrfectui.com/components](https://purrfectui.com/components).
 
-## MCP (Claude Code, Cursor, Codex)
+## MCP (Claude Code, Cursor, VS Code)
 
-Not tested end to end yet; tracked in [#1](https://github.com/Vaibhav91one/purrfect-ui/issues/1).
+Tested end to end in Claude Code. Cursor and VS Code get the same server config but have not been tried in the editors yet.
 
 In your project, add this to `components.json`:
 
