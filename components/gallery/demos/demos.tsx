@@ -49,6 +49,7 @@ import VoiceBarsDemo from "@/registry/voice-bars/demo";
 import AnnounceStripDemo from "@/registry/announce-strip/demo";
 import GridDisclosureDemo from "@/registry/grid-disclosure/demo";
 import { StickyCrossfadeScene } from "@/registry/sticky-crossfade/demo";
+import { ParallaxPhotoScene } from "@/registry/parallax-photo/demo";
 import StepRingDemo from "@/registry/step-ring/demo";
 import PixelWaveDemo from "@/registry/pixel-wave/demo";
 import WordStreamDemo from "@/registry/word-stream/demo";
@@ -417,6 +418,18 @@ function StickyCrossfadeLoop({ playing, speed }: DemoProps) {
   );
 }
 
+// the box scrolls the event page down and back, so the cover photo holds nearly still while its frame passes over it
+function ParallaxPhotoLoop({ playing, speed }: DemoProps) {
+  const box = useRef<HTMLDivElement>(null);
+  return (
+    <div className="relative size-full">
+      <ScrollBox playing={playing} speed={speed} boxRef={box} className="absolute inset-0 h-auto max-w-none bg-background text-foreground">
+        <ParallaxPhotoScene container={box} />
+      </ScrollBox>
+    </div>
+  );
+}
+
 export const DEMOS: Record<string, (p: DemoProps) => ReactNode> = {
   "roll-button": ButtonLoop,
   magnetic: MagneticLoop,
@@ -452,6 +465,7 @@ export const DEMOS: Record<string, (p: DemoProps) => ReactNode> = {
   "sticker-pop": ({ playing, speed }: DemoProps) => <StickerPopDemo playing={playing} speed={speed} />,
   "swap-card": SwapCardLoop,
   "sticky-crossfade": StickyCrossfadeLoop,
+  "parallax-photo": ParallaxPhotoLoop,
   "spring-chips": SpringChipsDemo,
   "voice-bars": ({ playing, speed }: DemoProps) => <VoiceBarsDemo playing={playing} speed={speed} />,
   "announce-strip": AnnounceStripDemo,
