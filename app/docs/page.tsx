@@ -36,9 +36,9 @@ export default function DocsPage() {
         </p>
         <Snippet lang="typescript" code={`{\n  "registries": {\n    "@purrfectui": "${SITE_URL}/r/{name}.json"\n  }\n}`} />
         <p className="mt-4">Then install by name:</p>
-        <Snippet code="npx shadcn@latest add @purrfectui/button" />
+        <Snippet code="npx shadcn@latest add @purrfectui/roll-button" />
         <p className="mt-4">
-          The same names work from the shadcn MCP server in Claude Code, Cursor or VS Code (<code>npx shadcn@latest mcp init --client claude</code>), then ask for <code>add @purrfectui/button</code>.
+          The same names work from the shadcn MCP server in Claude Code, Cursor or VS Code (<code>npx shadcn@latest mcp init --client claude</code>), then ask for <code>add @purrfectui/roll-button</code>.
         </p>
       </section>
       <section>
