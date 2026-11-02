@@ -14,10 +14,9 @@ const EASE = "cubic-bezier(0.23, 1, 0.32, 1)";
 const JOINED = /[\p{M}\p{Emoji_Modifier}\p{Regional_Indicator}\u{E0020}-\u{E007F}‍️\p{Script=Arabic}\p{Script=Syriac}\p{Script=Nko}\p{Script=Mongolian}]/u;
 
 /**
- * Text whose lines rise and fade in one after another as it scrolls into view, and whose letters flip over on the X axis when
- * the mouse crosses them (a tap flips one on touch; a swipe or keyboard focus flips nothing). One delegated listener on
- * the root, the flips are Web Animations on transform and opacity, and the text stays visible when JavaScript is off. Screen readers read the text, not letters.
- * Reduced motion: lines fade in without the rise and letters blink their opacity instead of turning.
+ * Text whose letters flip over on the X axis when the mouse crosses them (a tap flips one on touch; a swipe or keyboard
+ * focus flips nothing). One delegated listener on the root, the flips are Web Animations on transform and opacity.
+ * Screen readers read the text, not letters. Reduced motion: letters blink their opacity instead of turning.
  */
 export function FlipText({ text, className, ...rest }: FlipTextProps) {
   const ref = useRef<HTMLParagraphElement>(null);
@@ -50,30 +49,9 @@ export function FlipText({ text, className, ...rest }: FlipTextProps) {
       const l = e.pointerType !== "mouse" && (e.target as Element).closest("[data-l]");
       if (l && !l.getAnimations().length) flip(l);
     };
-    // lines are only known once laid out: group the words by their top edge, then let each line fade in after the last
-    const io = new IntersectionObserver(
-      ([en]) => {
-        if (!en.isIntersecting) return;
-        io.disconnect();
-        let line = -1;
-        let top = -Infinity;
-        root.querySelectorAll<HTMLElement>("[data-w]").forEach((w) => {
-          if (w.offsetTop > top + w.offsetHeight / 2) {
-            line++;
-            top = w.offsetTop;
-          }
-          w.style.transitionDelay = `${Math.min(line, 8) * 60}ms`;
-        });
-        root.dataset.shown = "";
-      },
-      // no inset margin: text in the bottom strip of a page that cannot scroll further would never be revealed
-      { rootMargin: "0px" },
-    );
-    io.observe(root);
     root.addEventListener("pointerover", onOver);
     root.addEventListener("pointerup", onUp);
     return () => {
-      io.disconnect();
       root.removeEventListener("pointerover", onOver);
       root.removeEventListener("pointerup", onUp);
     };
@@ -82,16 +60,15 @@ export function FlipText({ text, className, ...rest }: FlipTextProps) {
   // split on breaking whitespace only: a no-break space keeps "10 kg" together
   const words = text.trim().split(/[^\S\u00A0\u202F]+/).filter(Boolean);
   return (
-    <p ref={ref} className={cn("group/flip relative", className)} {...rest}>
+    <p ref={ref} className={cn("relative", className)} {...rest}>
       {/* unselectable so a copy takes the visible words once, not twice */}
       <span className="sr-only select-none">{text}</span>
       <span aria-hidden>
         {words.map((w, i) => (
           <Fragment key={i}>
             {i > 0 && " "}
-            {/* hidden only where scripts run, so the server HTML reads without JS; a long word wraps inside its own box */}
-            {/* check-ignore: duration a once-per-page entrance, lines fading in as they arrive */}
-            <span data-w className="inline-block max-w-full transition-[opacity,translate] duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] [@media(scripting:enabled)]:opacity-0 motion-safe:[@media(scripting:enabled)]:translate-y-[0.25em] group-data-shown/flip:translate-y-0 group-data-shown/flip:opacity-100">
+            {/* a long word wraps inside its own box */}
+            <span className="inline-block max-w-full">
               {(JOINED.test(w) ? [w] : Array.from(w)).map((c, j) => (
                 <span key={j} data-l className="inline-block">
                   {c}

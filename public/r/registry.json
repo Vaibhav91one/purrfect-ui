@@ -708,13 +708,33 @@
       "name": "flip-text",
       "type": "registry:ui",
       "title": "Flip text",
-      "description": "Text whose lines fade in on scroll and whose letters flip over on the X axis under the pointer.",
+      "description": "Text whose letters flip over on the X axis under the pointer.",
       "registryDependencies": [
         "utils"
       ],
       "files": [
         {
           "path": "registry/flip-text/flip-text.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "meta": {
+        "react": ">=19",
+        "tailwindcss": ">=4",
+        "tokens": "shadcn (background, foreground, muted, border, ...): run shadcn init first"
+      }
+    },
+    {
+      "name": "fade-lines",
+      "type": "registry:ui",
+      "title": "Fade lines",
+      "description": "Text whose lines rise and fade in one after another as it scrolls into view.",
+      "registryDependencies": [
+        "utils"
+      ],
+      "files": [
+        {
+          "path": "registry/fade-lines/fade-lines.tsx",
           "type": "registry:ui"
         }
       ],

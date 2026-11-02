@@ -33,7 +33,7 @@ export type ComponentItem = {
   ambient?: boolean;
 };
 
-const REPLAY = new Set(["notch", "hero-reveal", "inertia-gallery", "arrow-link", "flip-text"]);
+const REPLAY = new Set(["notch", "hero-reveal", "inertia-gallery", "arrow-link", "fade-lines"]);
 const AMBIENT = new Set(["pixel-wave", "shimmer-text", "spin-mark", "voice-bars"]);
 const FILL = new Set(["scroll-marquee", "photo-wordmark", "line-rise", "sticky-crossfade"]);
 
@@ -95,7 +95,8 @@ export const COMPONENTS: ComponentItem[] = [
   item("step-ring", "Step ring", "Display", "A numbered step badge: a quarter-arc spins for the current step, a tick for done, a dash for skipped.", [800, 560]),
   item("pixel-wave", "Pixel wave", "Text", "A 3x3 pixel loader whose cells fade on staggered delays, so a wavefront sweeps across the grid.", [240, 240]),
   item("word-stream", "Word stream", "Text", "A chat reply that types in word by word behind a caret, then hands back when done.", [800, 560]),
-  item("flip-text", "Flip text", "Text", "Text whose lines fade in on scroll and whose letters flip over under the pointer.", [560, 300]),
+  item("flip-text", "Flip text", "Text", "Text whose letters flip over on the X axis under the pointer.", [560, 300]),
+  item("fade-lines", "Fade lines", "Text", "Text whose lines rise and fade in one after another as it scrolls into view.", [560, 300]),
   item("spin-mark", "Spin mark", "Display", "A mark that pops in with a spring, then spins forever or turns as you scroll.", [448, 320]),
   item("arrow-link", "Arrow link", "Navigation", "A big arrow link that rises from a mask on first view; on hover or focus the arrow slides and the label rolls over.", [480, 180]),
   item("fill-button", "Fill button", "Input", "An outlined pill whose fill sweeps in from the left and out to the right."),
