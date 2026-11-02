@@ -32,7 +32,7 @@ export type ComponentItem = {
 };
 
 const REPLAY = new Set(["notch", "hero-reveal", "inertia-gallery", "arrow-link", "flip-text"]);
-const FILL = new Set(["scroll-marquee", "photo-wordmark", "line-rise", "sticky-crossfade", "location-pill"]);
+const FILL = new Set(["scroll-marquee", "photo-wordmark", "line-rise", "sticky-crossfade", "location-pill", "fan-out-cards"]);
 
 const item = (slug: string, name: string, category: string, description: string, nat: [number, number] = [420, 300], extras?: Extra[]): ComponentItem => ({
   slug,

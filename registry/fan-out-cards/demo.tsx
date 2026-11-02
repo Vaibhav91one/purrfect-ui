@@ -24,10 +24,11 @@ const CARDS: FanOutCard[] = [
 ];
 
 const phone = (
-  // the phone sits above the cards, so they tuck behind it as they land; its top fades out like the original's
-  <div className="relative z-10 h-[440px] w-[290px] overflow-hidden rounded-[48px] border-[7px] border-neutral-900 bg-neutral-900 shadow-2xl [mask-image:linear-gradient(to_bottom,transparent,black_30%)]">
+  // the phone sits above the cards, so they tuck behind it as they land; its top fades out and the box's bottom edge cuts it
+  // off mid-body, like the original's (its bottom always runs 140px past the box, whatever height the preview stretches it to)
+  <div className="relative z-10 mt-[34cqh] h-[calc(66cqh+140px)] w-[290px] self-start overflow-hidden rounded-[48px] border-[7px] border-neutral-900 bg-neutral-900 shadow-2xl [mask-image:linear-gradient(to_bottom,transparent,black_30%)]">
     <img src="/demo/field.jpg" alt="" className="absolute inset-0 size-full rounded-[40px] object-cover" />
-    <div className="dark absolute inset-x-0 bottom-20 flex justify-center">
+    <div className="dark absolute inset-x-0 top-[50%] flex justify-center">
       <div className="rounded-full bg-card px-5 py-2 shadow-lg">
         <ShimmerText className="text-base">
           <span className="font-semibold">Armour</span> is listening
@@ -40,7 +41,8 @@ const phone = (
 export default function FanOutCardsDemo() {
   const [run, setRun] = useState(0);
   return (
-    <div className="relative grid h-[520px] w-[900px] place-items-center overflow-hidden rounded-3xl">
+    // h-full: the preview stretches the demo to its box's height, so the phone is always cut by the box's bottom edge
+    <div className="relative grid h-full min-h-[400px] w-[900px] place-items-center overflow-hidden rounded-3xl">
       {/* the replay button sits behind the cards, not around them: the cards' text stays readable to screen readers */}
       <button type="button" onClick={() => setRun((n) => n + 1)} aria-label="Replay the fan-out" className="absolute inset-0" />
       {/* pointer-events-none lets clicks around the cards reach the replay button */}
