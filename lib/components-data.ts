@@ -70,7 +70,7 @@ export const COMPONENTS: ComponentItem[] = [
   item("cursor-follower", "Cursor follower", "Display", "A dot that follows the mouse and inverts what is under it."),
   item("load-preloader", "Load preloader", "Display", "A full-screen cover with a big 0 to 100 count that tracks real loading, then fades away.", [480, 320]),
   item("star-rise", "Star rise", "Display", "A liquid-metal asterisk that rises into place, then turns as you scroll.", [1000, 560]),
-  item("marquee-rows", "Marquee rows", "Text", "Big text rows that swap to a coloured scrolling band on hover, focus or tap.", [1000, 560]),
+  item("marquee-rows", "Marquee rows", "Text", "Big text rows that swap to a coloured scrolling band on hover, focus or tap.", [1000, 734]), // the clip's ratio (960x704): the card covers by that ratio, so a wider demo lost its sides
   item("peek-card", "Peek card", "Display", "A card whose image zooms and info panel slides up on hover, with a wide row variant.", [1000, 760]),
   item("counter-loader", "Counter loader", "Display", "A full-screen intro whose counter rolls to 100 while stickers pile up, then a block wipes up and it lifts away.", [480, 320]),
   item("sticker-cover", "Sticker cover", "Navigation", "A page-transition sheet that rises, swaps the page, pops a sticker and lifts away.", [480, 320]),
