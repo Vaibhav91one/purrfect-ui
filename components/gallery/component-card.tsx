@@ -4,6 +4,7 @@ import { ArrowUpRight } from "lucide-react";
 import { useInView, useReducedMotion } from "motion/react";
 import { useRef } from "react";
 import type { ComponentItem } from "@/lib/components-data";
+import { cn } from "@/lib/utils";
 import { cardLabel } from "./card";
 import { Preview } from "./preview";
 import { SiteClip } from "./site-clip";
@@ -29,12 +30,12 @@ export function CardFace({ item, hideLabel = false }: { item: ComponentItem; hid
   );
 }
 
-/** The open arrow top-right and the name bottom-left, both shown on hover or focus. */
-function CardMeta({ name }: { name: string }) {
+/** The open arrow top-right and the name bottom-left, both shown on hover or focus. `arrow`/`label` move them. */
+function CardMeta({ name, arrow, label }: { name: string; arrow?: string; label?: string }) {
   return (
     <>
-      <ArrowUpRight aria-hidden className="absolute top-4 right-4 size-5 text-muted-foreground opacity-0 transition-opacity duration-200 ease-snappy group-hover:opacity-100 group-focus-visible:opacity-100 group-has-[a:focus-visible]:opacity-100 motion-reduce:transition-none" />
-      <span className={cardLabel}>
+      <ArrowUpRight aria-hidden className={cn("absolute top-4 right-4 size-5 text-muted-foreground opacity-0 transition-opacity duration-200 ease-snappy group-hover:opacity-100 group-focus-visible:opacity-100 group-has-[a:focus-visible]:opacity-100 motion-reduce:transition-none", arrow)} />
+      <span className={cn(cardLabel, label)}>
         <span className="sr-only">Open </span>
         {name}
       </span>
@@ -64,12 +65,16 @@ export function LiveCard({ item }: { item: ComponentItem }) {
       onKeyDown={(e) => {
         if (e.target === e.currentTarget && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); openSheet(item.slug, ref.current); }
       }}
-      style={{ aspectRatio: `${item.nat[0]} / ${item.nat[1]}` }}
-      className="group relative mb-3 cursor-pointer min-h-[240px] max-h-[484px] w-full break-inside-avoid overflow-hidden rounded-[28px] bg-card focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+      className="group relative mb-3 w-full cursor-pointer break-inside-avoid overflow-hidden rounded-[28px] bg-card px-6 py-14 sm:px-10 sm:py-16 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
     >
-      <Preview item={item} pad={0} cover live={near} playing={inView && !reduce} />
-      {item.clip && <SiteClip slug={item.slug} hover className="pointer-events-none absolute inset-0 size-full object-cover" />}
-      <CardMeta name={item.name} />
+      {/* every card shows the component in the same padded stage; the taller bands above and below hold the arrow and name,
+          centred in them and lined up with the stage's edges. A card with a clip
+          takes the clip's shape, so the whole recording shows uncropped; the rest take the demo's own shape (filled edge to edge) */}
+      <div style={{ aspectRatio: item.clip ? `${item.clip.w} / ${item.clip.h}` : `${item.nat[0]} / ${item.nat[1]}` }} className="relative max-h-[404px] min-h-[160px] w-full overflow-hidden rounded-2xl">
+        <Preview item={item} pad={0} cover live={near} playing={inView && !reduce} />
+        {item.clip && <SiteClip slug={item.slug} hover className="pointer-events-none absolute inset-0 size-full object-cover" />}
+      </div>
+      <CardMeta name={item.name} arrow="top-[18px] right-6 sm:top-[22px] sm:right-10" label="bottom-[18px] left-6 max-w-[calc(100%-3rem)] sm:bottom-[22px] sm:left-10 sm:max-w-[calc(100%-5rem)]" />
     </div>
   );
 }
