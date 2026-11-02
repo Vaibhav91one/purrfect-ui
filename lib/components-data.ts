@@ -84,7 +84,7 @@ export const COMPONENTS: ComponentItem[] = [
   item("sticker-pop", "Sticker pop", "Display", "A sticker image that pops in with a springy overshoot into its own tilt once it has loaded, and shrinks, tilts and fades on exit.", [800, 560]),
   item("swap-card", "Swap card", "Display", "A product card whose photo crossfades and zooms to a second one on hover, with a wobbly badge that turns.", [720, 528]),
   item("sticky-crossfade", "Sticky crossfade", "Layout", "A sticky picture beside a column of text that crossfades to the next picture as each block passes the middle of the screen.", [1000, 600]),
-  item("spring-chips", "Spring chips", "Layout", "Pill labels with icon tiles that spring in around a centrepiece, one after another, when scrolled into view.", [1000, 600]),
+  item("spring-chips", "Spring chips", "Layout", "Pill labels with icon tiles that spring in around a centrepiece, one after another, when scrolled into view.", [520, 560]),
   item("voice-bars", "Voice bars", "Text", "Thin bars jumping between heights on a staggered loop, for a mic that is listening.", [600, 640]),
   item("announce-strip", "Announce strip", "Navigation", "A thin announcement strip whose line loops seamlessly; it slides away as you scroll down or dismiss it."),
   item("grid-disclosure", "Grid disclosure", "Layout", "A one-open-at-a-time list whose panels open to their own height through grid rows, with no measuring.", [880, 680]),
