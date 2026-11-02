@@ -321,10 +321,12 @@ const [tab, setTab] = useState("preview");
       { name: "speed", type: "number", default: "80", description: "Pixels per second." },
       { name: "direction", type: '"left" | "right"', default: '"left"', description: "Which way it runs before the first scroll." },
       { name: "container", type: "RefObject<HTMLElement | null>", default: "the page", description: "Follow a scrolling box instead of the page." },
+      { name: "travel", type: "number", default: "500", description: "Pixels the line slides sideways over the first screen of scroll, on top of the drift. 0 turns it off." },
       { name: "className", type: "string", description: "Extra classes on the root." },
     ],
     behaviors: [
-      "Reduced motion: it stands still.",
+      "Reduced motion: it stands still and does not slide.",
+      "The line slides `travel` px left over the first screen of scroll and back as you scroll up, on top of the drift.",
       "Scrolling down runs it left, scrolling up runs it right.",
       "A linear WAAPI loop at a fixed speed per second, off the main thread; as many copies as the width needs, wrapped by exactly one copy.",
       "Only runs while on screen. Screen readers and Tab get the first copy; the repeats are inert.",

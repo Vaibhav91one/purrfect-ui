@@ -1,6 +1,6 @@
 "use client";
 
-import { useAnimationFrame, useInView, useMotionValueEvent, useReducedMotion, useScroll, useVelocity } from "motion/react";
+import { motion, useAnimationFrame, useInView, useMotionValueEvent, useReducedMotion, useScroll, useSpring, useTransform, useVelocity } from "motion/react";
 import { useEffect, useRef, useState, type ComponentProps, type ReactNode, type RefObject } from "react";
 import { cn } from "@/lib/utils";
 
@@ -13,18 +13,21 @@ export interface ScrollMarqueeProps extends Omit<ComponentProps<"div">, "ref" | 
   direction?: "left" | "right";
   /** Follow a scrolling box instead of the page. */
   container?: RefObject<HTMLElement | null>;
+  /** Pixels the whole line slides sideways over the first screen of scroll, on top of the drift. 0 turns it off. */
+  travel?: number;
 }
 
 /**
- * A marquee that flips direction with the page's scroll: scroll down and it runs left, scroll back up and it runs right.
+ * A marquee driven by the page's scroll: the line slides `travel` px sideways over the first screen of scroll (and back as
+ * you scroll up), while it drifts on its own and the drift flips with the scroll: down runs it left, up runs it right.
  * It moves at a fixed speed per second whatever the frame rate, renders as many copies as the width needs and wraps by
  * exactly one copy, so it never runs out. The motion is a WAAPI animation on the compositor, so a busy main thread does
  * not stall it; JavaScript only eases its playback rate. It only runs while on screen, eases to a stop while hovered and
  * stops at once while focus is inside. A scroll flip eases the speed through zero instead of snapping. Screen readers and
  * Tab get the first copy only (the repeats are inert, so links inside are not doubled).
- * Reduced motion: it stands still.
+ * Reduced motion: it stands still and does not slide.
  */
-export function ScrollMarquee({ children, speed = 80, direction = "left", container, className, onPointerEnter, onPointerLeave, onFocus, onBlur, ...rest }: ScrollMarqueeProps) {
+export function ScrollMarquee({ children, speed = 80, direction = "left", container, travel = 500, className, onPointerEnter, onPointerLeave, onFocus, onBlur, ...rest }: ScrollMarqueeProps) {
   const root = useRef<HTMLDivElement>(null);
   const first = useRef<HTMLDivElement>(null);
   const track = useRef<HTMLDivElement>(null);
@@ -40,6 +43,15 @@ export function ScrollMarquee({ children, speed = 80, direction = "left", contai
   const [count, setCount] = useState(2);
 
   const { scrollY } = useScroll({ container });
+  // 0 to -travel over the first screen (the box's height when following one), quad ease-out, smoothed a little
+  const slide = useSpring(
+    useTransform(scrollY, (y) => {
+      if (reduce) return 0;
+      const p = Math.min(1, Math.max(0, y / (container?.current?.clientHeight || window.innerHeight)));
+      return (rtl.current ? 1 : -1) * travel * (1 - (1 - p) * (1 - p));
+    }),
+    { stiffness: 400, damping: 50 },
+  );
   useMotionValueEvent(useVelocity(scrollY), "change", (v) => {
     if (v) dir.current = v > 0 ? -1 : 1;
   });
@@ -51,7 +63,7 @@ export function ScrollMarquee({ children, speed = 80, direction = "left", contai
     const ro = new ResizeObserver(() => {
       const w = one.offsetWidth, isRtl = getComputedStyle(box).direction === "rtl"; // RTL copies stack leftwards from the right edge
       if (!w) return;
-      setCount(Math.max(2, Math.ceil(box.clientWidth / w) + 1));
+      setCount(Math.max(2, Math.ceil((box.clientWidth + travel) / w) + 1));
       const prev = anim.current, t = prev?.effect?.getTiming();
       if (prev && t?.duration === w && rtl.current === isRtl) return;
       rtl.current = isRtl;
@@ -66,7 +78,7 @@ export function ScrollMarquee({ children, speed = 80, direction = "left", contai
     ro.observe(box);
     ro.observe(one);
     return () => ro.disconnect();
-  }, []);
+  }, [travel]);
   useEffect(() => () => anim.current?.cancel(), []);
 
   // only the rate is set from here, and only while it changes: once it settles the compositor runs the loop alone
@@ -93,13 +105,15 @@ export function ScrollMarquee({ children, speed = 80, direction = "left", contai
       onBlur={(e) => ((paused.current = e.currentTarget.contains(e.relatedTarget)), onBlur?.(e))}
       {...rest}
     >
-      <div ref={track} className="flex w-max will-change-transform">
-        {Array.from({ length: count }, (_, i) => (
-          <div key={i} ref={i === 0 ? first : undefined} aria-hidden={i > 0 || undefined} inert={i > 0 || undefined} className="shrink-0">
-            {children}
-          </div>
-        ))}
-      </div>
+      <motion.div style={{ x: slide }} className="w-max">
+        <div ref={track} className="flex w-max will-change-transform">
+          {Array.from({ length: count }, (_, i) => (
+            <div key={i} ref={i === 0 ? first : undefined} aria-hidden={i > 0 || undefined} inert={i > 0 || undefined} className="shrink-0">
+              {children}
+            </div>
+          ))}
+        </div>
+      </motion.div>
     </div>
   );
 }
