@@ -2,8 +2,8 @@ import type { CSSProperties, ReactNode, SVGProps } from "react";
 import { OUTLINE, SITTING, SLEEPING } from "./cat-shapes";
 import { EYES, VARIANTS } from "./cat-variants";
 
-// The cats on the footer wordmark are the site's own cats in new poses: the hero's sitting cat (gradient-cat.tsx), the
-// sleeping cat (sleeping-cat.tsx) and the playing cat (playing-cat.tsx), with the same shapes (cat-shapes.ts), the same thin outline in the text colour
+// The cats on the footer wordmark are the site's own cats in new poses: the hero's sitting cat (gradient-cat.tsx) and the
+// sleeping cat (sleeping-cat.tsx), with the same shapes (cat-shapes.ts), the same thin outline in the text colour
 // and the same gradient blobs. Each keeps its own viewBox and is pinned to its letter in em by `At`, so it stays put at
 // any wordmark size. Motion is CSS; the client `Wordmark` turns the heads (`[data-head]`) and moves the peeking eyes
 // (`[data-look]`) toward the pointer. Glyph numbers in em are Geist 600, measured.
@@ -184,42 +184,6 @@ export function SittingOnU() {
     </>
   );
   return <Cat id="sit" i={2} variant={4} vb={[240, 250]} at={[0.462 - 140 * k, 0.534 - 6 * k, 240 * k]} blobs={BLOB_AT} blob={[62, 12]} spin={[120, 130]} parts={parts} mirror />;
-}
-
-/**
- * The sleeping cat's shapes (same body, ears grown into the head, two dot eyes), awake and curled on the baseline in
- * the nook under the second r's arm, with its ball against the f. It has shoved the f over, which leans away (`.wm-f`)
- * and rocks each time the ball rolls into it. The playing cat's motion (`play-*` in globals.css): the paw swats, the
- * ball hops and rolls, the tail flicks. From the second r's origin: r stem to 0.19em; the f, moved over by
- * `.wm-f`'s margin, has its stem from 0.619em.
- */
-export function PlayingOnR() {
-  const { BODY, TAIL, HEAD, EYES, NECK, TAIL_PIVOT, BLOB_AT } = SLEEPING;
-  const BALL = { x: 262, y: 112, r: 11 }; // ground (belly, paw, ball shadow) is y 124; the roll (+14) ends at the f
-  const k = 0.00166; // back (x 30) just off the r's stem (0.205em), the rolled ball's edge (x 288.5) at the f's stem
-  const vb = (o: string) => ({ transformOrigin: o, transformBox: "view-box" }) as CSSProperties;
-  const parts = (f: boolean) => (
-    <>
-      <path d={TAIL} fill="none" stroke={f ? "white" : undefined} strokeWidth={12 + (f ? 0 : OUTLINE)} strokeLinecap="round" className="play-tail" style={vb(TAIL_PIVOT)} />
-      {part(BODY, f)}
-      <g className="play-head" style={vb(NECK)}>
-        {HEAD.map((d) => part(d, f))}
-        {/* awake: the two dot eyes, glancing toward the ball */}
-        {f && EYES.map(([cx, cy]) => <circle key={cx} cx={cx + 3} cy={cy + 1} r="2.8" fill="black" />)}
-      </g>
-      <path d="M196 116 L238 120" fill="none" stroke={f ? "white" : undefined} strokeWidth={12 + (f ? 0 : OUTLINE)} strokeLinecap="round" className="play-paw" style={vb("196px 116px")} />
-    </>
-  );
-  const look = VARIANTS[1];
-  return (
-    <Cat id="play" i={1} variant={1} vb={[260, 140]} at={[0.205 - 30 * k, -16 * k, 260 * k]} blobs={BLOB_AT} blob={[70, 12]} spin={[130, 80]} parts={parts}>
-      <ellipse cx={BALL.x} cy="124" rx="12" ry="2.5" fill="currentColor" fillOpacity="0.25" className="play-shadow text-foreground" style={vb(`${BALL.x}px 124px`)} />
-      <g className="play-ball" style={vb(`${BALL.x}px ${BALL.y + BALL.r}px`)}>
-        <circle cx={BALL.x} cy={BALL.y} r={BALL.r} fill={look.blobs[0]} className="text-foreground" stroke="currentColor" strokeWidth="3" />
-        <path d={`M${BALL.x - 8} ${BALL.y - 4} Q${BALL.x} ${BALL.y - 10} ${BALL.x + 8} ${BALL.y - 4}`} fill="none" stroke="white" strokeOpacity="0.7" strokeWidth="2" strokeLinecap="round" />
-      </g>
-    </Cat>
-  );
 }
 
 /** The dot of the "i", as its own element (the letter itself is set as a dotless ı) so the cat can knock it. */
