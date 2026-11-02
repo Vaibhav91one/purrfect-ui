@@ -116,7 +116,8 @@ export function Preloader({ words = WELCOME, duration = 2.4, storageKey = "prelo
       initial={false}
       // a full transform string (not y), so Motion can hand the lift to WAAPI while the page hydrates. Every state names the
       // same keys: a missing one becomes an instant animation whose completion would end the reduced fade in one frame
-      animate={phase === "lift" ? (reduce ? { opacity: 0, transform: "translateY(0%)" } : { opacity: 1, transform: "translateY(-100%)" }) : { opacity: 1, transform: "translateY(0%)" }}
+      // -115%, not -100%: the curved edge hangs 15% below the panel, and must be off screen too or it pops away on unmount
+      animate={phase === "lift" ? (reduce ? { opacity: 0, transform: "translateY(0%)" } : { opacity: 1, transform: "translateY(-115%)" }) : { opacity: 1, transform: "translateY(0%)" }}
       transition={lift}
       onAnimationComplete={() => phase === "lift" && finish()}
       className={cn(contained ? "absolute" : "fixed", "inset-0 z-[9999] grid cursor-pointer place-items-center bg-foreground text-background", className)}
@@ -127,10 +128,10 @@ export function Preloader({ words = WELCOME, duration = 2.4, storageKey = "prelo
       <style>{`@keyframes preloader-failsafe{to{visibility:hidden}}${key ? `html[data-preloader-seen~=${key}] [data-preloader=${key}]{display:none}` : ""}`}</style>
       {/* a click before hydration marks the panel, and the mount effect skips */}
       {!hydrated && <script dangerouslySetInnerHTML={{ __html: `var p=document.currentScript.parentElement;p.addEventListener("click",function(){p.preloaderSkip=1},{once:true});` + (key ? `try{var d=document.documentElement.dataset;if(sessionStorage.getItem(${key})==="1")d.preloaderSeen=(d.preloaderSeen||"")+" "+${key}}catch(e){}` : "") }} />}
-      {/* the curved bottom edge: a half ellipse under the panel that grows as it lifts (transform only, so it stays in step with the slide) */}
+      {/* the curved bottom edge: a half ellipse under the panel that grows as it lifts (transform only, so it stays in step with the slide); it tucks 1px under the panel so no subpixel seam shows between them */}
       <motion.span
         aria-hidden
-        className="absolute inset-x-0 top-full h-[15%] origin-top rounded-b-[50%] bg-foreground"
+        className="absolute inset-x-0 top-full -mt-px h-[calc(15%+1px)] origin-top rounded-b-[50%] bg-foreground"
         initial={false}
         animate={{ transform: phase === "lift" && !reduce ? "scaleY(1)" : "scaleY(0)" }}
         transition={lift}
