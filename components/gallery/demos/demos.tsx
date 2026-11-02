@@ -108,7 +108,8 @@ const SCENERY = "/demo/scenery.jpg"; // the Armour hero's photo; the live clip s
 const PHOTOS = ["fjord", "canyon", "cliffs", "storm", "valley", "coast", "city", "jellyfish", "field", "canal", "hiker", "dunes"];
 // eslint-disable-next-line @next/next/no-img-element -- demo art; the registry components take plain <img> too
 const photo = (i: number, className = "") => <img src={`/demo/${PHOTOS[i % PHOTOS.length]}.jpg`} alt="" className={`size-full object-cover ${className}`} />;
-const frame = "relative h-[282px] w-96 overflow-hidden rounded-2xl bg-muted"; // a surface for the notch to drop onto; 1.364 is the clip stage's ratio
+// check-ignore: hardcoded-color Armour's brand blue under a white notch, as on the source site, in either theme
+const frame = "relative h-[282px] w-96 overflow-hidden rounded-2xl bg-[#0E7DDA]"; // a surface for the notch to drop onto; 1.364 is the clip stage's ratio
 const pageFrame = "relative size-full overflow-hidden rounded-[64px] bg-white"; // a full-page demo is drawn at a page's size and scaled down; the card's stage supplies the padding
 
 /** Notch drops in once on mount, so the loop remounts it to replay the drop. */
@@ -116,8 +117,9 @@ function NotchLoop({ playing, speed }: DemoProps) {
   const n = useTick(playing, speed, 3200);
   return (
     <div className={frame}>
-      <Notch key={n} delay={0.15}>
-        <span className="text-2xl font-medium text-foreground">ARMOUR</span>
+      <Notch key={n} delay={0.15} color="#fff">
+        {/* check-ignore: hardcoded-color dark type on the white notch, in either theme */}
+        <span className="text-2xl font-medium text-[#1B1B1B]">ARMOUR</span>
       </Notch>
     </div>
   );
