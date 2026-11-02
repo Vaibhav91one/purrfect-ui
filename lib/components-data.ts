@@ -89,7 +89,7 @@ export const COMPONENTS: ComponentItem[] = [
   item("stroke-replay", "Stroke replay", "Display", "Replays an SVG painting shape by shape, like a drawing-app timelapse, with play, pause and a scrubber.", [720, 760]),
   item("spring-chips", "Spring chips", "Layout", "Pill labels with icon tiles that spring in around a centrepiece, one after another, when scrolled into view.", [1000, 600]),
   item("voice-bars", "Voice bars", "Text", "Thin bars jumping between heights on a staggered loop, for a mic that is listening.", [600, 640]),
-  item("announce-strip", "Announce strip", "Navigation", "A thin announcement strip whose line loops seamlessly; it slides away as you scroll down or dismiss it.", [800, 560]),
+  item("announce-strip", "Announce strip", "Navigation", "A thin announcement strip whose line loops seamlessly; it slides away as you scroll down or dismiss it."),
   item("grid-disclosure", "Grid disclosure", "Layout", "A one-open-at-a-time list whose panels open to their own height through grid rows, with no measuring.", [880, 680]),
   item("step-ring", "Step ring", "Display", "A numbered step badge: a quarter-arc spins for the current step, a tick for done, a dash for skipped.", [800, 560]),
   item("location-pill", "Location pill", "Display", "A hero-edge pill with a slowly spinning globe that drifts up as you scroll.", [800, 560]),
