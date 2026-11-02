@@ -3,7 +3,7 @@ import { CATEGORIES, categorySlug, COMPONENTS } from "@/lib/components-data";
 import { sectionBaseClasses } from "@/lib/layout-classes";
 import { GITHUB_URL } from "@/lib/site";
 import { Wordmark } from "@/components/gallery/wordmark";
-import { CurledCat, LoafCat, StretchCat } from "@/components/gallery/wordmark-cats";
+import { At, IDot, PeekOverC, SittingOnU, SleepingOnP } from "@/components/gallery/wordmark-cats";
 
 const columns = [
   { title: "Components", links: COMPONENTS.slice(0, 6).map((c) => ({ label: c.name, href: `/components/${c.slug}` })) },
@@ -22,8 +22,8 @@ export function FooterSection() {
       <div className={`${sectionBaseClasses} relative px-6 pt-14 pb-8 md:px-8 lg:px-12`}>
         <div className="flex flex-col justify-between gap-12 md:flex-row">
           <div className="max-w-xs">
-            <p className="text-sm text-muted-foreground">Interactive components for React, live and ready to tune.</p>
-            <p className="mt-3 text-sm text-muted-foreground">
+            <p className="text-lg leading-snug font-medium text-balance">Interactive components for React, live and ready to tune.</p>
+            <p className="mt-4 text-sm text-muted-foreground">
               Built by{" "}
               <a href="https://vaibhavtomar.com/" className="text-foreground hover:underline">
                 Vaibhav
@@ -67,20 +67,23 @@ export function FooterSection() {
             ))}
           </nav>
         </div>
-        <Wordmark className="mt-32 select-none pb-[0.25em] text-center text-[clamp(4rem,19vw,22rem)] leading-[0.8] font-semibold tracking-tighter md:mt-40">
-          <span className="relative inline-block">
-            pur
-            <LoafCat className="bottom-[0.52em] left-[0.02em] w-[0.9em]" />
-          </span>
-          rfe
-          <span className="relative inline-block">
-            c<CurledCat className="bottom-[0.12em] left-[0.17em] w-[0.26em]" />
-          </span>
-          t
-          <span className="relative inline-block w-[0.3em]">
-            <StretchCat className="bottom-[0.02em] left-[-0.06em] w-[0.42em]" />
-          </span>
-          ui
+        <Wordmark className="isolate mt-20 select-none sm:mt-36 pb-[0.25em] text-center text-[clamp(4rem,19vw,22rem)] leading-[0.8] font-semibold tracking-tighter md:mt-48">
+          <At>
+            <SleepingOnP />
+          </At>
+          purrfe
+          <At>
+            <PeekOverC />
+          </At>
+          ct{" "}
+          <At>
+            <SittingOnU />
+          </At>
+          u
+          <At>
+            <IDot />
+          </At>
+          ı
         </Wordmark>
       </div>
     </footer>

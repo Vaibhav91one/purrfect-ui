@@ -2,28 +2,14 @@
 
 import { useReducedMotion } from "motion/react";
 import { useEffect, useId, useRef, useState, type RefObject } from "react";
+import { OUTLINE, SLEEPING } from "./cat-shapes";
 import { VARIANTS } from "./cat-variants";
 
 // A cat curled up asleep, drawn like the sitting one: every part twice (a fattened outline copy and a white copy
-// inside the gradient mask). Everything that moves is CSS (breathing, tail swing, the head lifting), switched by
-// `data-awake` on the svg, so both copies stay in step. Now and then, or when you poke it, the cat wakes: head up,
-// one eye opens and looks around, tail wags wider; then it settles back down.
-const BODY = "M30 112 C22 80 52 56 110 54 C170 52 214 66 224 96 C230 116 214 122 190 122 L60 122 C42 122 32 120 30 112 Z";
-const TAIL = "M38 112 C14 110 6 88 16 72"; // curls up behind the back, away from the face
-const HEAD = [
-  "M182 68 L184 44 L200 58 Z", // ears
-  "M208 58 L222 42 L228 66 Z",
-  "M176 92 C172 70 190 58 208 60 C228 62 238 78 234 96 C230 112 210 118 194 116 C182 114 177 104 176 92 Z", // skull
-];
-const NECK = "200px 112px";
-const BLOB_AT = [
-  [60, 90],
-  [190, 80],
-  [120, 118],
-  [150, 70],
-];
-const OUTLINE = 4;
-const TAIL_PIVOT = "38px 112px";
+// inside the gradient mask; shapes in cat-shapes.ts). Everything that moves is CSS (breathing, tail swing, the head
+// lifting), switched by `data-awake` on the svg, so both copies stay in step. Now and then, or when you poke it, the
+// cat wakes: head up, one eye opens and looks around, tail wags wider; then it settles back down.
+const { BODY, TAIL, HEAD, NECK, BLOB_AT, TAIL_PIVOT } = SLEEPING;
 
 /** Two white dot eyes (cut out of the gradient, like the hero cat). `trigger`: another element (a button the cat sits on) whose hover also wakes it. */
 export function SleepingCat({ className = "h-24 sm:h-32", outlineClass = "text-foreground", variant = 1, trigger }: { className?: string; outlineClass?: string; variant?: number; trigger?: RefObject<HTMLElement | null> }) {
