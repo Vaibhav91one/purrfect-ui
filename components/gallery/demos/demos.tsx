@@ -123,6 +123,12 @@ function NotchLoop({ playing, speed }: DemoProps) {
   );
 }
 
+/** StarRise rises once on mount, so the loop remounts it to replay the rise; Speed shortens the rise with the loop. */
+function StarRiseLoop({ playing, speed, opts }: DemoProps) {
+  const n = useTick(playing, speed, 5000);
+  return <StarRiseDemo replay={n} duration={3.6 / speed} shader={!opts.card} />;
+}
+
 /** HeroReveal is a full-page hero, so it is drawn at a full page's size (see `nat`) and the card or dialog scales it down. Only the photo frame opening is shown; the text and action are in the clip. It plays once when it scrolls into view, so the loop remounts it to replay. */
 function HeroLoop({ playing, speed }: DemoProps) {
   const n = useTick(playing, speed, 3600);
@@ -423,7 +429,7 @@ export const DEMOS: Record<string, (p: DemoProps) => ReactNode> = {
   preloader: PreloaderDemo,
   "load-preloader": LoadPreloaderDemo,
   // a grid card draws the plain mark: the shader's one-off image pass is ~0.5s of main thread, so it runs only in the dialog
-  "star-rise": ({ opts }: DemoProps) => <StarRiseDemo shader={!opts.card} />,
+  "star-rise": StarRiseLoop,
   "marquee-rows": MarqueeRowsDemo,
   "peek-card": PeekCardDemo,
   "counter-loader": CounterLoaderDemo,
