@@ -766,11 +766,25 @@ const box = useRef<HTMLDivElement>(null);
       { name: "className", type: "string", description: "Size, weight and colour of the text." },
     ],
     behaviors: [
-      "Lines rise a quarter of a line and fade in one after another (60ms apart) the first time the text scrolls into view (even at the very bottom of a page that cannot scroll further); the text is visible without JavaScript.",
       "Copying the text gives it once, as written. No-break spaces keep their words together.",
       "A letter flips over on the X axis when the mouse crosses it; a tap flips it on touch, and a swipe that scrolls the page flips nothing. A flip that is running finishes before the letter can flip again.",
       "Joined scripts (Arabic, Indic marks, emoji sequences and tag flags) flip a word at a time so their letters keep their shapes.",
-      "Reduced motion: lines still fade in, without the rise; letters blink their opacity instead of turning.",
+      "Reduced motion: letters blink their opacity instead of turning.",
+    ],
+  },
+  "fade-lines": {
+    usage: `import { FadeLines } from "@/components/ui/fade-lines";
+
+<FadeLines text="Helping brands thrive in the digital world." className="text-2xl" />`,
+    props: [
+      { name: "text", type: "string", description: "The text. The lines are wherever it wraps; you don't break it yourself." },
+      { name: "className", type: "string", description: "Size, weight, colour and line height." },
+    ],
+    behaviors: [
+      "Lines rise a quarter of a line and fade in one after another (60ms apart, capped at the ninth line) the first time the text scrolls into view, even at the very bottom of a page that cannot scroll further.",
+      "Lines are found once laid out, by grouping the words by their top edge; no-break spaces keep their words together and a long word wraps inside its own box.",
+      "The text is visible without JavaScript, and only opacity and translate move, so the layout never shifts.",
+      "Reduced motion: lines fade in without the rise.",
     ],
   },
   "spin-mark": {

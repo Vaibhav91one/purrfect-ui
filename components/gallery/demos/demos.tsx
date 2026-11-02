@@ -37,6 +37,7 @@ import QuoteCycleDemo from "@/registry/quote-cycle/demo";
 import ColumnHopDemo from "@/registry/column-hop/demo";
 import { LineRiseScene } from "@/registry/line-rise/demo";
 import FlipTextDemo from "@/registry/flip-text/demo";
+import FadeLinesDemo from "@/registry/fade-lines/demo";
 import SpinMarkDemo from "@/registry/spin-mark/demo";
 import ArrowLinkDemo from "@/registry/arrow-link/demo";
 import RollLinkDemo from "@/registry/roll-link/demo";
@@ -446,6 +447,7 @@ export const DEMOS: Record<string, (p: DemoProps) => ReactNode> = {
   "pixel-wave": PixelWaveDemo,
   "word-stream": WordStreamDemo,
   "flip-text": FlipTextDemo,
+  "fade-lines": FadeLinesDemo,
   "spin-mark": SpinMarkDemo,
   "arrow-link": ArrowLinkDemo,
   "cursor-follower": CursorLoop,
