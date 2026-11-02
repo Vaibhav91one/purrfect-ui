@@ -58,8 +58,6 @@ export default function StickyCrossfadeDemo() {
   const box = useRef<HTMLDivElement>(null);
   return (
     <div className="relative h-[600px] w-[1000px] overflow-hidden rounded-3xl">
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src="/demo/dunes.jpg" alt="" className="absolute inset-0 size-full object-cover" />
       <div ref={box} className="absolute inset-4 overflow-y-auto overscroll-contain rounded-2xl bg-background text-foreground">
         <StickyCrossfadeScene container={box} />
       </div>

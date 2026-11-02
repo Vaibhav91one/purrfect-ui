@@ -1,4 +1,3 @@
-/* eslint-disable @next/next/no-img-element */
 import { PhotoWordmark } from "./photo-wordmark";
 
 const link = "text-muted-foreground transition-colors hover:text-foreground";
@@ -61,7 +60,6 @@ export function ArmourFooter() {
 export default function PhotoWordmarkDemo() {
   return (
     <div className="relative w-[800px] overflow-clip rounded-3xl p-6">
-      <img src="/demo/storm.jpg" alt="" className="absolute inset-0 size-full object-cover" />
       <div className="relative">
         <ArmourFooter />
       </div>

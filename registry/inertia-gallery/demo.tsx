@@ -19,8 +19,6 @@ export const DEMO_ITEMS: InertiaGalleryItem[] = PHOTOS.map(([file, title]) => ({
 export default function InertiaGalleryDemo() {
   return (
     <div className="relative h-[560px] w-[900px] overflow-hidden rounded-2xl">
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src="/demo/scenery.jpg" alt="" className="absolute inset-0 size-full object-cover" />
       <div className="absolute inset-4 flex flex-col overflow-hidden rounded-xl bg-background text-foreground shadow-xl">
         <div className="grid h-11 shrink-0 grid-cols-[1fr_auto_auto] items-center gap-16 px-5 text-xs">
           <span>©Studio</span>

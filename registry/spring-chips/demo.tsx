@@ -17,7 +17,6 @@ export default function SpringChipsDemo() {
   const [run, setRun] = useState(0);
   return (
     <div className="relative h-[600px] w-[1000px] overflow-hidden rounded-3xl p-6">
-      <img src="/demo/valley.jpg" alt="" className="absolute inset-0 size-full object-cover" />
       <div className="relative grid size-full grid-cols-[1fr_380px] items-center gap-10 rounded-[2rem] bg-background py-8 pr-16 pl-14 text-foreground">
         <div>
           <p className="mb-5 flex items-center gap-2 text-xs font-semibold tracking-[0.18em] uppercase">

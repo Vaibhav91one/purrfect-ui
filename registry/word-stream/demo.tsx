@@ -1,4 +1,3 @@
-/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import { useState } from "react";
@@ -20,7 +19,6 @@ export default function WordStreamDemo() {
   const [run, setRun] = useState(0);
   return (
     <div className="relative grid h-[560px] w-[800px] place-items-center overflow-hidden rounded-3xl">
-      <img src="/demo/fjord.jpg" alt="" className="absolute inset-0 size-full object-cover" />
       <section
         aria-label="Reviewer advisory chat"
         className="relative flex h-[480px] w-[600px] flex-col overflow-hidden rounded-2xl bg-card text-card-foreground shadow-xl"

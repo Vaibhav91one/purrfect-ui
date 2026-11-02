@@ -41,11 +41,9 @@ export default function FanOutCardsDemo() {
   const [run, setRun] = useState(0);
   return (
     <div className="relative grid h-[520px] w-[900px] place-items-center overflow-hidden rounded-3xl">
-      {/* the replay button is the backdrop, not a wrapper: the cards' text stays readable to screen readers */}
-      <button type="button" onClick={() => setRun((n) => n + 1)} aria-label="Replay the fan-out" className="absolute inset-0">
-        <img src="/demo/fjord.jpg" alt="" className="size-full object-cover" />
-      </button>
-      {/* pointer-events-none lets clicks around the cards reach the backdrop */}
+      {/* the replay button sits behind the cards, not around them: the cards' text stays readable to screen readers */}
+      <button type="button" onClick={() => setRun((n) => n + 1)} aria-label="Replay the fan-out" className="absolute inset-0" />
+      {/* pointer-events-none lets clicks around the cards reach the replay button */}
       <FanOutCards key={run} cards={CARDS} cardClassName="w-80 p-2 text-left shadow-xl" className="pointer-events-none size-full" center={phone} />
     </div>
   );

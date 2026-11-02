@@ -1,8 +1,6 @@
-/* eslint-disable @next/next/no-img-element */
 "use client";
 
-import { motion, useReducedMotion } from "motion/react";
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { cn } from "@/lib/utils";
 import { StickerPop } from "./sticker-pop";
 
@@ -13,29 +11,30 @@ const PILE = [
   ["canyon", -12, 22, 4],
   ["jellyfish", 26, 26, -6],
 ] as const;
-const STEPS = ["0", "27", "64", "100"];
 
-/** The source's intro loader, small: a fanned pile of die-cut stickers over the page, the counter rolling up bottom-left. */
-export function LoaderBox({ stickers = PILE.map(([f]) => `/demo/${f}.jpg`), stickerClassName, children }: { stickers?: string[]; stickerClassName?: string; children?: ReactNode }) {
+/** The source's intro pile, small: a fanned pile of die-cut stickers over the page. `loop` (ms) replays it on a timer. */
+export function LoaderBox({ stickers = PILE.map(([f]) => `/demo/${f}.jpg`), stickerClassName, loop, children }: { stickers?: string[]; stickerClassName?: string; loop?: number; children?: ReactNode }) {
   const [run, setRun] = useState(0);
   const [out, setOut] = useState(false);
-  const timer = useRef<ReturnType<typeof setTimeout>>(undefined);
-  const reduce = useReducedMotion();
   const count = Math.min(stickers.length, PILE.length); // only the rendered stickers stagger out
-  useEffect(() => () => clearTimeout(timer.current), []);
-  // click: the pile leaves in reverse, then pops in again
-  const replay = () => {
-    if (out) return;
-    setOut(true);
-    timer.current = setTimeout(() => {
+  // click (or the loop): the pile leaves in reverse, then pops in again
+  const replay = () => setOut(true);
+  useEffect(() => {
+    if (!out) return;
+    const id = setTimeout(() => {
       setOut(false);
       setRun((n) => n + 1);
     }, (count - 1) * 50 + 300); // the last sticker's outDelay plus its 0.3s exit
-  };
+    return () => clearTimeout(id);
+  }, [out, count]);
+  useEffect(() => {
+    if (!loop || out) return;
+    const id = setTimeout(() => setOut(true), loop);
+    return () => clearTimeout(id);
+  }, [loop, out]);
   return (
     <div className="relative h-[560px] w-[800px] overflow-hidden rounded-2xl">
-      <img src="/demo/dunes.jpg" alt="" className="absolute inset-0 size-full object-cover" />
-      <div className="absolute inset-6 flex items-end overflow-hidden rounded-xl bg-background p-7 text-foreground shadow-xl">
+      <div className="absolute inset-6 overflow-hidden rounded-xl bg-background text-foreground shadow-xl">
         <button type="button" aria-label="Replay the sticker pile" onClick={replay} className="absolute top-1/2 left-1/2 size-[200px] -translate-x-1/2 -translate-y-1/2 rounded-3xl">
           {stickers.slice(0, PILE.length).map((src, i) => (
             <StickerPop
@@ -50,23 +49,13 @@ export function LoaderBox({ stickers = PILE.map(([f]) => `/demo/${f}.jpg`), stic
             />
           ))}
         </button>
-        <div key={run} className="h-[1.2em] overflow-hidden text-[40px] leading-[1.2] tabular-nums">
-          {/* check-ignore: duration the source counter rolls for 1.4s while the pile pops; ease-in-out so it reaches 100 with the
-              last sticker, and under reduced motion it jumps to 100 as the last fade ends */}
-          <motion.div initial={{ y: "0%" }} animate={{ y: "-75%" }} transition={reduce ? { duration: 0, delay: 0.9 } : { duration: 1.4, ease: [0.77, 0, 0.175, 1] }} className="flex flex-col">
-            {STEPS.map((s) => (
-              <span key={s} className="h-[1.2em]">
-                {s}
-              </span>
-            ))}
-          </motion.div>
-        </div>
         {children}
       </div>
     </div>
   );
 }
 
-export default function StickerPopDemo() {
-  return <LoaderBox />;
+// playing/speed come from the gallery's Pause and Speed controls: while playing, the pile leaves and pops in again on a loop
+export default function StickerPopDemo({ playing, speed = 1 }: { playing?: boolean; speed?: number }) {
+  return <LoaderBox loop={playing ? 2800 / speed : undefined} />;
 }

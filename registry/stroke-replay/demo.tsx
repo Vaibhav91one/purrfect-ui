@@ -31,8 +31,6 @@ export function Painting() {
 export default function StrokeReplayDemo() {
   return (
     <div className="relative grid h-[760px] w-[720px] place-items-center overflow-hidden">
-      {/* eslint-disable-next-line @next/next/no-img-element -- static demo wallpaper */}
-      <img src="/demo/field.jpg" alt="" className="absolute inset-0 size-full object-cover" />
       <section className="relative w-[600px] rounded-3xl bg-background p-10 text-foreground shadow-xl">
         <h2 className="m-0 mb-8 text-5xl font-normal tracking-tight">Process</h2>
         <div className="grid grid-cols-[86px_minmax(0,1fr)] items-start">

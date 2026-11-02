@@ -39,8 +39,6 @@ export { links };
 export default function DrawerMenuDemo() {
   return (
     <div className="relative h-[640px] w-[390px] overflow-hidden rounded-3xl bg-background">
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src="/demo/coast.jpg" alt="" className="absolute inset-0 size-full object-cover" />
       <DrawerMenu contained active="#projects" links={links} footer={footer} />
     </div>
   );

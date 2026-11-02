@@ -12,8 +12,6 @@ const place = (where: string) => (
 export default function PeekCardDemo() {
   return (
     <div className="relative grid h-[760px] w-[1000px] content-center gap-4 overflow-hidden rounded-3xl p-8">
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src="/demo/dunes.jpg" alt="" className="absolute inset-0 size-full object-cover" />
       <div className="relative grid grid-cols-3">
         <PeekCard
           index={1}

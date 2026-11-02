@@ -13,8 +13,6 @@ export default function AnnounceStripDemo() {
   const [open, setOpen] = useState(true);
   return (
     <div className="relative h-[560px] w-[800px] overflow-hidden rounded-2xl p-8">
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src="/demo/fjord.jpg" alt="" className="absolute inset-0 size-full object-cover" />
       <div ref={box} className="relative h-full overflow-y-auto rounded-xl bg-background text-foreground shadow-2xl">
         <div className="sticky top-0 z-10 bg-background">
           <AnnounceStrip open={open} onDismiss={() => setOpen(false)} container={box}>
@@ -53,8 +51,6 @@ export default function AnnounceStripDemo() {
           </span>
         </section>
         <div className="relative px-10 py-10">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/demo/valley.jpg" alt="" className="absolute inset-0 size-full object-cover" />
           <div className="relative grid gap-3 rounded-xl border bg-card p-5 text-sm text-card-foreground">
             <p>
               <span className="mr-2 rounded-md bg-muted px-2 py-0.5 text-xs text-muted-foreground">Awaiting approval</span>

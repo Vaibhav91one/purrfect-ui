@@ -2,9 +2,10 @@ import { LayeredMenu } from "./layered-menu";
 
 export default function LayeredMenuDemo() {
   return (
-    <div className="relative h-72 w-full max-w-md overflow-hidden rounded-3xl bg-[url(/demo/valley.jpg)] bg-cover bg-center">
+    <div className="relative h-72 w-full max-w-md overflow-hidden rounded-3xl text-foreground">
       <LayeredMenu
         contained
+        color="currentColor"
         delay={0.2}
         logo={<span className="font-medium tracking-tight">ARMOUR</span>}
         primary={[

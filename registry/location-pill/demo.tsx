@@ -13,8 +13,6 @@ export default function LocationPillDemo() {
   const box = useRef<HTMLDivElement>(null);
   return (
     <div className="relative grid h-[560px] w-[800px] place-items-center overflow-hidden rounded-3xl">
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src="/demo/fjord.jpg" alt="" className="absolute inset-0 size-full object-cover" />
       <div
         ref={box}
         className="relative h-[500px] w-[740px] overflow-y-auto overscroll-contain rounded-2xl [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
