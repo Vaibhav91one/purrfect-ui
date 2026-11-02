@@ -92,7 +92,7 @@ export const COMPONENTS: ComponentItem[] = [
   item("grid-disclosure", "Grid disclosure", "Layout", "A one-open-at-a-time list whose panels open to their own height through grid rows, with no measuring.", [880, 680]),
   item("step-ring", "Step ring", "Display", "A numbered step badge: a quarter-arc spins for the current step, a tick for done, a dash for skipped.", [800, 560]),
   item("location-pill", "Location pill", "Display", "A hero-edge pill with a slowly spinning globe that drifts up as you scroll.", [800, 560]),
-  item("pixel-wave", "Pixel wave", "Text", "A 3x3 pixel loader whose cells fade on staggered delays, so a wavefront sweeps across the grid.", [600, 700]),
+  item("pixel-wave", "Pixel wave", "Text", "A 3x3 pixel loader whose cells fade on staggered delays, so a wavefront sweeps across the grid.", [240, 240]),
   item("word-stream", "Word stream", "Text", "A chat reply that types in word by word behind a caret, then hands back when done.", [800, 560]),
   item("flip-text", "Flip text", "Text", "Text whose lines fade in on scroll and whose letters flip over under the pointer.", [560, 300]),
   item("spin-mark", "Spin mark", "Display", "A mark that pops in with a spring, then spins forever or turns as you scroll.", [448, 320]),
