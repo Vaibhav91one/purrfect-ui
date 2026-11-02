@@ -58,7 +58,8 @@ export const CLIPS = {
   "quote-cycle": { target: "#projects p.animated-text", interact: "hover", stay: 4.5, label: "vaibhavtomar.com" },
   "column-hop": { site: BOUNTYDESK, target: 'div[class*="border-border/50"][class*="bg-card"] > div.grid-cols-3', interact: "hover", realtime: true, stay: 3.6, label: "bountydesk.vaibhav.quest" },
   "line-rise": { site: MAPINLY, target: "main > section:nth-of-type(2)", interact: "scroll", session: { "mapinly-intro": "1" }, local: ML, label: "mapinly.vaibhavtomar.com" },
-  "announce-strip": { site: BOUNTYDESK, target: 'div[class*="bg-emerald-500"][class*="overflow-hidden"]', interact: "load", start: "true", realtime: true, label: "bountydesk.vaibhav.quest" },
+  // starts on the settled page (no blank or half-loaded frames), then pushes in on the strip while it scrolls
+  "announce-strip": { site: BOUNTYDESK, target: 'div[class*="bg-emerald-500"][class*="overflow-hidden"]', interact: "load", start: 'performance.now() > 5000 && document.readyState === "complete"', realtime: true, push: 0.6, zoom: 3, stay: 2.6, poster: 2.2, label: "bountydesk.vaibhav.quest" },
   "grid-disclosure": { site: BOUNTYDESK, target: "section#faq ul li:nth-child(3) button", interact: "click", label: "bountydesk.vaibhav.quest" },
   "location-pill": { target: "div.title.rounded-r-full", interact: "scroll", label: "vaibhavtomar.com" },
   "flip-text": { target: 'nav p[class*="leading-relaxed"]', interact: "hover", label: "vaibhavtomar.com" },
