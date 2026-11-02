@@ -1,16 +1,13 @@
 "use client";
 
-import Link from "next/link";
-import { CATEGORIES, categorySlug, COMPONENTS } from "@/lib/components-data";
+import { COMPONENTS } from "@/lib/components-data";
 import { ScrollReveal } from "@/registry/scroll-reveal/scroll-reveal";
 import { sectionBaseClasses } from "@/lib/layout-classes";
 import { LiveCard } from "./component-card";
 import { SleepingCat } from "./sleeping-cat";
 import { SheetHost } from "./use-sheet";
 
-const chip = "rounded-full bg-muted px-3 py-1 text-sm text-muted-foreground transition-colors hover:text-foreground aria-[current=page]:bg-foreground aria-[current=page]:text-background focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent";
-
-/** /components and /components/category/<name>: a hero, category links and a grid. Click a card to open its dialog. */
+/** /components and /components/category/<name>: a hero and a grid. Click a card to open its dialog. */
 export function ComponentsExplorer({ category }: { category?: string }) {
   const items = category ? COMPONENTS.filter((c) => c.category === category) : COMPONENTS;
   return (
@@ -23,16 +20,6 @@ export function ComponentsExplorer({ category }: { category?: string }) {
         <div className="mt-6 max-w-[28ch] md:max-w-3xl">
           <ScrollReveal text="Every component is a single file. Open one to tweak it live, then install it with one command." className="text-xl font-light tracking-tight text-muted-foreground md:text-3xl" offset={["start 0.95", "start 0.55"]} />
         </div>
-        <nav aria-label="Categories" className="mt-10 flex flex-wrap justify-center gap-2">
-          <Link href="/components" aria-current={category ? undefined : "page"} className={chip}>
-            All
-          </Link>
-          {CATEGORIES.map((c) => (
-            <Link key={c} href={`/components/category/${categorySlug(c)}`} aria-current={c === category ? "page" : undefined} className={chip}>
-              {c}
-            </Link>
-          ))}
-        </nav>
       </header>
 
       <div className="columns-1 gap-3 sm:columns-2 lg:columns-3">
