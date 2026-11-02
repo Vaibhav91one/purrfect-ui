@@ -386,6 +386,11 @@ function LoadPreloaderLoop({ playing, speed }: DemoProps) {
   return <LoadPreloaderDemo key={n} minDuration={1.2 / speed} />;
 }
 
+// the card swaps to its second photo and back every 1.6s, the way a pointer passing over it would
+function SwapCardLoop({ playing, speed }: DemoProps) {
+  return <SwapCardDemo hover={useTick(playing, speed, 1600) % 2 === 1} />;
+}
+
 // the box scrolls the about page, so the sticky picture crossfades as each block passes its middle
 function StickyCrossfadeLoop({ playing, speed }: DemoProps) {
   const box = useRef<HTMLDivElement>(null);
@@ -431,7 +436,7 @@ export const DEMOS: Record<string, (p: DemoProps) => ReactNode> = {
   "column-hop": ColumnHopDemo,
   "line-rise": LineRiseLoop,
   "sticker-pop": ({ playing, speed }: DemoProps) => <StickerPopDemo playing={playing} speed={speed} />,
-  "swap-card": SwapCardDemo,
+  "swap-card": SwapCardLoop,
   "sticky-crossfade": StickyCrossfadeLoop,
   "spring-chips": SpringChipsDemo,
   "voice-bars": ({ playing, speed }: DemoProps) => <VoiceBarsDemo playing={playing} speed={speed} />,

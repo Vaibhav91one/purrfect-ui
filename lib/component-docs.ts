@@ -926,6 +926,7 @@ import { Mic, Banknote } from "lucide-react";
       "The badge ring turns 30 degrees and inverts its colours; the title nudges 6px forward (left in RTL), and text starts at the inline start.",
       "Content sits at the top of the button, so images line up across a grid row whose titles differ in length.",
       "disabled dims the card and plays no hover state. The focus outline survives forced-colors (high contrast) mode.",
+      "data-hover=\"true\" shows the hover state without a pointer, for a looping demo.",
       "Keyboard focus crossfades the image and inverts the badge plus a focus ring, without the zoom, turn or nudge; a tap gets only the press scale, and hover never sticks after a tap.",
       "Pure CSS: no JavaScript, nothing per frame, identical server HTML.",
       "Reduced motion: the images still crossfade and the badge still inverts, but nothing zooms, turns or moves.",
