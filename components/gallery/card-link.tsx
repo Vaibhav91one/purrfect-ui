@@ -8,7 +8,7 @@ import { openSheet } from "./use-sheet";
  *  is laid over the face, not around it: some demos (hover-preview, roll-link) hold links, and <a> can't nest. */
 export function CardLink({ item, className }: { item: ComponentItem; className: string }) {
   return (
-    <div className={`${className} has-[>a:focus-visible]:outline-2 has-[>a:focus-visible]:outline-offset-2 has-[>a:focus-visible]:outline-accent`}>
+    <div data-card className={`${className} has-[>a:focus-visible]:outline-2 has-[>a:focus-visible]:outline-offset-2 has-[>a:focus-visible]:outline-accent`}>
       <CardFace item={item} />
       <a
         href={`/components?c=${item.slug}`}
