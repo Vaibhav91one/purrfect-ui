@@ -92,10 +92,10 @@ export const COMPONENTS: ComponentItem[] = [
   item("spring-chips", "Spring chips", "Layout", "Pill labels with icon tiles that spring in around a centrepiece, one after another, when scrolled into view.", [709, 520]), // the demo's 520px height (room for the phone's shadow) at the clip's ratio (960x704): the card covers by that ratio, so a taller demo lost its top and bottom
   item("voice-bars", "Voice bars", "Text", "Thin bars jumping between heights on a staggered loop, for a mic that is listening.", [600, 640]),
   item("announce-strip", "Announce strip", "Navigation", "A thin announcement strip whose line loops seamlessly; it slides away as you scroll down or dismiss it."),
-  item("grid-disclosure", "Grid disclosure", "Layout", "A one-open-at-a-time list whose panels open to their own height through grid rows, with no measuring.", [880, 680]),
+  item("grid-disclosure", "Grid disclosure", "Layout", "A one-open-at-a-time list whose panels open to their own height through grid rows, without measuring the content.", [880, 680]),
   item("step-ring", "Step ring", "Display", "A numbered step badge: a quarter-arc spins for the current step, a tick for done, a dash for skipped.", [800, 560]),
   item("pixel-wave", "Pixel wave", "Text", "A 3x3 pixel loader whose cells fade on staggered delays, so a wavefront sweeps across the grid.", [240, 240]),
-  item("word-stream", "Word stream", "Text", "A chat reply that types in word by word behind a caret, then hands back when done.", [800, 560]),
+  item("word-stream", "Word stream", "Text", "A chat reply that types in word by word behind a caret, then tells you when it is done.", [800, 560]),
   item("flip-text", "Flip text", "Text", "Text whose letters flip over on the X axis under the pointer.", [560, 300]),
   item("fade-lines", "Fade lines", "Text", "Text whose lines rise and fade in one after another as it scrolls into view.", [560, 300]),
   item("spin-mark", "Spin mark", "Display", "A mark that pops in with a spring, then spins forever or turns as you scroll.", [448, 320]),

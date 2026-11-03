@@ -7,7 +7,7 @@ const logo = "flex h-20 flex-col items-center justify-center gap-0.5 rounded-2xl
 export function SponsorsSection() {
   return (
     <section id="sponsors" className={`${sectionBaseClasses} scroll-mt-24 px-6 py-20 md:px-8 lg:px-12`}>
-      <h2 className="text-4xl font-light tracking-tight md:text-5xl">Backed and supported by the finest</h2>
+      <h2 className="text-4xl font-light tracking-tight md:text-5xl">Backed by our sponsors</h2>
       <p className="mt-3 text-muted-foreground">Thanks to the people keeping purrfect ui free.</p>
       {Object.entries(SPONSORS).map(([tier, list]) => (
         <div key={tier}>
