@@ -6,7 +6,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { FAST, SPRING } from "@/lib/motion";
-import { openSheet } from "@/components/gallery/use-sheet";
+import { openSheet, useCategoryFilter } from "@/components/gallery/use-sheet";
 import { useSound } from "@/components/providers/sound-provider";
 import { CATEGORIES, COMPONENTS, categorySlug } from "@/lib/components-data";
 import { NAV_LINKS } from "@/lib/site";
@@ -31,9 +31,6 @@ const subscribeResize = (cb: () => void) => {
   addEventListener("resize", cb);
   return () => removeEventListener("resize", cb);
 };
-// every page mounts its own notch, so a category chip (which navigates) hands the open search bar to the next one
-let keepSearching = false;
-
 const useViewportWidth = () => useSyncExternalStore(subscribeResize, () => innerWidth, () => 1280);
 
 /**
@@ -48,11 +45,10 @@ export function Notch() {
   const router = useRouter();
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
-  const [searching, setSearching] = useState(() => keepSearching);
+  const [searching, setSearching] = useState(false);
   const [query, setQuery] = useState("");
-  // the category filter lives in the URL, so it filters /components and outlasts the search bar
-  const active = CATEGORIES.find((c) => pathname === `/components/category/${categorySlug(c)}`);
-  const filter = active ?? "All";
+  // the category filter lives in the URL (`?cat=`), so it filters the /components grid in place and outlasts the search bar
+  const [active, setActive] = useCategoryFilter();
 
   const root = useRef<HTMLDivElement>(null);
   const trigger = useRef<HTMLButtonElement>(null);
@@ -85,14 +81,6 @@ export function Notch() {
     setOpen(false);
     setSearching(true);
   }, []);
-
-  // take over the search bar from the previous page's notch; tuck ours away when this page is hidden (cacheComponents keeps it)
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- a page cacheComponents brings back keeps its old state
-    if (keepSearching) setSearching(true);
-    setTimeout(() => (keepSearching = false)); // a tick later: Strict Mode runs this twice
-    return closeAll;
-  }, [closeAll]);
 
   // sound on pop and tuck (never on first render)
   useEffect(() => {
@@ -132,13 +120,13 @@ export function Notch() {
     return () => removeEventListener("keydown", onKey);
   }, [openSearch]);
 
-  // search lists the pages and every component (name or category); the filter narrows components to one category
+  // search lists the pages and every component (name or category); the filter narrows components to its categories
   const needle = query.trim().toLowerCase();
   type Row = { label: string; href: string; Icon: LucideIcon; tag?: string };
-  const pages: Row[] = filter === "All" ? NAV_LINKS.filter((l) => l.label.toLowerCase().includes(needle)).map((l) => ({ label: l.label, href: l.href, Icon: NAV_ICONS[l.label] })) : [];
-  const comps: Row[] = COMPONENTS.filter((c) => (filter === "All" || c.category === filter) && (!needle || `${c.name} ${c.category}`.toLowerCase().includes(needle))).map((c) => ({
+  const pages: Row[] = !active.length ? NAV_LINKS.filter((l) => l.label.toLowerCase().includes(needle)).map((l) => ({ label: l.label, href: l.href, Icon: NAV_ICONS[l.label] })) : [];
+  const comps: Row[] = COMPONENTS.filter((c) => (!active.length || active.includes(c.category)) && (!needle || `${c.name} ${c.category}`.toLowerCase().includes(needle))).map((c) => ({
     label: c.name,
-    href: `${active ? `/components/category/${categorySlug(active)}` : "/components"}?c=${c.slug}`,
+    href: `/components?${active.length ? `cat=${active.map(categorySlug).join(",")}&` : ""}c=${c.slug}`, // the filter carries over
     Icon: Boxes,
     tag: c.category,
   }));
@@ -146,15 +134,14 @@ export function Notch() {
   const go = (href: string) => {
     quiet();
     closeAll();
-    // same page: SheetHost only hears openSheet, not a router push of ?c=
-    const [path, slug] = href.split("?c=");
-    if (slug && path === pathname) openSheet(slug, null);
+    // same page: SheetHost only hears openSheet, not a router push of ?c= (and ?cat= is already in the URL)
+    const u = new URL(href, location.href);
+    const slug = u.searchParams.get("c");
+    if (slug && u.pathname === pathname) openSheet(slug, null);
     else router.push(href);
   };
-  const setFilter = (c: string) => {
-    keepSearching = true;
-    router.push(c === "All" ? "/components" : `/components/category/${categorySlug(c)}`);
-  };
+  // a category chip toggles that category; "All" clears them. Only the URL changes, nothing navigates.
+  const toggle = (c: string) => setActive(c === "All" ? [] : active.includes(c) ? active.filter((x) => x !== c) : [...active, c]);
 
   const width = searching ? Math.min(560, vw - 32) : vw >= 640 ? NOTCH_W : 250;
   const t = reduce ? { duration: 0 } : SPRING;
@@ -204,17 +191,23 @@ export function Notch() {
             >
               <div className="flex items-center gap-2 rounded-full px-4 focus-within:outline-2 focus-within:-outline-offset-2 focus-within:outline-white/50" style={{ height: ROW_H }}>
                 <Search className="size-4 shrink-0 text-white/60" />
-                {active && (
-                  <button
-                    type="button"
-                    onClick={() => setFilter("All")}
-                    aria-label={`Remove ${active} filter`}
-                    data-cuelume-close
-                    className={`${chip} flex shrink-0 items-center gap-1 pr-2 whitespace-nowrap bg-white! text-black! hover:bg-white/85!`}
-                  >
-                    {active}
-                    <X className="size-3.5" />
-                  </button>
+                {active.length > 0 && (
+                  // the chips scroll sideways once they fill the row; the input always keeps room to type
+                  <div className="flex min-w-0 gap-1 overflow-x-auto [scrollbar-width:none]">
+                    {active.map((c) => (
+                      <button
+                        key={c}
+                        type="button"
+                        onClick={() => toggle(c)}
+                        aria-label={`Remove ${c} filter`}
+                        data-cuelume-close
+                        className={`${chip} flex shrink-0 items-center gap-1 pr-2 whitespace-nowrap bg-white! text-black! hover:bg-white/85!`}
+                      >
+                        {c}
+                        <X className="size-3.5" />
+                      </button>
+                    ))}
+                  </div>
                 )}
                 <input
                   autoFocus
@@ -222,11 +215,11 @@ export function Notch() {
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
                   onKeyDown={(e) => {
-                    if (e.key === "Backspace" && !query && active) setFilter("All");
+                    if (e.key === "Backspace" && !query && active.length) setActive(active.slice(0, -1));
                   }}
                   placeholder="Search…"
                   aria-label="Search"
-                  className="min-w-0 flex-1 bg-transparent text-sm text-white outline-none placeholder:text-white/40"
+                  className="min-w-16 flex-1 bg-transparent text-sm text-white outline-none placeholder:text-white/40"
                 />
                 <button
                   type="button"
@@ -247,12 +240,12 @@ export function Notch() {
                   <button
                     key={c}
                     type="button"
-                    aria-pressed={filter === c}
+                    aria-pressed={c === "All" ? !active.length : active.includes(c)}
                     onClick={(e) => {
-                      setFilter(c);
+                      toggle(c);
                       e.currentTarget.scrollIntoView({ inline: "center", block: "nearest" });
                     }}
-                    data-cuelume-tap
+                    data-cuelume-toggle
                     className={`${chip} shrink-0 whitespace-nowrap`}
                   >
                     {c}
