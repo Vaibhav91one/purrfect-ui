@@ -121,7 +121,13 @@ Copying shows a toast. The host is one shared sonner `<Toaster />` in `component
 
 ### "In the wild" clips
 
-A component that came from a real site can show a short clip of it running there: the hero, a scroll to the component, a camera push-in, one interaction, then back to the hero so the loop has no seam. It plays on card hover and in the dialog's "In the wild" tab. Add an entry (`target` is a CSS selector on the live page) to `scripts/capture/clips.mjs`, then run `pnpm capture <slug>` (or `all`, `--base http://localhost:3000` for a local copy of the site). The capture renders frame by frame in virtual time, so it is a true 60fps (960x600) however slow the machine is; it needs Chrome and system `ffmpeg`. The files land in `public/previews/` and the slug is listed in `lib/clips.json`; without a clip nothing extra shows.
+A component that came from a real site can show a short clip of it running there: the hero, a scroll to the component, a camera push-in, one interaction, then back to the hero so the loop has no seam. It plays on card hover and in the dialog's "In the wild" tab. Add an entry (`target` is a CSS selector on the live page) to `scripts/capture/clips.mjs`, then run `pnpm capture <slug>` (or `all`, `--base http://localhost:3000` for a local copy of the site). The capture renders frame by frame in virtual time, so it is a true 60fps however slow the machine is: rendered at DPR 3, written at 1440x1056 as an H.264 High yuv420p mp4 (CRF 23, which X accepts since it is under 1920x1200) and a VP9 webm (CRF 33). It needs Chrome and system `ffmpeg`. The files land in `public/previews/` and the slug is listed in `lib/clips.json`; without a clip nothing extra shows.
+
+### Daily X post
+
+`pnpm x:today` prepares one post a day, one component each, for every component with a clip (texts in `scripts/x/posts.mjs`). It opens X's compose page with the text and link filled in and shows the component's mp4 in Finder; you attach the mp4 and press Post. It never posts by itself. `--dry` prints the next post without opening or recording it, `--slug <slug>` picks one, `--list` shows what has been posted.
+
+`pnpm x:install` adds a LaunchAgent that runs it at 10:00 every day (or on wake if the Mac was asleep); `pnpm x:uninstall` removes it. What has been posted is kept in `~/.purrfectui-x.json`, and the log is `~/Library/Logs/purrfectui-x.log`. The paths in `scripts/x/run.sh` and the plist are this machine's; edit them if node or the repo moves.
 
 ### Quality gate for a component
 
