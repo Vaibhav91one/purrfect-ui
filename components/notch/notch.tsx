@@ -31,6 +31,10 @@ const subscribeResize = (cb: () => void) => {
   addEventListener("resize", cb);
   return () => removeEventListener("resize", cb);
 };
+// every page mounts its own notch, so a chip that navigates to /components hands the open search bar to the next one
+let keepSearching = false;
+const handOffSearch = () => (keepSearching = true);
+
 const useViewportWidth = () => useSyncExternalStore(subscribeResize, () => innerWidth, () => 1280);
 
 /**
@@ -45,7 +49,7 @@ export function Notch() {
   const router = useRouter();
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
-  const [searching, setSearching] = useState(false);
+  const [searching, setSearching] = useState(() => keepSearching);
   const [query, setQuery] = useState("");
   // the category filter lives in the URL (`?cat=`), so it filters the /components grid in place and outlasts the search bar
   const [active, setActive] = useCategoryFilter();
@@ -82,23 +86,35 @@ export function Notch() {
     setSearching(true);
   }, []);
 
+  // take over the search bar from the previous page's notch; tuck ours away when this page is hidden (cacheComponents keeps it)
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- a page cacheComponents brings back keeps its old state
+    if (keepSearching) setSearching(true);
+    setTimeout(() => (keepSearching = false)); // a tick later: Strict Mode runs this twice
+    return closeAll;
+  }, [closeAll]);
+
   // sound on pop and tuck (never on first render)
   useEffect(() => {
     if (open !== wasOpen.current) play(open ? "open" : "close");
     wasOpen.current = open;
   }, [open, play]);
 
-  // Esc and outside pointerdown put everything back
+  // Esc and outside pointerdown put everything back. The effect above only hears the arc, so a closing search bar plays its own cue.
   useEffect(() => {
     if (!open && !searching) return;
+    const dismiss = () => {
+      if (searching) play("close");
+      closeAll();
+    };
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== "Escape") return;
       quiet();
-      closeAll();
+      dismiss();
       trigger.current?.focus();
     };
     const onDown = (e: PointerEvent) => {
-      if (!root.current?.contains(e.target as Node)) closeAll();
+      if (!root.current?.contains(e.target as Node)) dismiss();
     };
     addEventListener("keydown", onKey);
     addEventListener("pointerdown", onDown);
@@ -106,19 +122,21 @@ export function Notch() {
       removeEventListener("keydown", onKey);
       removeEventListener("pointerdown", onDown);
     };
-  }, [open, searching, quiet, closeAll]);
+  }, [open, searching, quiet, closeAll, play]);
 
-  // ⌘K / Ctrl+K opens the search bar
+  // ⌘K / Ctrl+K opens the search bar, and closes it again
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
         e.preventDefault();
-        openSearch();
+        if (!searching) return openSearch();
+        play("close");
+        closeAll();
       }
     };
     addEventListener("keydown", onKey);
     return () => removeEventListener("keydown", onKey);
-  }, [openSearch]);
+  }, [searching, openSearch, closeAll, play]);
 
   // search lists the pages and every component (name or category); the filter narrows components to its categories
   const needle = query.trim().toLowerCase();
@@ -140,8 +158,14 @@ export function Notch() {
     if (slug && u.pathname === pathname) openSheet(slug, null);
     else router.push(href);
   };
-  // a category chip toggles that category; "All" clears them. Only the URL changes, nothing navigates.
-  const toggle = (c: string) => setActive(c === "All" ? [] : active.includes(c) ? active.filter((x) => x !== c) : [...active, c]);
+  // a category chip toggles that category; "All" clears them. On /components only the URL changes; elsewhere the first
+  // toggle goes to /components with the filter, and the search bar comes along.
+  const toggle = (c: string) => {
+    const next = c === "All" ? [] : active.includes(c) ? active.filter((x) => x !== c) : [...active, c];
+    if (pathname === "/components") return setActive(next);
+    handOffSearch();
+    router.push(next.length ? `/components?cat=${next.map(categorySlug).join(",")}` : "/components");
+  };
 
   const width = searching ? Math.min(560, vw - 32) : vw >= 640 ? NOTCH_W : 250;
   const t = reduce ? { duration: 0 } : SPRING;
@@ -187,7 +211,9 @@ export function Notch() {
               role="search"
               onSubmit={(e) => {
                 e.preventDefault();
-                if (matches[0]) go(matches[0].href);
+                if (!matches[0]) return;
+                play("navigate"); // Enter picks the first result, like a click on it (which data-cuelume-navigate covers)
+                go(matches[0].href);
               }}
             >
               <div className="flex items-center gap-2 rounded-full px-4 focus-within:outline-2 focus-within:-outline-offset-2 focus-within:outline-white/50" style={{ height: ROW_H }}>
