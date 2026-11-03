@@ -1,5 +1,5 @@
 import { ArrowRight } from "lucide-react";
-import { GradientCat } from "@/components/gallery/gradient-cat";
+import { PurrCat } from "@/components/gallery/purr-cat";
 import { RotatingInstall } from "@/components/gallery/rotating-install";
 import { RollButton as Button } from "@/registry/roll-button/roll-button";
 import { sectionClasses } from "@/lib/layout-classes";
@@ -30,7 +30,7 @@ export function HeroSection() {
           <i className="star" style={{ left: "73.3%", top: "48.6%", width: 2, height: 2, animationDelay: "-9.8s" }} />
           <i className="star star-tw" style={{ left: "38.4%", top: "39.9%", width: 1, height: 1, animationDelay: "-10.5s" }} />
         </div>
-        <GradientCat />
+        <PurrCat />
       </div>
       <p style={{ "--d": "300ms" } as React.CSSProperties} className="intro-item max-w-[46ch] text-lg text-muted-foreground">React components that wiggle, stretch and snap back. Each one is a single file you can copy, paste and play with.</p>
       <div style={{ "--d": "450ms" } as React.CSSProperties} className="intro-item mt-8 flex w-full max-w-3xl flex-wrap items-center justify-center gap-3">

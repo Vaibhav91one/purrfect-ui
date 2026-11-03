@@ -47,7 +47,7 @@ All sound goes through `lib/sound.ts` (Cuelume) and `useSound()` from `component
 - Plain click: add `data-cuelume-tap | toggle | open | close | navigate | select | type` to the element.
 - Outcome: `play("success", { emphasis: "subtle" })` after the thing actually worked (the copy button does this).
 - Sound is on by default, off when `localStorage.sound === "off"`; audio is locked until the first gesture, so never rely on a sound playing before a click or key press.
-- Currently wired: notch, hero Browse link, every `CopyButton`. See the table in `README.md` and update it when adding cues.
+- Currently wired: notch, hero Browse link, every `CopyButton`, the three cats (a soft `purr(ms)` from `useSound()`, synthesized in `lib/cat-sounds.ts`). See the table in `README.md` and update it when adding cues.
 
 ## Toasts
 
@@ -55,7 +55,7 @@ One shared `<Toaster />` (`components/ui/sonner.tsx`, shadcn's sonner wrapper th
 
 ## The cat
 
-`gallery/gradient-cat.tsx` is the mascot: each part is drawn twice (a fattened outline copy and a white copy inside a `<mask>`), gradient blobs spin inside the mask, head follows the cursor. The hero uses the sitting cat; the notch uses it (`notch/notch-cat.tsx`) with a new colour variant (`cat-variants.ts`) every time it ducks out and returns. Parked and unwired for now: `hero-cat.tsx` + `walking-cat.tsx` (walk-in), `purr-cat.tsx` + `motion-lines.tsx` (click lines), `lib/cat-sounds.ts` (purr/meow/steps). They are untracked files, so do not delete them without asking.
+`gallery/gradient-cat.tsx` is the mascot: each part is drawn twice (a fattened outline copy and a white copy inside a `<mask>`), gradient blobs spin inside the mask, head follows the cursor. The hero uses the sitting cat as `purr-cat.tsx` (a button: click to pet, a slow blink and a purr); the notch uses it (`notch/notch-cat.tsx`, tap for a blink and a quiet purr) with a new colour variant (`cat-variants.ts`) every time it ducks out and returns; `/components` has the sleeping cat (`sleeping-cat.tsx`, `purrOnClick`: click wakes it and it purrs). The cat sounds live in `lib/cat-sounds.ts` and reach components only through `useSound()` (`purr(ms)`). Parked and unwired for now: `hero-cat.tsx` + `walking-cat.tsx` (walk-in), `motion-lines.tsx` and `step()` in `cat-sounds.ts`. Do not delete them without asking.
 
 ## Site clips ("In the wild")
 

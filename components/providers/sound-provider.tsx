@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useSyncExternalStore, type ReactNode } from "react";
-import { sound, type Cue, type CueOptions } from "@/lib/sound";
+import { purr, sound, type Cue, type CueOptions } from "@/lib/sound";
 
 const KEY = "sound";
 const HOVER_TARGETS = 'a[href], button, [role="button"], [role="tab"], [role="switch"], [data-cuelume-hover]';
@@ -24,7 +24,7 @@ const subscribe = (cb: () => void) => {
   };
 };
 
-type SoundContext = { enabled: boolean; toggle: () => void; play: (cue: Cue, options?: CueOptions) => void };
+type SoundContext = { enabled: boolean; toggle: () => void; play: (cue: Cue, options?: CueOptions) => void; purr: (ms: number, opts?: { gain?: number }) => void };
 const Ctx = createContext<SoundContext | null>(null);
 
 /** Sound is on by default; browsers keep audio locked until the first gesture, so the first pointerdown unlocks it. */
@@ -74,7 +74,11 @@ export function SoundProvider({ children }: { children: ReactNode }) {
     if (next) sound.play("tap"); // a click to confirm sound is back
   }, []);
 
-  const value = useMemo<SoundContext>(() => ({ enabled, toggle, play: (cue, options) => sound.play(cue, options) }), [enabled, toggle]);
+  // the cat purr bypasses Cuelume, so it checks the on/off setting here; call it from a click (audio unlocks on a gesture)
+  const value = useMemo<SoundContext>(
+    () => ({ enabled, toggle, play: (cue, options) => sound.play(cue, options), purr: (ms, opts) => void (enabled && purr(ms, opts)) }),
+    [enabled, toggle],
+  );
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }
 

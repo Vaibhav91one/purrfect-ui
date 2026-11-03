@@ -112,8 +112,11 @@ Where sound is wired today:
 | Notch theme and sound toggles | `toggle`, `tap` |
 | Hero "Browse components" link | `navigate` (`data-cuelume-navigate`) |
 | Copy buttons (the whole hero install pill, path view, component sheet) | `success`, subtle, only after the copy worked |
+| Hero cat, click to pet | `purr(1600)` and a slow blink (`lib/cat-sounds.ts`) |
+| Sleeping cat on /components, click to wake | `purr(1200)` (hover wakes it silently) |
+| Notch cat, tap | a quieter `purr(900)` and a slow blink, not while it is ducked out |
 
-Pick the cue that matches the action (copy = `success` subtle, route change = `navigate`, switch = `toggle`). Cat sounds (purr, meow, steps) are parked in `lib/cat-sounds.ts`, not wired in.
+Pick the cue that matches the action (copy = `success` subtle, route change = `navigate`, switch = `toggle`). Cat sounds are synthesized in `lib/cat-sounds.ts`, re-exported from `lib/sound.ts`, and played through `useSound()`'s `purr(ms, opts?)`, which stays silent when sound is off.
 
 ### Toasts
 

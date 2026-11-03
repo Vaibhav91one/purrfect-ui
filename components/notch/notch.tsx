@@ -18,6 +18,8 @@ import { ThemeToggle } from "./theme-toggle";
 
 const HOVER_IN_MS = 80;
 const HOVER_OUT_MS = 260;
+// the notch cat is its own button (tap to say hi): hovering or focusing it does not pop the menu
+const onCat = (el: EventTarget | null) => !!(el as Element | null)?.closest?.("[data-notch-cat]");
 const ROW_H = 48;
 const NOTCH_W = 340; // collapsed width from `sm` up
 
@@ -179,7 +181,11 @@ export function Notch() {
         onPointerEnter={(e) => {
           if (e.pointerType !== "mouse" || searching) return;
           hovered.current = true;
-          schedule(true, HOVER_IN_MS);
+          if (!onCat(e.target)) schedule(true, HOVER_IN_MS);
+        }}
+        onPointerOver={(e) => {
+          // came in over the cat (which says hi instead of popping the menu) and moved on: now it pops
+          if (e.pointerType === "mouse" && !searching && onCat(e.relatedTarget) && !onCat(e.target)) schedule(true, HOVER_IN_MS);
         }}
         onPointerLeave={(e) => {
           if (e.pointerType !== "mouse") return;
@@ -187,8 +193,8 @@ export function Notch() {
           if (root.current?.contains(document.activeElement) && document.activeElement !== document.body) return;
           schedule(false, HOVER_OUT_MS);
         }}
-        onFocus={() => {
-          if (!ignoreFocus.current && !searching) schedule(true, 0);
+        onFocus={(e) => {
+          if (!ignoreFocus.current && !searching && !onCat(e.target)) schedule(true, 0);
         }}
         onBlur={(e) => {
           if (!root.current?.contains(e.relatedTarget as Node) && !hovered.current) schedule(false, 120);

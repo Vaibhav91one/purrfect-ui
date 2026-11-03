@@ -11,7 +11,8 @@ import { EYES, VARIANTS } from "./cat-variants";
 // shared spring below.
 const { TAIL, BODY, PAWS, HEAD, TAIL_PIVOT, NECK, BLOB_AT } = SITTING;
 
-export function GradientCat({ className = "h-44 sm:h-56", outlineClass = "text-foreground", variant = 0 }: { className?: string; outlineClass?: string; variant?: number }) {
+/** `blink`: bump the number to make the cat blink slowly at you once (a content cat's blink). */
+export function GradientCat({ className = "h-44 sm:h-56", outlineClass = "text-foreground", variant = 0, blink = 0 }: { className?: string; outlineClass?: string; variant?: number; blink?: number }) {
   const look = VARIANTS[variant % VARIANTS.length];
   const eye = EYES[look.eye];
   const uid = useId().replace(/:/g, ""); // each cat needs its own mask and filter ids
@@ -33,6 +34,15 @@ export function GradientCat({ className = "h-44 sm:h-56", outlineClass = "text-f
     addEventListener("pointermove", move);
     return () => { off(); removeEventListener("pointermove", move); };
   }, [reduce, turn]);
+
+  // the slow blink: close ~150ms, hold, open ~250ms; every eye copy blinks together. Reduced motion: a quick fade instead.
+  useEffect(() => {
+    if (!blink) return;
+    const eyes = svg.current?.querySelectorAll<SVGPathElement>(".cat-blink");
+    const easing = "cubic-bezier(0.23, 1, 0.32, 1)"; // per keyframe, so each step (close, open) eases out on its own
+    const frames = reduce ? { opacity: [1, 0.35, 1], easing } : { scale: ["1 1", "1 0.1", "1 0.1", "1 1"], offset: [0, 0.3, 0.5, 1], easing };
+    eyes?.forEach((e) => e.animate(frames, reduce ? 240 : 500));
+  }, [blink, reduce]);
 
   const head = (fill: boolean) => (
     <g data-head style={{ transformOrigin: NECK }}>

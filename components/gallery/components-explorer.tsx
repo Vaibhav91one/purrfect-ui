@@ -31,7 +31,7 @@ function Explorer({ active, category, reduce }: { active: string[]; category?: s
       <header className="flex min-h-[70svh] flex-col items-center justify-center pt-24 pb-12 text-center md:pt-32">
         <h1 className="pb-1 text-5xl font-light tracking-[-0.05em] sm:text-7xl lg:text-8xl">{category ? `${category} components` : "Components"}</h1>
         <div className="mt-8 grid h-24 place-items-center sm:h-32">
-          <SleepingCat />
+          <SleepingCat purrOnClick />
         </div>
         <div className="mt-6 max-w-[28ch] md:max-w-3xl">
           <ScrollReveal text="Every component is a single file. Open one to tweak it live, then install it with one command." className="text-xl font-light tracking-tight text-muted-foreground md:text-3xl" offset={["start 0.95", "start 0.55"]} />

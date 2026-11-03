@@ -1,18 +1,16 @@
-// Not wired in for now: the cat purr/meow/step sounds are parked until they get another pass.
 // Cat sounds, all synthesized with Web Audio (no audio files). Tune by ear with the constants below.
-const RUMBLE_HZ = 25; // purr: how fast the rumble pulses
-const CUTOFF_HZ = 240; // purr: brightness
-const HUM_HZ = 110;
-const FADE = 0.15; // seconds
-const PEAK = 0.55;
-const MEOW_GAIN = 0.35;
+const RUMBLE_HZ = 24; // purr: how fast the rumble pulses (a real purr is ~22-26Hz)
+const RUMBLE_DEPTH = 0.4; // purr: gain swings between 1 - 2*depth and 1
+const CUTOFF_HZ = 180; // purr: warmth (lower = darker)
+const PURR_GAIN = 0.15; // purr: peak level
+const FADE_IN = 0.25; // seconds
+const FADE_OUT = 0.5; // seconds
 const STEP_GAIN = 0.16;
-const PURR_DELAY = 0.45; // seconds between the meow and the purr starting
 
 let ctx: AudioContext | null = null;
 let stopCurrent: (() => void) | null = null;
 
-/** Browsers keep audio locked until a gesture, so the context is only created from one (and only then can steps/meows play). */
+/** Browsers keep audio locked until a gesture, so the context is only created from one (and only then can steps and purrs play). */
 export function primeAudio() {
   ctx ??= new AudioContext();
   void ctx.resume();
@@ -40,110 +38,62 @@ export function step() {
   src.start(now);
 }
 
-/** A meow: a sawtooth that swoops up and down, shaped by two moving vowel-like filters. */
-export function meow() {
-  const c = ready();
-  if (!c) return;
-  const now = c.currentTime;
-  const dur = 0.6;
-  const osc = c.createOscillator();
-  osc.type = "sawtooth";
-  osc.frequency.setValueAtTime(480, now);
-  osc.frequency.linearRampToValueAtTime(820, now + dur * 0.35);
-  osc.frequency.linearRampToValueAtTime(520, now + dur);
-  const vib = c.createOscillator();
-  vib.frequency.value = 6;
-  const vibDepth = c.createGain();
-  vibDepth.gain.value = 9;
-  vib.connect(vibDepth).connect(osc.frequency);
-
-  const f1 = c.createBiquadFilter();
-  f1.type = "bandpass";
-  f1.Q.value = 5;
-  f1.frequency.setValueAtTime(650, now);
-  f1.frequency.linearRampToValueAtTime(1000, now + dur * 0.4);
-  f1.frequency.linearRampToValueAtTime(700, now + dur);
-  const f2 = c.createBiquadFilter();
-  f2.type = "bandpass";
-  f2.Q.value = 7;
-  f2.frequency.setValueAtTime(1500, now);
-  f2.frequency.linearRampToValueAtTime(2100, now + dur * 0.4);
-  f2.frequency.linearRampToValueAtTime(1600, now + dur);
-
-  const g = c.createGain();
-  g.gain.setValueAtTime(0, now);
-  g.gain.linearRampToValueAtTime(MEOW_GAIN, now + 0.07);
-  g.gain.linearRampToValueAtTime(MEOW_GAIN * 0.8, now + dur * 0.6);
-  g.gain.linearRampToValueAtTime(0, now + dur);
-  osc.connect(f1).connect(g);
-  osc.connect(f2).connect(g);
-  g.connect(c.destination);
-  [osc, vib].forEach((n) => {
-    n.start(now);
-    n.stop(now + dur + 0.05);
-  });
-}
-
-/** Starts a purr that lasts `ms`, beginning `delay` seconds from now. Returns a function that ends it early. */
-export function startPurr(ms: number, delay = 0) {
+/**
+ * A soft purr lasting `ms`: lowpassed brown noise pulsing at RUMBLE_HZ, swelling once or twice like breathing in and
+ * out, with exponential fades so it never clicks. A new purr fades the previous one out first. Call from a click.
+ */
+export function purr(ms: number, { gain = PURR_GAIN }: { gain?: number } = {}) {
   stopCurrent?.();
   const c = primeAudio();
-  const now = c.currentTime + delay;
-  const end = now + ms / 1000;
+  const now = c.currentTime + 0.01;
+  const dur = ms / 1000;
 
-  // brown noise: each sample drifts a little from the last
-  const buf = c.createBuffer(1, c.sampleRate * 2, c.sampleRate);
+  // brown noise (each sample drifts a little from the last), long enough not to loop, normalised to an RMS of 0.4
+  // so every purr is about as loud (peaks land around PURR_GAIN)
+  const buf = c.createBuffer(1, Math.ceil(c.sampleRate * (dur + 0.3)), c.sampleRate);
   const data = buf.getChannelData(0);
   let last = 0;
-  for (let i = 0; i < data.length; i++) data[i] = last = (last + 0.02 * (Math.random() * 2 - 1)) / 1.02;
+  let sum = 0;
+  for (let i = 0; i < data.length; i++) sum += (data[i] = last = (last + 0.02 * (Math.random() * 2 - 1)) / 1.02) ** 2;
+  const k = 0.4 / Math.sqrt(sum / data.length);
+  for (let i = 0; i < data.length; i++) data[i] *= k;
   const noise = c.createBufferSource();
   noise.buffer = buf;
-  noise.loop = true;
   const low = c.createBiquadFilter();
   low.type = "lowpass";
   low.frequency.value = CUTOFF_HZ;
+  low.Q.value = 0.7;
 
-  // the rumble: a gain that swings between 0.35 and 1 at RUMBLE_HZ
-  const wobble = c.createGain();
-  wobble.gain.value = 0.65;
+  // the rumble: a gain that swings with a sine at RUMBLE_HZ
+  const rumble = c.createGain();
+  rumble.gain.value = 1 - RUMBLE_DEPTH;
   const lfo = c.createOscillator();
   lfo.frequency.value = RUMBLE_HZ;
   const depth = c.createGain();
-  depth.gain.value = 0.35;
-  lfo.connect(depth).connect(wobble.gain);
+  depth.gain.value = RUMBLE_DEPTH;
+  lfo.connect(depth).connect(rumble.gain);
 
-  const hum = c.createOscillator();
-  hum.frequency.value = HUM_HZ;
-  const humGain = c.createGain();
-  humGain.gain.value = 0.05;
+  // breathing: one swell (short purrs) or two (inhale, exhale), times exponential fade in and out, from 0 back to 0
+  const swells = dur >= 1.4 ? 2 : 1;
+  const curve = new Float32Array(Math.ceil(dur * 200));
+  for (let i = 0; i < curve.length; i++) {
+    const t = (i / (curve.length - 1)) * dur;
+    const fade = (1 - Math.exp((-3 * t) / FADE_IN)) * (1 - Math.exp((-3 * (dur - t)) / FADE_OUT)) / (1 - Math.exp(-3));
+    curve[i] = gain * Math.min(1, fade) * (0.6 + 0.4 * Math.sin((Math.PI * swells * t) / dur) ** 2);
+  }
+  curve[curve.length - 1] = 0;
+  const breath = c.createGain();
+  breath.gain.value = 0;
+  breath.gain.setValueCurveAtTime(curve, now, dur);
+  const out = c.createGain(); // a separate gain for stopping early, so the breathing curve never has to be cancelled
 
-  const master = c.createGain();
-  master.gain.setValueAtTime(0, now);
-  master.gain.linearRampToValueAtTime(PEAK, now + FADE);
-  master.gain.setValueAtTime(PEAK, end - FADE);
-  master.gain.linearRampToValueAtTime(0, end);
-
-  noise.connect(low).connect(wobble).connect(master);
-  hum.connect(humGain).connect(master);
-  master.connect(c.destination);
-  const nodes = [noise, lfo, hum];
-  nodes.forEach((n) => n.start(now));
-  nodes.forEach((n) => n.stop(end + 0.05));
+  noise.connect(low).connect(rumble).connect(breath).connect(out).connect(c.destination);
+  [noise, lfo].forEach((n) => (n.start(now), n.stop(now + dur + 0.05)));
 
   const stop = () => {
-    master.gain.cancelScheduledValues(c.currentTime);
-    master.gain.setValueAtTime(master.gain.value, c.currentTime);
-    master.gain.linearRampToValueAtTime(0, c.currentTime + 0.1);
-    nodes.forEach((n) => n.stop(c.currentTime + 0.12));
+    out.gain.setTargetAtTime(0, c.currentTime, 0.02);
+    [noise, lfo].forEach((n) => n.stop(c.currentTime + 0.15));
     if (stopCurrent === stop) stopCurrent = null;
   };
   stopCurrent = stop;
-  return stop;
-}
-
-/** Petting the cat: a meow, then the purr. Call from a click. */
-export function pet(ms: number) {
-  primeAudio();
-  meow();
-  return startPurr(ms, PURR_DELAY);
 }

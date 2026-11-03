@@ -1,32 +1,24 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
+import { useSound } from "@/components/providers/sound-provider";
 import { GradientCat } from "./gradient-cat";
-import { MotionLines } from "./motion-lines";
 
-const PURR_MS = 2600;
+const PURR_MS = 1600;
 
-/**
- * The gradient cat as a button: click to pet it and comic-style motion lines pulse around it for a moment.
- * `lines` turns the lines on from outside (for example when the hero cat arrives). Sound is parked in lib/cat-sounds.ts.
- */
-export function PurrCat({ className, outlineClass, variant, lines = false, onPurr }: { className?: string; outlineClass?: string; variant?: number; lines?: boolean; onPurr?: (on: boolean) => void }) {
-  const [purring, setPurring] = useState(false);
-  const timer = useRef<ReturnType<typeof setTimeout>>(undefined);
-
-  useEffect(() => () => clearTimeout(timer.current), []);
+/** The gradient cat as a button: click to pet it, and it blinks slowly at you and purrs softly. */
+export function PurrCat({ className, outlineClass, variant }: { className?: string; outlineClass?: string; variant?: number }) {
+  const [blink, setBlink] = useState(0);
+  const { purr } = useSound();
 
   const onClick = () => {
-    clearTimeout(timer.current);
-    setPurring(true);
-    onPurr?.(true);
-    timer.current = setTimeout(() => (setPurring(false), onPurr?.(false)), PURR_MS);
+    setBlink((b) => b + 1);
+    purr(PURR_MS);
   };
 
   return (
-    <button type="button" onClick={onClick} aria-label="Pet the cat" className="relative inline-grid cursor-pointer place-items-center rounded-full focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent">
-      <MotionLines active={purring || lines} />
-      <GradientCat className={className} outlineClass={outlineClass} variant={variant} />
+    <button type="button" onClick={onClick} aria-label="Pet the cat" data-hover-sound="off" className="relative inline-grid cursor-pointer place-items-center rounded-full focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent">
+      <GradientCat className={className} outlineClass={outlineClass} variant={variant} blink={blink} />
     </button>
   );
 }
