@@ -145,6 +145,7 @@ export function Notch() {
 
   const width = searching ? Math.min(560, vw - 32) : vw >= 640 ? NOTCH_W : 250;
   const t = reduce ? { duration: 0 } : SPRING;
+  const fade = { duration: FAST, ease: EASE };
 
   return (
     <div
@@ -311,22 +312,37 @@ export function Notch() {
                 >
                   <Search className="size-4" />
                   <span className="hidden sm:inline">Search</span>
-                  <AnimatePresence initial={false}>
-                    {active.length > 0 && (
-                      <motion.span
-                        key="count"
-                        initial={{ opacity: 0, scale: reduce ? 1 : 0.6 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: reduce ? 1 : 0.6 }}
-                        transition={{ duration: FAST, ease: EASE }}
-                        className="grid h-4 min-w-4 place-items-center rounded-full bg-white px-1 text-[11px] leading-none font-medium text-black tabular-nums"
-                      >
-                        {active.length}
-                      </motion.span>
-                    )}
-                  </AnimatePresence>
-                  {/* the badge takes the shortcut's place, so the notch keeps its width */}
-                  {!active.length && <kbd className="hidden rounded bg-white/10 px-1.5 text-[11px] text-white/60 sm:inline">⌘K</kbd>}
+                  {/* the badge and the shortcut share one cell and crossfade, so the pill keeps its width; on a phone (no
+                      shortcut) the cell folds away instead */}
+                  <motion.span
+                    initial={false}
+                    animate={{ width: active.length || vw >= 640 ? "auto" : 0, marginLeft: active.length || vw >= 640 ? 0 : -8 }}
+                    transition={fade}
+                    className="grid place-items-center"
+                  >
+                    <AnimatePresence initial={false}>
+                      {active.length > 0 && (
+                        <motion.span
+                          key="count"
+                          initial={{ opacity: 0, scale: reduce ? 1 : 0.6 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          exit={{ opacity: 0, scale: reduce ? 1 : 0.6 }}
+                          transition={fade}
+                          className="col-start-1 row-start-1 grid h-4 min-w-4 place-items-center rounded-full bg-white px-1 text-[11px] leading-none font-medium text-black tabular-nums"
+                        >
+                          {active.length}
+                        </motion.span>
+                      )}
+                    </AnimatePresence>
+                    <motion.kbd
+                      initial={false}
+                      animate={{ opacity: active.length ? 0 : 1, scale: active.length && !reduce ? 0.8 : 1 }}
+                      transition={fade}
+                      className="col-start-1 row-start-1 hidden rounded bg-white/10 px-1.5 text-[11px] text-white/60 sm:inline"
+                    >
+                      ⌘K
+                    </motion.kbd>
+                  </motion.span>
                 </button>
                 <AnimatePresence initial={false}>
                   {active.length > 0 && (
@@ -337,15 +353,16 @@ export function Notch() {
                       onClick={() => {
                         quiet();
                         setActive([]);
-                        trigger.current?.focus(); // the button unmounts, so focus needs somewhere to go
+                        trigger.current?.focus({ preventScroll: true }); // the button unmounts, so focus needs somewhere to go
                       }}
                       aria-label="Clear filters"
                       data-cuelume-close
-                      initial={{ opacity: 0, scale: reduce ? 1 : 0.6 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: reduce ? 1 : 0.6 }}
-                      transition={{ duration: FAST, ease: EASE }}
-                      className="grid size-5 shrink-0 place-items-center rounded-full text-white/60 transition-colors hover:bg-white/10 hover:text-white focus-visible:outline-2 focus-visible:outline-white"
+                      // it folds its width too, so the pill slides over instead of jumping
+                      initial={{ opacity: 0, scale: reduce ? 1 : 0.6, width: 0, marginLeft: -2 }}
+                      animate={{ opacity: 1, scale: 1, width: 20, marginLeft: 0 }}
+                      exit={{ opacity: 0, scale: reduce ? 1 : 0.6, width: 0, marginLeft: -2 }}
+                      transition={fade}
+                      className="grid h-5 shrink-0 overflow-hidden place-items-center rounded-full text-white/60 transition-colors hover:bg-white/10 hover:text-white focus-visible:outline-2 focus-visible:outline-white"
                     >
                       <X className="size-3.5" />
                     </motion.button>

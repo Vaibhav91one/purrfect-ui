@@ -1,6 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
+import { useDeferredValue, useMemo } from "react";
 import { COMPONENTS } from "@/lib/components-data";
 import { EASE, FAST, SPRING } from "@/lib/motion";
 import { ScrollReveal } from "@/registry/scroll-reveal/scroll-reveal";
@@ -14,8 +15,14 @@ import { SheetHost, useCategoryFilter } from "./use-sheet";
  * notch search's category chips (`?cat=`) filter the grid in place: cards slide to their new spots, the rest pop out.
  */
 export function ComponentsExplorer({ category }: { category?: string }) {
-  const [active] = useCategoryFilter();
+  // deferred and memoised: re-rendering a grid of live cards is heavy, and the notch's own animation must get its frames
+  // first (the urgent render bails out here; the grid catches up in a background render)
+  const active = useDeferredValue(useCategoryFilter()[0]);
   const reduce = useReducedMotion();
+  return useMemo(() => <Explorer active={active} category={category} reduce={!!reduce} />, [active, category, reduce]);
+}
+
+function Explorer({ active, category, reduce }: { active: string[]; category?: string; reduce: boolean }) {
   const items = category ? COMPONENTS.filter((c) => c.category === category) : active.length ? COMPONENTS.filter((c) => active.includes(c.category)) : COMPONENTS;
   // reduced motion: no sliding, a quick fade only (props, not markup, so the server HTML is the same)
   const pop = reduce ? { opacity: 0 } : { opacity: 0, scale: 0.9 };
