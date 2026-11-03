@@ -158,8 +158,8 @@ export function Notch() {
     if (slug && u.pathname === pathname) openSheet(slug, null);
     else router.push(href);
   };
-  // a category chip toggles that category; "All" clears them. On /components only the URL changes; elsewhere the first
-  // toggle goes to /components with the filter, and the search bar comes along.
+  // a category chip toggles that category; "All" clears them (pressed only on /components). On /components only the URL
+  // changes; elsewhere the first toggle goes to /components with the filter, and the search bar comes along.
   const toggle = (c: string) => {
     const next = c === "All" ? [] : active.includes(c) ? active.filter((x) => x !== c) : [...active, c];
     if (pathname === "/components") return setActive(next);
@@ -267,7 +267,7 @@ export function Notch() {
                   <button
                     key={c}
                     type="button"
-                    aria-pressed={c === "All" ? !active.length : active.includes(c)}
+                    aria-pressed={c === "All" ? pathname === "/components" && !active.length : active.includes(c)}
                     onClick={(e) => {
                       toggle(c);
                       e.currentTarget.scrollIntoView({ inline: "center", block: "nearest" });
