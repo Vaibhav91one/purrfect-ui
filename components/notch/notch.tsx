@@ -6,8 +6,9 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { FAST, SPRING } from "@/lib/motion";
+import { openSheet } from "@/components/gallery/use-sheet";
 import { useSound } from "@/components/providers/sound-provider";
-import { CATEGORIES, COMPONENTS } from "@/lib/components-data";
+import { CATEGORIES, COMPONENTS, categorySlug } from "@/lib/components-data";
 import { NAV_LINKS } from "@/lib/site";
 import { NotchCat } from "./notch-cat";
 import { GithubStars } from "./github-stars";
@@ -30,6 +31,9 @@ const subscribeResize = (cb: () => void) => {
   addEventListener("resize", cb);
   return () => removeEventListener("resize", cb);
 };
+// every page mounts its own notch, so a category chip (which navigates) hands the open search bar to the next one
+let keepSearching = false;
+
 const useViewportWidth = () => useSyncExternalStore(subscribeResize, () => innerWidth, () => 1280);
 
 /**
@@ -44,9 +48,11 @@ export function Notch() {
   const router = useRouter();
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
-  const [searching, setSearching] = useState(false);
+  const [searching, setSearching] = useState(() => keepSearching);
   const [query, setQuery] = useState("");
-  const [filter, setFilter] = useState("All"); // category filter in the search bar
+  // the category filter lives in the URL, so it filters /components and outlasts the search bar
+  const active = CATEGORIES.find((c) => pathname === `/components/category/${categorySlug(c)}`);
+  const filter = active ?? "All";
 
   const root = useRef<HTMLDivElement>(null);
   const trigger = useRef<HTMLButtonElement>(null);
@@ -72,7 +78,6 @@ export function Notch() {
     setOpen(false);
     setSearching(false);
     setQuery("");
-    setFilter("All");
   }, []);
 
   const openSearch = useCallback(() => {
@@ -80,6 +85,14 @@ export function Notch() {
     setOpen(false);
     setSearching(true);
   }, []);
+
+  // take over the search bar from the previous page's notch; tuck ours away when this page is hidden (cacheComponents keeps it)
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- a page cacheComponents brings back keeps its old state
+    if (keepSearching) setSearching(true);
+    setTimeout(() => (keepSearching = false)); // a tick later: Strict Mode runs this twice
+    return closeAll;
+  }, [closeAll]);
 
   // sound on pop and tuck (never on first render)
   useEffect(() => {
@@ -125,7 +138,7 @@ export function Notch() {
   const pages: Row[] = filter === "All" ? NAV_LINKS.filter((l) => l.label.toLowerCase().includes(needle)).map((l) => ({ label: l.label, href: l.href, Icon: NAV_ICONS[l.label] })) : [];
   const comps: Row[] = COMPONENTS.filter((c) => (filter === "All" || c.category === filter) && (!needle || `${c.name} ${c.category}`.toLowerCase().includes(needle))).map((c) => ({
     label: c.name,
-    href: `/components?c=${c.slug}`,
+    href: `${active ? `/components/category/${categorySlug(active)}` : "/components"}?c=${c.slug}`,
     Icon: Boxes,
     tag: c.category,
   }));
@@ -133,7 +146,14 @@ export function Notch() {
   const go = (href: string) => {
     quiet();
     closeAll();
-    router.push(href);
+    // same page: SheetHost only hears openSheet, not a router push of ?c=
+    const [path, slug] = href.split("?c=");
+    if (slug && path === pathname) openSheet(slug, null);
+    else router.push(href);
+  };
+  const setFilter = (c: string) => {
+    keepSearching = true;
+    router.push(c === "All" ? "/components" : `/components/category/${categorySlug(c)}`);
   };
 
   const width = searching ? Math.min(560, vw - 32) : vw >= 640 ? NOTCH_W : 250;
@@ -184,11 +204,26 @@ export function Notch() {
             >
               <div className="flex items-center gap-2 rounded-full px-4 focus-within:outline-2 focus-within:-outline-offset-2 focus-within:outline-white/50" style={{ height: ROW_H }}>
                 <Search className="size-4 shrink-0 text-white/60" />
+                {active && (
+                  <button
+                    type="button"
+                    onClick={() => setFilter("All")}
+                    aria-label={`Remove ${active} filter`}
+                    data-cuelume-close
+                    className={`${chip} flex shrink-0 items-center gap-1 pr-2 whitespace-nowrap bg-white! text-black! hover:bg-white/85!`}
+                  >
+                    {active}
+                    <X className="size-3.5" />
+                  </button>
+                )}
                 <input
                   autoFocus
                   data-cuelume-type
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Backspace" && !query && active) setFilter("All");
+                  }}
                   placeholder="Search…"
                   aria-label="Search"
                   className="min-w-0 flex-1 bg-transparent text-sm text-white outline-none placeholder:text-white/40"
