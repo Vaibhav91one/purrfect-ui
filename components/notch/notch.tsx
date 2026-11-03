@@ -5,7 +5,7 @@ import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
-import { FAST, SPRING } from "@/lib/motion";
+import { EASE, FAST, SPRING } from "@/lib/motion";
 import { openSheet, useCategoryFilter } from "@/components/gallery/use-sheet";
 import { useSound } from "@/components/providers/sound-provider";
 import { CATEGORIES, COMPONENTS, categorySlug } from "@/lib/components-data";
@@ -301,11 +301,57 @@ export function Notch() {
               >
                 <span className="text-sm font-medium tracking-tight">purrfect ui</span>
               </button>
-              <button type="button" onClick={openSearch} aria-label="Search" data-cuelume-open className={`${notchPill} px-2.5 sm:pr-3 sm:pl-3.5`}>
-                <Search className="size-4" />
-                <span className="hidden sm:inline">Search</span>
-                <kbd className="hidden rounded bg-white/10 px-1.5 text-[11px] text-white/60 sm:inline">⌘K</kbd>
-              </button>
+              <div className="flex items-center gap-0.5">
+                <button
+                  type="button"
+                  onClick={openSearch}
+                  aria-label={active.length ? `Search, ${active.length} filter${active.length > 1 ? "s" : ""}` : "Search"}
+                  data-cuelume-open
+                  className={`${notchPill} px-2.5 sm:pr-3 sm:pl-3.5`}
+                >
+                  <Search className="size-4" />
+                  <span className="hidden sm:inline">Search</span>
+                  <AnimatePresence initial={false}>
+                    {active.length > 0 && (
+                      <motion.span
+                        key="count"
+                        initial={{ opacity: 0, scale: reduce ? 1 : 0.6 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: reduce ? 1 : 0.6 }}
+                        transition={{ duration: FAST, ease: EASE }}
+                        className="grid h-4 min-w-4 place-items-center rounded-full bg-white px-1 text-[11px] leading-none font-medium text-black tabular-nums"
+                      >
+                        {active.length}
+                      </motion.span>
+                    )}
+                  </AnimatePresence>
+                  {/* the badge takes the shortcut's place, so the notch keeps its width */}
+                  {!active.length && <kbd className="hidden rounded bg-white/10 px-1.5 text-[11px] text-white/60 sm:inline">⌘K</kbd>}
+                </button>
+                <AnimatePresence initial={false}>
+                  {active.length > 0 && (
+                    <motion.button
+                      key="clear"
+                      type="button"
+                      onPointerDown={quiet} // a tap focuses it, which must not pop the arc
+                      onClick={() => {
+                        quiet();
+                        setActive([]);
+                        trigger.current?.focus(); // the button unmounts, so focus needs somewhere to go
+                      }}
+                      aria-label="Clear filters"
+                      data-cuelume-close
+                      initial={{ opacity: 0, scale: reduce ? 1 : 0.6 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: reduce ? 1 : 0.6 }}
+                      transition={{ duration: FAST, ease: EASE }}
+                      className="grid size-5 shrink-0 place-items-center rounded-full text-white/60 transition-colors hover:bg-white/10 hover:text-white focus-visible:outline-2 focus-visible:outline-white"
+                    >
+                      <X className="size-3.5" />
+                    </motion.button>
+                  )}
+                </AnimatePresence>
+              </div>
             </div>
           )}
         </motion.nav>
