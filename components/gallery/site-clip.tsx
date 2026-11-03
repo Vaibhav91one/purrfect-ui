@@ -41,7 +41,7 @@ export function SiteClip({ slug, playing = true, speed = 1, hover = false, class
 
   // a parent card drives hover mode (mouse only, so touch keeps the live preview)
   useEffect(() => {
-    const host = ref.current?.closest<HTMLElement>("[role=button]") ?? ref.current?.parentElement; // the whole card, not the padded stage
+    const host = ref.current?.closest<HTMLElement>("[role=button],[data-card]") ?? ref.current?.parentElement; // the whole card, not the padded stage
     if (!hover || !host) return;
     const on = (e: PointerEvent | FocusEvent) => {
       if ("pointerType" in e && e.pointerType !== "mouse") return;
