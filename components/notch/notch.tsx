@@ -5,9 +5,10 @@ import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
-import { FAST, SPRING } from "@/lib/motion";
+import { EASE, FAST, SPRING } from "@/lib/motion";
+import { openSheet, useCategoryFilter } from "@/components/gallery/use-sheet";
 import { useSound } from "@/components/providers/sound-provider";
-import { CATEGORIES, COMPONENTS } from "@/lib/components-data";
+import { CATEGORIES, COMPONENTS, categorySlug } from "@/lib/components-data";
 import { NAV_LINKS } from "@/lib/site";
 import { NotchCat } from "./notch-cat";
 import { GithubStars } from "./github-stars";
@@ -30,6 +31,10 @@ const subscribeResize = (cb: () => void) => {
   addEventListener("resize", cb);
   return () => removeEventListener("resize", cb);
 };
+// every page mounts its own notch, so a chip that navigates to /components hands the open search bar to the next one
+let keepSearching = false;
+const handOffSearch = () => (keepSearching = true);
+
 const useViewportWidth = () => useSyncExternalStore(subscribeResize, () => innerWidth, () => 1280);
 
 /**
@@ -44,9 +49,10 @@ export function Notch() {
   const router = useRouter();
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
-  const [searching, setSearching] = useState(false);
+  const [searching, setSearching] = useState(() => keepSearching);
   const [query, setQuery] = useState("");
-  const [filter, setFilter] = useState("All"); // category filter in the search bar
+  // the category filter lives in the URL (`?cat=`), so it filters the /components grid in place and outlasts the search bar
+  const [active, setActive] = useCategoryFilter();
 
   const root = useRef<HTMLDivElement>(null);
   const trigger = useRef<HTMLButtonElement>(null);
@@ -72,7 +78,6 @@ export function Notch() {
     setOpen(false);
     setSearching(false);
     setQuery("");
-    setFilter("All");
   }, []);
 
   const openSearch = useCallback(() => {
@@ -81,23 +86,35 @@ export function Notch() {
     setSearching(true);
   }, []);
 
+  // take over the search bar from the previous page's notch; tuck ours away when this page is hidden (cacheComponents keeps it)
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- a page cacheComponents brings back keeps its old state
+    if (keepSearching) setSearching(true);
+    setTimeout(() => (keepSearching = false)); // a tick later: Strict Mode runs this twice
+    return closeAll;
+  }, [closeAll]);
+
   // sound on pop and tuck (never on first render)
   useEffect(() => {
     if (open !== wasOpen.current) play(open ? "open" : "close");
     wasOpen.current = open;
   }, [open, play]);
 
-  // Esc and outside pointerdown put everything back
+  // Esc and outside pointerdown put everything back. The effect above only hears the arc, so a closing search bar plays its own cue.
   useEffect(() => {
     if (!open && !searching) return;
+    const dismiss = () => {
+      if (searching) play("close");
+      closeAll();
+    };
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== "Escape") return;
       quiet();
-      closeAll();
+      dismiss();
       trigger.current?.focus();
     };
     const onDown = (e: PointerEvent) => {
-      if (!root.current?.contains(e.target as Node)) closeAll();
+      if (!root.current?.contains(e.target as Node)) dismiss();
     };
     addEventListener("keydown", onKey);
     addEventListener("pointerdown", onDown);
@@ -105,27 +122,29 @@ export function Notch() {
       removeEventListener("keydown", onKey);
       removeEventListener("pointerdown", onDown);
     };
-  }, [open, searching, quiet, closeAll]);
+  }, [open, searching, quiet, closeAll, play]);
 
-  // ⌘K / Ctrl+K opens the search bar
+  // ⌘K / Ctrl+K opens the search bar, and closes it again
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
         e.preventDefault();
-        openSearch();
+        if (!searching) return openSearch();
+        play("close");
+        closeAll();
       }
     };
     addEventListener("keydown", onKey);
     return () => removeEventListener("keydown", onKey);
-  }, [openSearch]);
+  }, [searching, openSearch, closeAll, play]);
 
-  // search lists the pages and every component (name or category); the filter narrows components to one category
+  // search lists the pages and every component (name or category); the filter narrows components to its categories
   const needle = query.trim().toLowerCase();
   type Row = { label: string; href: string; Icon: LucideIcon; tag?: string };
-  const pages: Row[] = filter === "All" ? NAV_LINKS.filter((l) => l.label.toLowerCase().includes(needle)).map((l) => ({ label: l.label, href: l.href, Icon: NAV_ICONS[l.label] })) : [];
-  const comps: Row[] = COMPONENTS.filter((c) => (filter === "All" || c.category === filter) && (!needle || `${c.name} ${c.category}`.toLowerCase().includes(needle))).map((c) => ({
+  const pages: Row[] = !active.length ? NAV_LINKS.filter((l) => l.label.toLowerCase().includes(needle)).map((l) => ({ label: l.label, href: l.href, Icon: NAV_ICONS[l.label] })) : [];
+  const comps: Row[] = COMPONENTS.filter((c) => (!active.length || active.includes(c.category)) && (!needle || `${c.name} ${c.category}`.toLowerCase().includes(needle))).map((c) => ({
     label: c.name,
-    href: `/components?c=${c.slug}`,
+    href: `/components?${active.length ? `cat=${active.map(categorySlug).join(",")}&` : ""}c=${c.slug}`, // the filter carries over
     Icon: Boxes,
     tag: c.category,
   }));
@@ -133,11 +152,24 @@ export function Notch() {
   const go = (href: string) => {
     quiet();
     closeAll();
-    router.push(href);
+    // same page: SheetHost only hears openSheet, not a router push of ?c= (and ?cat= is already in the URL)
+    const u = new URL(href, location.href);
+    const slug = u.searchParams.get("c");
+    if (slug && u.pathname === pathname) openSheet(slug, null);
+    else router.push(href);
+  };
+  // a category chip toggles that category; "All" clears them. On /components only the URL changes; elsewhere the first
+  // toggle goes to /components with the filter, and the search bar comes along.
+  const toggle = (c: string) => {
+    const next = c === "All" ? [] : active.includes(c) ? active.filter((x) => x !== c) : [...active, c];
+    if (pathname === "/components") return setActive(next);
+    handOffSearch();
+    router.push(next.length ? `/components?cat=${next.map(categorySlug).join(",")}` : "/components");
   };
 
   const width = searching ? Math.min(560, vw - 32) : vw >= 640 ? NOTCH_W : 250;
   const t = reduce ? { duration: 0 } : SPRING;
+  const fade = { duration: FAST, ease: EASE };
 
   return (
     <div
@@ -179,19 +211,42 @@ export function Notch() {
               role="search"
               onSubmit={(e) => {
                 e.preventDefault();
-                if (matches[0]) go(matches[0].href);
+                if (!matches[0]) return;
+                play("navigate"); // Enter picks the first result, like a click on it (which data-cuelume-navigate covers)
+                go(matches[0].href);
               }}
             >
               <div className="flex items-center gap-2 rounded-full px-4 focus-within:outline-2 focus-within:-outline-offset-2 focus-within:outline-white/50" style={{ height: ROW_H }}>
                 <Search className="size-4 shrink-0 text-white/60" />
+                {active.length > 0 && (
+                  // the chips scroll sideways once they fill the row; the input always keeps room to type
+                  <div className="flex min-w-0 gap-1 overflow-x-auto [scrollbar-width:none]">
+                    {active.map((c) => (
+                      <button
+                        key={c}
+                        type="button"
+                        onClick={() => toggle(c)}
+                        aria-label={`Remove ${c} filter`}
+                        data-cuelume-close
+                        className={`${chip} flex shrink-0 items-center gap-1 pr-2 whitespace-nowrap bg-white! text-black! hover:bg-white/85!`}
+                      >
+                        {c}
+                        <X className="size-3.5" />
+                      </button>
+                    ))}
+                  </div>
+                )}
                 <input
                   autoFocus
                   data-cuelume-type
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Backspace" && !query && active.length) setActive(active.slice(0, -1));
+                  }}
                   placeholder="Search…"
                   aria-label="Search"
-                  className="min-w-0 flex-1 bg-transparent text-sm text-white outline-none placeholder:text-white/40"
+                  className="min-w-16 flex-1 bg-transparent text-sm text-white outline-none placeholder:text-white/40"
                 />
                 <button
                   type="button"
@@ -212,12 +267,12 @@ export function Notch() {
                   <button
                     key={c}
                     type="button"
-                    aria-pressed={filter === c}
+                    aria-pressed={c === "All" ? !active.length : active.includes(c)}
                     onClick={(e) => {
-                      setFilter(c);
+                      toggle(c);
                       e.currentTarget.scrollIntoView({ inline: "center", block: "nearest" });
                     }}
-                    data-cuelume-tap
+                    data-cuelume-toggle
                     className={`${chip} shrink-0 whitespace-nowrap`}
                   >
                     {c}
@@ -273,11 +328,73 @@ export function Notch() {
               >
                 <span className="text-sm font-medium tracking-tight">purrfect ui</span>
               </button>
-              <button type="button" onClick={openSearch} aria-label="Search" data-cuelume-open className={`${notchPill} px-2.5 sm:pr-3 sm:pl-3.5`}>
-                <Search className="size-4" />
-                <span className="hidden sm:inline">Search</span>
-                <kbd className="hidden rounded bg-white/10 px-1.5 text-[11px] text-white/60 sm:inline">⌘K</kbd>
-              </button>
+              <div className="flex items-center gap-0.5">
+                <button
+                  type="button"
+                  onClick={openSearch}
+                  aria-label={active.length ? `Search, ${active.length} filter${active.length > 1 ? "s" : ""}` : "Search"}
+                  data-cuelume-open
+                  className={`${notchPill} px-2.5 sm:pr-3 sm:pl-3.5`}
+                >
+                  <Search className="size-4" />
+                  <span className="hidden sm:inline">Search</span>
+                  {/* the badge and the shortcut share one cell and crossfade, so the pill keeps its width; on a phone (no
+                      shortcut) the cell folds away instead */}
+                  <motion.span
+                    initial={false}
+                    animate={{ width: active.length || vw >= 640 ? "auto" : 0, marginLeft: active.length || vw >= 640 ? 0 : -8 }}
+                    transition={fade}
+                    className="grid place-items-center"
+                  >
+                    <AnimatePresence initial={false}>
+                      {active.length > 0 && (
+                        <motion.span
+                          key="count"
+                          initial={{ opacity: 0, scale: reduce ? 1 : 0.6 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          exit={{ opacity: 0, scale: reduce ? 1 : 0.6 }}
+                          transition={fade}
+                          className="col-start-1 row-start-1 grid h-4 min-w-4 place-items-center rounded-full bg-white px-1 text-[11px] leading-none font-medium text-black tabular-nums"
+                        >
+                          {active.length}
+                        </motion.span>
+                      )}
+                    </AnimatePresence>
+                    <motion.kbd
+                      initial={false}
+                      animate={{ opacity: active.length ? 0 : 1, scale: active.length && !reduce ? 0.8 : 1 }}
+                      transition={fade}
+                      className="col-start-1 row-start-1 hidden rounded bg-white/10 px-1.5 text-[11px] text-white/60 sm:inline"
+                    >
+                      ⌘K
+                    </motion.kbd>
+                  </motion.span>
+                </button>
+                <AnimatePresence initial={false}>
+                  {active.length > 0 && (
+                    <motion.button
+                      key="clear"
+                      type="button"
+                      onPointerDown={quiet} // a tap focuses it, which must not pop the arc
+                      onClick={() => {
+                        quiet();
+                        setActive([]);
+                        trigger.current?.focus({ preventScroll: true }); // the button unmounts, so focus needs somewhere to go
+                      }}
+                      aria-label="Clear filters"
+                      data-cuelume-close
+                      // it folds its width too, so the pill slides over instead of jumping
+                      initial={{ opacity: 0, scale: reduce ? 1 : 0.6, width: 0, marginLeft: -2 }}
+                      animate={{ opacity: 1, scale: 1, width: 20, marginLeft: 0 }}
+                      exit={{ opacity: 0, scale: reduce ? 1 : 0.6, width: 0, marginLeft: -2 }}
+                      transition={fade}
+                      className="grid h-5 shrink-0 overflow-hidden place-items-center rounded-full text-white/60 transition-colors hover:bg-white/10 hover:text-white focus-visible:outline-2 focus-visible:outline-white"
+                    >
+                      <X className="size-3.5" />
+                    </motion.button>
+                  )}
+                </AnimatePresence>
+              </div>
             </div>
           )}
         </motion.nav>

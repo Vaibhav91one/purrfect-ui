@@ -1,8 +1,8 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useEffect, useSyncExternalStore } from "react";
-import { bySlug } from "@/lib/components-data";
+import { useCallback, useEffect, useMemo, useSyncExternalStore } from "react";
+import { CATEGORIES, bySlug, categorySlug } from "@/lib/components-data";
 
 // the dialog (docs, highlighter, controls) is its own chunk: fetched on idle after load, or when a dialog opens first
 const loadSheet = () => import("./component-sheet");
@@ -48,6 +48,24 @@ export function closeSheet() {
   u.searchParams.delete("c");
   history.replaceState(null, "", u);
   notify();
+}
+
+// The /components category filter lives in the URL too (`?cat=input,text`), written with replaceState: no navigation,
+// no history entry, and `?c=` is left alone (each side edits only its own param of the current URL).
+const readCat = () => new URLSearchParams(location.search).get("cat") ?? "";
+
+/** The active categories (names, in the order they were picked) and a setter; [] on the server. */
+export function useCategoryFilter() {
+  const raw = useSyncExternalStore(subscribe, readCat, () => "");
+  const active = useMemo(() => raw.split(",").flatMap((s) => CATEGORIES.filter((c) => categorySlug(c) === s)), [raw]);
+  const set = useCallback((next: string[]) => {
+    const u = new URL(location.href);
+    if (next.length) u.searchParams.set("cat", next.map(categorySlug).join(","));
+    else u.searchParams.delete("cat");
+    history.replaceState(history.state, "", u.href.replaceAll("%2C", ","));
+    notify();
+  }, []);
+  return [active, set] as const;
 }
 
 /** Mount once per page: renders the dialog for whichever component the URL names. */
