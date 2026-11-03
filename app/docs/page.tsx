@@ -2,7 +2,7 @@ import Link from "next/link";
 import { ProsePage, Snippet } from "@/components/sections/prose-page";
 import { DEFAULT_OG, SITE_URL } from "@/lib/site";
 
-const DESCRIPTION = "Install purrfect ui components with the shadcn CLI, the @purrfectui registry or by copying the source. Sound and reduced motion explained.";
+const DESCRIPTION = "Install purrfect ui components with the shadcn CLI, the @purrfectui registry or by copying the source, plus how sound and reduced motion work.";
 
 export const metadata = {
   title: "Docs",
@@ -14,7 +14,7 @@ export const metadata = {
 
 export default function DocsPage() {
   return (
-    <ProsePage title="Docs" intro="Every component is one file that lands in your codebase. No package to depend on: you own the code and restyle anything.">
+    <ProsePage title="Docs" intro="Every component is one file that goes into your codebase. There is no package to depend on, so you own the code and can restyle any of it.">
       <section>
         <h2>Requirements</h2>
         <p>
@@ -26,7 +26,7 @@ export default function DocsPage() {
         <p>Point the CLI at a component&apos;s registry file:</p>
         <Snippet code={`npx shadcn@latest add ${SITE_URL}/r/roll-button.json`} />
         <p className="mt-4">
-          Swap <code>button</code> for any slug from <Link href="/components">the components page</Link>. Each component page has the command ready to copy, for npm, pnpm, yarn and bun.
+          Swap <code>roll-button</code> for any slug from <Link href="/components">the components page</Link>. Each component page has the command ready to copy, for npm, pnpm, yarn and bun.
         </p>
       </section>
       <section>
@@ -43,7 +43,7 @@ export default function DocsPage() {
       </section>
       <section>
         <h2>Copy the source</h2>
-        <p>Prefer no CLI? Open a component, copy its file from the Code tab and drop it into your project. Install the dependency it imports, usually <code>motion</code>.</p>
+        <p>To skip the CLI, open a component, copy its file from the Code tab and drop it into your project. Install the dependency it imports, usually <code>motion</code>.</p>
       </section>
       <section>
         <h2>Sound</h2>

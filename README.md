@@ -21,7 +21,7 @@
 
 <br />
 
-purrfect ui is a shadcn registry built with Next.js, Tailwind CSS and TypeScript. Every component is animated (Motion, or GSAP for Magnetic, or plain CSS and rAF), honors `prefers-reduced-motion` and installs straight into your codebase. You own the code: no package to depend on, restyle anything. The site itself plays synthesized sound cues; the installed components stay silent. The components are extracted from my own projects (Poinu, Mapinly, Bountydesk, portfolio).
+purrfect ui is a shadcn registry built with Next.js, Tailwind CSS and TypeScript. Every component is animated (Motion, or GSAP for Magnetic, or plain CSS and rAF), honors `prefers-reduced-motion` and installs straight into your codebase. You own the code, so there is no package to depend on and you can restyle anything. The site itself plays synthesized sound cues; the installed components stay silent. The components are extracted from my own projects (Poinu, Mapinly, Bountydesk, portfolio).
 
 ### Requirements
 
@@ -70,7 +70,7 @@ npx shadcn@latest mcp init --client claude
 
 Ask: `add @purrfectui/roll-button`
 
-Not `add roll-button` on its own. That looks in the default shadcn registry.
+Keep the `@purrfectui/` prefix: a bare `add roll-button` looks in the default shadcn registry.
 
 ## Running locally
 
@@ -97,7 +97,7 @@ Next 16: read `node_modules/next/dist/docs/` before relying on older Next APIs (
 
 ### Sound
 
-Every interaction has a cue, synthesized live by [Cuelume](https://www.npmjs.com/package/cuelume) (no audio files). `components/providers/sound-provider.tsx` owns it: on by default, the saved choice lives in `localStorage` (`sound`), and the first pointerdown/keydown unlocks audio (browsers block it before a gesture). `lib/sound.ts` is the only file that imports Cuelume.
+The site's sound cues are synthesized live by [Cuelume](https://www.npmjs.com/package/cuelume) (no audio files). `components/providers/sound-provider.tsx` owns it: on by default, the saved choice lives in `localStorage` (`sound`), and the first pointerdown/keydown unlocks audio (browsers block it before a gesture). `lib/sound.ts` is the only file that imports Cuelume.
 
 Two ways to add a sound:
 
@@ -113,7 +113,7 @@ Where sound is wired today:
 | Hero "Browse components" link | `navigate` (`data-cuelume-navigate`) |
 | Copy buttons (the whole hero install pill, path view, component sheet) | `success`, subtle, only after the copy worked |
 
-Pick the cue by the job (copy = `success` subtle, route change = `navigate`, switch = `toggle`). Cat sounds (purr, meow, steps) are parked in `lib/cat-sounds.ts`, not wired in.
+Pick the cue that matches the action (copy = `success` subtle, route change = `navigate`, switch = `toggle`). Cat sounds (purr, meow, steps) are parked in `lib/cat-sounds.ts`, not wired in.
 
 ### Toasts
 

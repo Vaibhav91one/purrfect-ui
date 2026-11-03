@@ -6,7 +6,7 @@ const initials = (name: string) => name.split(" ").map((w) => w[0]).join("").sli
 export function LovedSection() {
   return (
     <section id="loved" className={`${sectionBaseClasses} scroll-mt-24 px-6 py-20 md:px-8 lg:px-12`}>
-      <h2 className="text-4xl font-light tracking-tight md:text-5xl">Loved by the people who ship</h2>
+      <h2 className="text-4xl font-light tracking-tight md:text-5xl">Loved by people who ship</h2>
       <p className="mt-3 text-muted-foreground">What builders say about purrfect ui.</p>
       <div className="mt-8 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
         {LOVED.map((p) => (

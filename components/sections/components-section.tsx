@@ -23,7 +23,7 @@ export function ComponentsSection() {
     <section id="components" className={`${sectionBaseClasses} scroll-mt-24 px-3 pb-20 md:px-0`}>
       {/* a full screen for the heading; the fill finishes as the text reaches the centre */}
       <div className="grid min-h-svh place-items-center px-6 md:px-8">
-        <ScrollReveal text={`${COMPONENTS.length} interactive components. Each one is a single file. Open it, tweak it, copy it.`} className="mx-auto max-w-5xl text-center text-4xl font-light tracking-tight md:text-6xl" />
+        <ScrollReveal text={`${COMPONENTS.length} interactive components, each one a single file you can open, tweak and copy.`} className="mx-auto max-w-5xl text-center text-4xl font-light tracking-tight md:text-6xl" />
       </div>
       <div className="relative -mt-[calc(50svh-10.5rem)]">
         <ParallaxColumns columns={cols} speeds={[0.12, 0.22, 0.05]} />

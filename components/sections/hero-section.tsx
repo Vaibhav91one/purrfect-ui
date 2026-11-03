@@ -32,7 +32,7 @@ export function HeroSection() {
         </div>
         <GradientCat />
       </div>
-      <p style={{ "--d": "300ms" } as React.CSSProperties} className="intro-item max-w-[46ch] text-lg text-muted-foreground">React components that wiggle, stretch and snap back. One file each. Copy, paste, play.</p>
+      <p style={{ "--d": "300ms" } as React.CSSProperties} className="intro-item max-w-[46ch] text-lg text-muted-foreground">React components that wiggle, stretch and snap back. Each one is a single file you can copy, paste and play with.</p>
       <div style={{ "--d": "450ms" } as React.CSSProperties} className="intro-item mt-8 flex w-full max-w-3xl flex-wrap items-center justify-center gap-3">
         <div className="min-w-0 flex-1 basis-80">
           <RotatingInstall />

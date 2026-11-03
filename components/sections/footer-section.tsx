@@ -22,7 +22,7 @@ export function FooterSection() {
       <div className={`${sectionBaseClasses} relative px-6 pt-14 pb-8 md:px-8 lg:px-12`}>
         <div className="flex flex-col justify-between gap-12 md:flex-row">
           <div className="max-w-xs">
-            <p className="text-lg leading-snug font-medium text-balance">Interactive components for React, live and ready to tune.</p>
+            <p className="text-lg leading-snug font-medium text-balance">Interactive React components you can try live and tune.</p>
             <p className="mt-4 text-sm text-muted-foreground">
               Built by{" "}
               <a href="https://vaibhavtomar.com/" className="text-foreground hover:underline">
