@@ -13,9 +13,9 @@ import { CLIPS, SITE } from "./clips.mjs";
 
 const W = 1440; // CSS px; same ratio as the output, which is the gallery card's (aspect-[300/220]) so a card shows the whole frame
 const H = 1056;
-const DPR = 2; // rendered at 2x so a 2.5x zoom stays sharp
-const OUT_W = 960;
-const OUT_H = 704; // 960 / 704 = 300 / 220
+const DPR = 3; // rendered at 3x so the 3x camera zoom still has a source pixel per output pixel
+const OUT_W = 1440;
+const OUT_H = 1056; // 1440 / 1056 = 300 / 220; sharp in the dialog on a 2x screen
 const FPS = 60;
 const OUT = "public/previews";
 const MANIFEST = "lib/clips.json";
@@ -48,7 +48,7 @@ const COMPOSE = async ({ img, sx, sy, sw, cur, press, ow, oh }) => {
   bmp.close();
   const x = (cur[0] - sx) * k;
   const y = (cur[1] - sy) * k;
-  const s = 1.15 * (press ? 0.9 : 1);
+  const s = 1.15 * (ow / 960) * (press ? 0.9 : 1); // sized for a 960-wide frame, so it keeps its look at any output size
   g.save();
   g.translate(x, y);
   g.scale(s, s);
@@ -348,8 +348,8 @@ async function render(slug, clip, base, browser) {
 function encode(slug, rec) {
   const src = ["-y", "-hide_banner", "-loglevel", "error", "-framerate", String(FPS), "-i", path.join(rec.dir, "c%05d.jpg"), "-an"];
   mkdirSync(OUT, { recursive: true });
-  sh("ffmpeg", [...src, "-c:v", "libx264", "-preset", "slow", "-crf", "29", "-profile:v", "high", "-g", String(FPS), "-pix_fmt", "yuv420p", "-movflags", "+faststart", `${OUT}/${slug}.mp4`]);
-  sh("ffmpeg", [...src, "-c:v", "libvpx-vp9", "-b:v", "0", "-crf", "40", "-row-mt", "1", "-g", String(FPS), `${OUT}/${slug}.webm`]);
+  sh("ffmpeg", [...src, "-c:v", "libx264", "-preset", "slow", "-crf", "23", "-profile:v", "high", "-g", String(FPS), "-vf", "scale=in_range=pc:out_range=tv,format=yuv420p", "-color_range", "tv", "-movflags", "+faststart", `${OUT}/${slug}.mp4`]);
+  sh("ffmpeg", [...src, "-c:v", "libvpx-vp9", "-b:v", "0", "-crf", "33", "-row-mt", "1", "-g", String(FPS), `${OUT}/${slug}.webm`]);
   sh("ffmpeg", ["-y", "-hide_banner", "-loglevel", "error", "-i", path.join(rec.dir, rec.poster), "-q:v", "4", `${OUT}/${slug}.jpg`]);
 }
 

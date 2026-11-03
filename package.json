@@ -36,7 +36,10 @@
     "check:selftest": "node scripts/check/selftest.mjs",
     "check:perf": "node scripts/check/perf.mjs",
     "check:behaviour": "node scripts/check/behaviour.mjs",
-    "check:budget": "node scripts/check/budget.mjs"
+    "check:budget": "node scripts/check/budget.mjs",
+    "x:today": "node scripts/x/today.mjs",
+    "x:install": "cp scripts/x/com.purrfectui.x-today.plist ~/Library/LaunchAgents/ && launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.purrfectui.x-today.plist",
+    "x:uninstall": "launchctl bootout gui/$(id -u)/com.purrfectui.x-today; rm -f ~/Library/LaunchAgents/com.purrfectui.x-today.plist"
   },
   "dependencies": {
     "@paper-design/shaders-react": "0.0.71",
