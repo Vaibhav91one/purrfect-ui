@@ -121,11 +121,17 @@ export function ComponentSheet({ item, onClose }: { item: ComponentItem; onClose
   const share = useCopy(`${SITE_URL}/components/${item.slug}`);
   const prompt = useCopy(buildPrompt(item), `Setup prompt for ${item.name}`);
 
+  const viaKey = useRef(false);
   const [shown, setShown] = useState(false); // the notch's items swap (the page's slide out, ours slide in)
 
   useEffect(() => {
     const d = dialog.current!;
     document.documentElement.dataset.sheet = "";
+    // what last touched the page: a key (keep the focus ring the dialog hands back) or a pointer (drop it, see close)
+    const key = () => (viaKey.current = true), pointer = () => (viaKey.current = false);
+    viaKey.current = !!document.activeElement?.matches?.(":focus-visible");
+    addEventListener("keydown", key, true);
+    addEventListener("pointerdown", pointer, true);
     opening.current = true; // showModal() focuses the first focusable thing (a demo's scroll box): that is not the person engaging
     if (!d.open) d.showModal();
     d.focus(); // not the demo's first control, so no focus ring on open; Tab still reaches everything
@@ -137,6 +143,8 @@ export function ComponentSheet({ item, onClose }: { item: ComponentItem; onClose
     return () => {
       anim.cancel();
       cancelAnimationFrame(raf);
+      removeEventListener("keydown", key, true);
+      removeEventListener("pointerdown", pointer, true);
       delete document.documentElement.dataset.sheet;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps -- runs once when the dialog mounts
@@ -153,6 +161,8 @@ export function ComponentSheet({ item, onClose }: { item: ComponentItem; onClose
     const out = sheet.animate(reduce ? [{ opacity: 1 }, { opacity: 0 }] : [{ opacity: 1, translate: "0 0", scale: "1" }, { opacity: 0, translate: "0 24px", scale: "0.97" }], reduce ? { ...o, duration: BASE * 1000 } : o);
     await out.finished.catch(() => {});
     d.close();
+    // the dialog hands focus back to the card, and Safari draws the keyboard ring on it even after a tap: drop it (keyboard users keep theirs)
+    if (!viaKey.current && document.activeElement !== document.body) (document.activeElement as HTMLElement).blur();
   };
 
   const views = [
