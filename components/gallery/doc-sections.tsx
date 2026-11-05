@@ -23,7 +23,7 @@ export function DocSections({ slug, install, published }: { slug: string; instal
         <section>
           <h2 className={h3}>Props</h2>
           <div className="overflow-x-auto rounded-xl bg-muted">
-            <table className="w-full text-left text-sm [&_code]:[overflow-wrap:anywhere]">
+            <table className="w-full min-w-[30rem] text-left text-sm [&_code]:[overflow-wrap:anywhere]">
               <thead>
                 <tr className="border-b border-border text-xs text-muted-foreground">
                   <th scope="col" className="px-4 py-2.5 font-medium">Prop</th>
