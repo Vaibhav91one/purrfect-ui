@@ -1,7 +1,7 @@
 // One entry per component that exists on the site it was lifted from. `target` is a CSS selector for the component on
 // the live page; `interact` is what the cursor does to it once the camera has settled ("hover" or "click"); `site`
 // overrides SITE for components lifted from another site.
-export const SITE = "https://vaibhavtomar.com";
+export const SITE = "https://v2.vaibhavtomar.com";
 export const ARMOUR = "https://armour.vaibhavtomar.com";
 export const MAPINLY = "https://mapinly.vaibhavtomar.com";
 export const POINU = "https://poinu.vercel.app";
@@ -29,13 +29,13 @@ export const CLIPS = {
   notch: { site: ARMOUR, interact: "load", start: NOTCH_NEXT, focus: "nav[role=navigation]", push: 1.6, zoom: 2.2, stay: 1.4, label: "armour.vaibhavtomar.com" },
   "hero-reveal": { site: ARMOUR, interact: "load", start: NAV_MOUNTED, seconds: 3.6, label: "armour.vaibhavtomar.com" },
   "layered-menu": { site: ARMOUR, target: 'button[aria-label$=" menu"]', interact: "click", realtime: true, toggle: 2.6, stay: 3.9, zoom: 1, label: "armour.vaibhavtomar.com" },
-  "hover-preview": { target: 'a[class*="border-gray-300"]', interact: "hover", label: "vaibhavtomar.com" },
-  "roll-link": { target: 'nav a[style*="perspective"]', interact: "hover", label: "vaibhavtomar.com" },
-  "scroll-marquee": { target: 'p[class*="lg:text-[200px]"]', interact: "scroll", label: "vaibhavtomar.com" },
-  "curtain-reveal": { target: 'div[style*="clip-path"]', interact: "scroll", label: "vaibhavtomar.com" },
+  "hover-preview": { target: 'a[class*="border-gray-300"]', interact: "hover", label: "v2.vaibhavtomar.com" },
+  "roll-link": { target: 'nav a[style*="perspective"]', interact: "hover", label: "v2.vaibhavtomar.com" },
+  "scroll-marquee": { target: 'p[class*="lg:text-[200px]"]', interact: "scroll", label: "v2.vaibhavtomar.com" },
+  "curtain-reveal": { target: 'div[style*="clip-path"]', interact: "scroll", label: "v2.vaibhavtomar.com" },
   // fresh: the site's own intro plays (the capture otherwise marks it seen); 5s of words, a 0.3s pause, a 1s lift
-  preloader: { interact: "load", fresh: true, start: "!!document.querySelector('.fixed.inset-0.bg-black')", seconds: 6.8, label: "vaibhavtomar.com" },
-  "cursor-follower": { target: ".titleAbout", interact: "hover", label: "vaibhavtomar.com" },
+  preloader: { interact: "load", fresh: true, start: "!!document.querySelector('.fixed.inset-0.bg-black')", seconds: 6.8, label: "v2.vaibhavtomar.com" },
+  "cursor-follower": { target: ".titleAbout", interact: "hover", label: "v2.vaibhavtomar.com" },
   // Mapinly: its own intro plays for these two (fresh); the star rises after the preloader opens its gate
   "load-preloader": { site: MAPINLY, interact: "load", fresh: true, realtime: true, start: "!!document.querySelector('.preloader')", seconds: 3.6, local: ML, label: "mapinly.vaibhavtomar.com" },
   "star-rise": { site: MAPINLY, interact: "load", fresh: true, start: "(() => { const e = document.querySelector('main > section:first-of-type [data-intro]'); if (!e) return false; const t = getComputedStyle(e).transform; return t !== 'none' && new DOMMatrix(t).m42 < innerHeight * 0.98; })()", seconds: 4.2, local: ML, label: "mapinly.vaibhavtomar.com" },
@@ -53,20 +53,20 @@ export const CLIPS = {
   "shimmer-text": { site: ARMOUR, target: ".rounded-full > span.bg-clip-text", interact: "hover", label: "armour.vaibhavtomar.com" },
   "photo-wordmark": { site: ARMOUR, target: "footer h1:not([aria-hidden])", interact: "scroll", label: "armour.vaibhavtomar.com" },
   // batch 4-5 (drawer-menu has no clip: the portfolio shows its burger only at phone width)
-  "quote-cycle": { target: "#projects p.animated-text", interact: "hover", stay: 4.5, label: "vaibhavtomar.com" },
+  "quote-cycle": { target: "#projects p.animated-text", interact: "hover", stay: 4.5, label: "v2.vaibhavtomar.com" },
   "column-hop": { site: BOUNTYDESK, target: 'div[class*="border-border/50"][class*="bg-card"] > div.grid-cols-3', interact: "hover", realtime: true, stay: 3.6, label: "bountydesk.vaibhav.quest" },
   "parallax-photo": { site: `${MAPINLY}/events/startup-pitch-night`, href: `${MAPINLY}/events/startup-pitch-night`, target: 'div[style*="clip-path"]', interact: "scroll", realtime: true, session: { "mapinly-intro": "1" }, local: ML, label: "mapinly.vaibhavtomar.com" },
   "line-rise": { site: MAPINLY, target: "main > section:nth-of-type(2)", interact: "scroll", session: { "mapinly-intro": "1" }, local: ML, label: "mapinly.vaibhavtomar.com" },
   // starts on the settled page (no blank or half-loaded frames), then pushes in on the strip while it scrolls
   "announce-strip": { site: BOUNTYDESK, target: 'div[class*="bg-emerald-500"][class*="overflow-hidden"]', interact: "load", start: 'performance.now() > 5000 && document.readyState === "complete"', realtime: true, push: 0.6, zoom: 3, stay: 2.6, poster: 2.2, label: "bountydesk.vaibhav.quest" },
   "grid-disclosure": { site: BOUNTYDESK, target: "section#faq ul li:nth-child(3) button", interact: "click", label: "bountydesk.vaibhav.quest" },
-  "flip-text": { target: 'nav p[class*="leading-relaxed"]', interact: "hover", label: "vaibhavtomar.com" },
+  "flip-text": { target: 'nav p[class*="leading-relaxed"]', interact: "hover", label: "v2.vaibhavtomar.com" },
   "spin-mark": { site: MAPINLY, target: "footer .origin-center svg", interact: "scroll", session: { "mapinly-intro": "1" }, local: ML, label: "mapinly.vaibhavtomar.com" },
   // a short scroll with the band held in the middle of a pushed-in camera (startAt/endAt: where its top starts and ends on
   // screen, zoom: the camera), so the marks turn and the rows flip without the sections around it
   "asterisk-rows": { site: MAPINLY, target: "section.bg-black.py-24", interact: "scroll", startAt: 0.32, endAt: 0.07, zoom: 1.5, session: { "mapinly-intro": "1" }, local: ML, label: "mapinly.vaibhavtomar.com" },
   "arrow-link": { site: `${POINU}/work/31`, target: 'small + a[href^="/work/"]', interact: "hover", realtime: true, stay: 2.2, zoom: 1, session: PS, label: "poinu.vercel.app" },
-  "fill-button": { target: '[class*="isolate"][class*="rounded-full"]', interact: "hover", label: "vaibhavtomar.com" },
+  "fill-button": { target: '[class*="isolate"][class*="rounded-full"]', interact: "hover", label: "v2.vaibhavtomar.com" },
   // the "Multi-channel" card, recorded centred (load with a target) while its meter loops; the card has nothing to hover
   "voice-bars": { site: ARMOUR, target: VB, interact: "load", realtime: true, start: `performance.now() > 5000 && document.readyState === "complete" && !!document.querySelector('${VB} canvas')`, zoom: 2.2, seconds: 4, label: "armour.vaibhavtomar.com" },
   // the hero's phone, jumped to once the page has loaded: the chips spring in as it comes into view, under the camera; zoom 2 is the least that centres it (the phone sits right of centre, a smaller zoom clamps at the page edge)
