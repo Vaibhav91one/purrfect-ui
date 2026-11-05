@@ -140,14 +140,25 @@ function HeroLoop({ playing, speed }: DemoProps) {
   );
 }
 
-/** The menu fills a full page, so it is drawn at a full page's size (see `nat`), over the valley photo (Armour's blue while it loads). The loop opens and shuts it while nobody is around; a click on the burger is the person's and the loop stays out of the way. A still card keeps it closed. */
+/** The menu fills a full page, so it is drawn at a full page's size (see `nat`), on no background of its own: the burger sits on the card or dialog. The loop opens and shuts it while nobody is around; a click on the burger is the person's and the loop stays out of the way. A still card keeps it closed. */
 function MenuLoop({ playing, speed }: DemoProps) {
   const n = useTick(playing, speed, 4200);
   const [pick, setPick] = useState<{ at: number; open: boolean } | null>(null); // the person's last click, good until the loop's next step
   const open = pick?.at === n ? pick.open : n % 2 === 1;
   return (
-    <div className={`${pageFrame} !bg-[#0E7DDA] bg-[url(/demo/valley.jpg)] bg-cover bg-center`}>
-      <LayeredMenu contained delay={0.2} open={open} onOpenChange={(o) => setPick({ at: n, open: o })} logo={<span className="font-medium tracking-tight">ARMOUR</span>} primary={[{ label: "Experience", href: "#a" }, { label: "Technology", href: "#b" }, { label: "Company", href: "#c" }]} secondary={[{ label: "Features", href: "#d" }, { label: "FAQ", href: "#e" }]} />
+    <div className={`${pageFrame} !bg-transparent text-foreground`}>
+      <LayeredMenu
+        contained
+        color="currentColor"
+        delay={0.2}
+        open={open}
+        onOpenChange={(o) => setPick({ at: n, open: o })}
+        // shut, the burger is big and centred so it reads at the scaled-down size; open, it goes back to the corner, clear of the links
+        className={`transition-[opacity,color,top,left,translate,scale] duration-500 ease-snappy motion-reduce:transition-none ${open ? "" : "top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 scale-[1.8] sm:top-1/2 sm:left-1/2"}`}
+        logo={<span className="font-medium tracking-tight">ARMOUR</span>}
+        primary={[{ label: "Experience", href: "#a" }, { label: "Technology", href: "#b" }, { label: "Company", href: "#c" }]}
+        secondary={[{ label: "Features", href: "#d" }, { label: "FAQ", href: "#e" }]}
+      />
     </div>
   );
 }
