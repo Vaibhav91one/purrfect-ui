@@ -107,6 +107,8 @@ export function ComponentSheet({ item, onClose }: { item: ComponentItem; onClose
   const engage = () => { if (opening.current) return; clearTimeout(resume.current); setEngaged(true); };
   const release = () => { if (opening.current) return; clearTimeout(resume.current); resume.current = setTimeout(() => setEngaged(false), 2000); };
   useEffect(() => () => clearTimeout(resume.current), []);
+  // what is really moving: hovering the preview holds the loop (see `engaged`), and the button must say so
+  const running = playing && (tab !== "preview" || item.ambient || !engaged);
   const extras = item.extras ?? [];
   const [opts, setOpts] = useState<Record<string, string | boolean>>(() => Object.fromEntries(extras.map((x) => [x.key, x.default])));
   const share = useCopy(`${SITE_URL}/components/${item.slug}`);
@@ -174,7 +176,7 @@ export function ComponentSheet({ item, onClose }: { item: ComponentItem; onClose
         <div className="relative min-h-0 flex-1">
           {tab === "preview" ? (
             <div ref={stage} data-hover-sound="off" className="absolute inset-x-6 inset-y-16" onPointerEnter={engage} onPointerLeave={release} onFocus={engage} onBlur={release}>
-              <Preview item={item} inert={false} max={1.4} playing={playing && (item.ambient || !engaged)} opts={opts} />
+              <Preview item={item} inert={false} max={1.4} playing={running} opts={opts} />
             </div>
           ) : tab === "wild" && item.clip ? (
             <div className="absolute inset-0">
@@ -198,7 +200,7 @@ export function ComponentSheet({ item, onClose }: { item: ComponentItem; onClose
           ) : null}
         </div>
       </section>
-      <SheetNotch name={item.name} shown={shown} canCopy={item.published} copied={prompt.done} onCopy={prompt.copy} shared={share.done} onShare={share.copy} views={views} tab={tab} onTab={(v) => { play("tap"); setTab(v as typeof tab); }} playing={playing} onTogglePlay={(tab === "preview" && item.pausable) || tab === "wild" ? () => setPick(!playing) : undefined} />
+      <SheetNotch name={item.name} shown={shown} canCopy={item.published} copied={prompt.done} onCopy={prompt.copy} shared={share.done} onShare={share.copy} views={views} tab={tab} onTab={(v) => { play("tap"); setEngaged(false); setTab(v as typeof tab); }} playing={running} onTogglePlay={(tab === "preview" && item.pausable) || tab === "wild" ? () => setPick(!playing) : undefined} />
     </dialog>
   );
 }

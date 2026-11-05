@@ -147,7 +147,17 @@ function MenuLoop({ playing, speed }: DemoProps) {
   const open = pick?.at === n ? pick.open : n % 2 === 1;
   return (
     <div className={`${pageFrame} !bg-[#0E7DDA] bg-[url(/demo/valley.jpg)] bg-cover bg-center`}>
-      <LayeredMenu contained delay={0.2} open={open} onOpenChange={(o) => setPick({ at: n, open: o })} logo={<span className="font-medium tracking-tight">ARMOUR</span>} primary={[{ label: "Experience", href: "#a" }, { label: "Technology", href: "#b" }, { label: "Company", href: "#c" }]} secondary={[{ label: "Features", href: "#d" }, { label: "FAQ", href: "#e" }]} />
+      <LayeredMenu
+        contained
+        delay={0.2}
+        open={open}
+        onOpenChange={(o) => setPick({ at: n, open: o })}
+        // shut, the burger is big and centred so it reads at the scaled-down size; open, it goes back to the corner, clear of the links
+        className={`transition-[opacity,color,top,left,translate,scale] duration-500 ease-snappy motion-reduce:transition-none ${open ? "" : "top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 scale-[1.8] sm:top-1/2 sm:left-1/2"}`}
+        logo={<span className="font-medium tracking-tight">ARMOUR</span>}
+        primary={[{ label: "Experience", href: "#a" }, { label: "Technology", href: "#b" }, { label: "Company", href: "#c" }]}
+        secondary={[{ label: "Features", href: "#d" }, { label: "FAQ", href: "#e" }]}
+      />
     </div>
   );
 }
