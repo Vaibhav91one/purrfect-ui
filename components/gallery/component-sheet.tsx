@@ -180,6 +180,8 @@ export function ComponentSheet({ item, onClose }: { item: ComponentItem; onClose
         <button type="button" onClick={close} aria-label="Close" className="absolute top-4 right-4 z-10 grid size-11 place-items-center rounded-full text-muted-foreground transition-colors hover:text-foreground active:text-foreground active:bg-foreground/10 focus-visible:outline-2 focus-visible:outline-accent">
           <X className="size-5" />
         </button>
+        {/* Code and Usage scroll under the close button: let them fade out there */}
+        {(tab === "code" || tab === "usage") && <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 z-[5] h-16 bg-linear-to-b from-card via-card/80 to-transparent" />}
         <div className="relative min-h-0 flex-1">
           {tab === "preview" ? (
             <div ref={stage} data-hover-sound="off" className="absolute inset-x-6 inset-y-16" onPointerEnter={engage} onPointerLeave={release} onFocus={engage} onBlur={release}>

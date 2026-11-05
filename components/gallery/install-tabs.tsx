@@ -20,7 +20,7 @@ export function InstallTabs({ install }: { install: string }) {
     <div className="rounded-xl bg-muted">
       <div role="tablist" aria-label="Package manager" className="flex gap-1 px-2 pt-2">
         {RUNNERS.map(([name]) => (
-          <button key={name} type="button" role="tab" aria-selected={pm === name} onClick={() => setPm(name)} className={`rounded-lg px-3 py-1.5 text-xs transition-colors focus-visible:outline-2 focus-visible:outline-accent ${pm === name ? "bg-background text-foreground" : "text-muted-foreground hover:text-foreground"}`}>
+          <button key={name} type="button" role="tab" aria-selected={pm === name} onClick={() => setPm(name)} className={`touch-hit relative rounded-lg px-3 py-1.5 text-xs transition-colors focus-visible:outline-2 focus-visible:outline-accent ${pm === name ? "bg-background text-foreground" : "text-muted-foreground hover:text-foreground"}`}>
             {name}
           </button>
         ))}

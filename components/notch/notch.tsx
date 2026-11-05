@@ -332,7 +332,7 @@ export function Notch() {
                   }
                   schedule(!open, 0);
                 }}
-                className="group flex h-10 items-center gap-2 rounded-full pr-3 pl-[62px] hover:bg-white/5 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-white"
+                className="touch-hit group relative flex h-10 items-center gap-2 rounded-full pr-3 pl-[62px] hover:bg-white/5 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-white"
               >
                 <span className="text-sm font-medium tracking-tight">purrfect ui</span>
               </button>

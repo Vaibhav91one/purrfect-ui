@@ -328,6 +328,28 @@ body {
   font-family: var(--font-sans), system-ui, sans-serif;
 }
 
+/* Under the iPhone status bar the page fades out, so scrolled text never runs through the clock (no height anywhere without a safe-area inset). */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0 0 auto;
+  height: env(safe-area-inset-top);
+  background: linear-gradient(var(--background) 40%, transparent);
+  pointer-events: none;
+  z-index: 40;
+}
+
+/* On touch, grow a small control's hit area past its looks (the element needs `relative`, or an absolute/fixed position of its own). */
+@utility touch-hit {
+  @media (pointer: coarse) {
+    &::after {
+      content: "";
+      position: absolute;
+      inset: -0.5rem -0.25rem;
+    }
+  }
+}
+
 @keyframes cat-spin {
   to {
     rotate: 360deg;

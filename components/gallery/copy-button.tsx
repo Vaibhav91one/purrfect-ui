@@ -4,6 +4,7 @@ import { Check, Copy } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { useSound } from "@/components/providers/sound-provider";
+import { cn } from "@/lib/utils";
 
 /** Copies `text`; `done` stays true for a moment afterwards and a soft success cue plays once the copy worked. */
 export function useCopy(text: string, label?: string) {
@@ -27,7 +28,7 @@ export function useCopy(text: string, label?: string) {
 export function CopyButton({ text, className = "", label = "Copy install command" }: { text: string; className?: string; label?: string }) {
   const { done, copy } = useCopy(text);
   return (
-    <button type="button" onClick={copy} aria-label={done ? "Copied" : label} title={done ? "Copied" : label} className={`grid size-8 shrink-0 place-items-center rounded-lg text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-2 focus-visible:outline-accent ${className}`}>
+    <button type="button" onClick={copy} aria-label={done ? "Copied" : label} title={done ? "Copied" : label} className={cn("touch-hit relative grid size-8 shrink-0 place-items-center rounded-lg text-muted-foreground transition-colors hover:text-foreground active:text-foreground focus-visible:outline-2 focus-visible:outline-accent", className)}>
       {done ? <Check className="size-4" /> : <Copy className="size-4" />}
     </button>
   );
