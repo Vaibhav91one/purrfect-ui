@@ -24,7 +24,25 @@ const subscribePhone = (cb: () => void) => {
 const usePhone = () => useSyncExternalStore(subscribePhone, () => matchMedia("(max-width: 639px)").matches, () => false);
 
 /** Draws children at their natural size and scales them to fit whatever box they sit in. `fill`: scale by width only and stretch the height to the box. */
-function Fit({ nat, max = 1, min = 0, pad = 24, fill = false, cover = false, children }: { nat: [number, number]; max?: number; min?: number; pad?: number; fill?: boolean; cover?: boolean; children: ReactNode }) {
+// a control a finger can reach: a tap that misses every one by up to this far (rendered px, 44 across) goes to the nearest
+const CONTROLS = "a[href],button,summary,input,select,textarea,label,[role=button],[role=tab],[role=switch],[role=link],[role=menuitem]";
+const SLOP = 22;
+function nearestControl(box: HTMLElement, x: number, y: number) {
+  let best: HTMLElement | undefined, d = Infinity;
+  for (const el of box.querySelectorAll<HTMLElement>(CONTROLS)) {
+    const r = el.getBoundingClientRect();
+    if (!r.width || !r.height) continue;
+    const dx = Math.max(r.left - x, 0, x - r.right), dy = Math.max(r.top - y, 0, y - r.bottom);
+    const dist = Math.hypot(dx, dy);
+    if (dist <= SLOP && dist < d) {
+      best = el;
+      d = dist;
+    }
+  }
+  return best;
+}
+
+function Fit({ nat, max = 1, min = 0, pad = 24, fill = false, cover = false, slop = false, children }: { nat: [number, number]; max?: number; min?: number; pad?: number; fill?: boolean; cover?: boolean; slop?: boolean; children: ReactNode }) {
   const box = useRef<HTMLDivElement>(null);
   const inner = useRef<HTMLDivElement>(null);
   useLayoutEffect(() => {
@@ -54,7 +72,20 @@ function Fit({ nat, max = 1, min = 0, pad = 24, fill = false, cover = false, chi
     return () => ro.disconnect();
   }, [nat, max, min, pad, fill, cover]);
   return (
-    <div ref={box} className="absolute inset-0 overflow-hidden overscroll-contain [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+    <div
+      ref={box}
+      onClick={
+        slop
+          ? (e) => {
+              // a demo scaled down to fit shrinks its controls under a fingertip: a tap that just misses one counts as a tap on it
+              const t = e.target as HTMLElement;
+              if (!matchMedia("(pointer: coarse)").matches || t.closest(CONTROLS) || getComputedStyle(t).cursor === "pointer") return;
+              nearestControl(box.current!, e.clientX, e.clientY)?.click();
+            }
+          : undefined
+      }
+      className="absolute inset-0 overflow-hidden overscroll-contain [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+    >
       <div ref={inner} style={{ width: nat[0], height: nat[1] }} className="absolute top-1/2 left-1/2 grid -translate-x-1/2 -translate-y-1/2 place-items-center">
         {children}
       </div>
@@ -72,7 +103,7 @@ export function Preview({ item, inert = true, max = 1, min, pad, cover, live = t
   if (!live) return item.clip ? <img src={`/previews/${item.slug}.jpg`} alt="" loading="lazy" decoding="async" className="absolute inset-0 size-full object-cover" /> : null;
   const compact = phone && !inert && !!item.natPhone; // the dialog on a phone: a demo with its own phone layout (`natPhone`) draws that one, as the site it came from does
   return (
-    <Fit nat={compact ? item.natPhone! : item.nat} max={max} min={min} pad={pad} fill={item.fill} cover={cover}>
+    <Fit nat={compact ? item.natPhone! : item.nat} max={max} min={min} pad={pad} fill={item.fill} cover={cover} slop={!inert}>
       <div inert={inert} aria-hidden={inert || undefined} className="grid size-full place-items-center">
         <Demo slug={item.slug} playing={playing} speed={speed} opts={inert ? { ...opts, card: true } : compact ? { ...opts, compact: true } : opts} />
       </div>
