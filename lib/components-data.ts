@@ -30,6 +30,8 @@ export type ComponentItem = {
   /** it moves on its own and really stops on Pause (audited slug by slug in the browser): the dialog shows Pause/Play only for these (and for the clip tab). Not here: interactive-only ones (nothing moves until you hover or click), one-shot entrances, and scroll-marquee, asterisk-rows, column-hop, whose own timers or frame loops a Pause cannot reach. */
   pausable?: boolean;
   /** a scrolling stage: its width scales like any preview, its height stretches to the whole cell */
+  /** natural size of the preview in the dialog on a phone, when the demo has a layout for it (it gets `opts.compact`) */
+  natPhone?: [number, number];
   fill?: boolean;
   /** a loop with nothing to interact with (a loader, a shimmer): the dialog does not pause it while the pointer is over it */
   ambient?: boolean;
@@ -71,6 +73,7 @@ const PAUSABLE = new Set([
   "announce-strip",
 ]);
 const AMBIENT = new Set(["pixel-wave", "shimmer-text", "spin-mark", "voice-bars"]);
+const NAT_PHONE: Record<string, [number, number]> = { "fan-out-cards": [390, 520] };
 const FILL = new Set(["scroll-marquee", "asterisk-rows", "photo-wordmark", "line-rise", "sticky-crossfade", "parallax-photo"]);
 
 const item = (slug: string, name: string, category: string, description: string, nat: [number, number] = [420, 300], extras?: Extra[]): ComponentItem => ({
@@ -84,6 +87,7 @@ const item = (slug: string, name: string, category: string, description: string,
   published: PUBLISHED.has(slug),
   clip: CLIPS[slug],
   replay: REPLAY.has(slug),
+  natPhone: NAT_PHONE[slug],
   fill: FILL.has(slug),
   pausable: PAUSABLE.has(slug),
   ambient: AMBIENT.has(slug),

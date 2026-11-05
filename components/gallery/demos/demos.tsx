@@ -469,7 +469,7 @@ export const DEMOS: Record<string, (p: DemoProps) => ReactNode> = {
   "peek-card": PeekCardDemo,
   "inertia-gallery": InertiaGalleryDemo,
   "fit-title": FitTitleDemo,
-  "fan-out-cards": FanOutCardsDemo,
+  "fan-out-cards": ({ opts }: DemoProps) => <FanOutCardsDemo compact={!!opts.compact} />,
   "shimmer-text": ShimmerTextDemo,
   "photo-wordmark": WordmarkLoop,
   "drawer-menu": DrawerLoop,

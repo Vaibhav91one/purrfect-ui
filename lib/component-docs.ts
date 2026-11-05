@@ -410,7 +410,7 @@ import { RollLink } from "@/components/ui/roll-link";
       "Reduced motion: it sits exactly on the pointer with no trail, and grows instantly instead of springing.",
       "It follows the mouse and inverts what is under it (mix-blend-difference).",
       "data-cursor-scale on any element grows it while hovered (the closest one wins; the value is read as positive and capped at 10). It needs no context or hooks.",
-      "One passive pointer listener moves motion values; React never re-renders while it moves. Mouse only, and it hides when the pointer leaves the window or a touch or pen takes over.",
+      "One passive pointer listener moves motion values; React never re-renders while it moves. Mouse only: on a touch phone (coarse pointer) it renders nothing, and on a hybrid device it hides when the pointer leaves the window or a touch or pen takes over.",
     ],
   },
   "fill-button": {

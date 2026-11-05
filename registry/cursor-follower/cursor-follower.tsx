@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, useMotionValue, useReducedMotion, useSpring } from "motion/react";
-import { useEffect, useRef, useState, type ComponentProps } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore, type ComponentProps } from "react";
 import { cn } from "@/lib/utils";
 
 export interface CursorFollowerProps extends Omit<ComponentProps<"div">, "children" | "ref" | "onDrag" | "onDragStart" | "onDragEnd" | "onAnimationStart"> {
@@ -14,17 +14,29 @@ const GROW = { stiffness: 420, damping: 40 }; // critically damped: shrinking ba
 /** Largest data-cursor-scale honoured, so a stray value cannot flood the page with inversion. */
 const MAX_GROW = 10;
 
+const COARSE = "(pointer: coarse)";
+function coarseNow() {
+  return matchMedia(COARSE).matches;
+}
+function subscribeCoarse(cb: () => void) {
+  const m = matchMedia(COARSE);
+  m.addEventListener("change", cb);
+  return () => m.removeEventListener("change", cb);
+}
+
 /**
  * A dot that follows the mouse and inverts what is under it (mix-blend-difference). Mount it once, near the root. Any
  * element with `data-cursor-scale="3"` grows it while hovered: no context, no hooks to wire. One passive pointer listener
- * on the document moves motion values, so React never re-renders while it moves. Mouse only: touch and pen never see it,
- * and it fades out when the pointer leaves the window (or a touch or pen takes over). Scale values are read as positive and
+ * on the document moves motion values, so React never re-renders while it moves. Mouse only: a coarse-pointer device (touch
+ * phone) renders nothing, and on a hybrid device touch or pen never see it: it fades out when the pointer leaves the window (or a touch or pen takes over). Scale values are read as positive and
  * capped at 10. Reduced motion: it sits exactly on the pointer with no trail, and grows instantly instead of springing.
  */
 export function CursorFollower({ size = 20, className, style, ...rest }: CursorFollowerProps) {
   const reduce = useReducedMotion();
   const still = useRef(reduce);
   const [shown, setShown] = useState(false);
+  // the server renders the dot; a touch phone renders nothing (read on the client, so server HTML never changes)
+  const coarse = useSyncExternalStore(subscribeCoarse, coarseNow, () => false);
   const x = useMotionValue(0);
   const y = useMotionValue(0);
   const grow = useMotionValue(1);
@@ -37,6 +49,7 @@ export function CursorFollower({ size = 20, className, style, ...rest }: CursorF
   }, [reduce]);
 
   useEffect(() => {
+    if (coarse) return;
     let visible = false;
     const move = (e: PointerEvent) => {
       // a hybrid device switching to touch or pen hides it instead of leaving it frozen
@@ -68,8 +81,9 @@ export function CursorFollower({ size = 20, className, style, ...rest }: CursorF
       document.removeEventListener("pointerover", over);
       document.documentElement.removeEventListener("pointerleave", leave);
     };
-  }, [x, y, sx, sy, grow, scale]);
+  }, [coarse, x, y, sx, sy, grow, scale]);
 
+  if (coarse) return null;
   return (
     <motion.div
       aria-hidden
