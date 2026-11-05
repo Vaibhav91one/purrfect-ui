@@ -188,7 +188,7 @@ export function ComponentSheet({ item, onClose }: { item: ComponentItem; onClose
           ) : tab === "wild" && item.clip ? (
             <div className="absolute inset-0">
               <SiteClip slug={item.slug} playing={playing} speed={1} className="absolute inset-x-6 inset-y-16 h-[calc(100%-8rem)] w-[calc(100%-3rem)] object-contain" />
-              <a href={item.clip.href} target="_blank" rel="noreferrer noopener" className="absolute bottom-6 left-6 rounded-sm text-xs text-muted-foreground hover:text-foreground">
+              <a href={item.clip.href} target="_blank" rel="noreferrer noopener" className="absolute inset-x-0 bottom-6 mx-auto w-fit rounded-sm text-xs text-muted-foreground hover:text-foreground">
                 From {item.clip.label} ↗
               </a>
             </div>
