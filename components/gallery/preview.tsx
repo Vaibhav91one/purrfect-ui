@@ -1,7 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useLayoutEffect, useRef, type ReactNode } from "react";
+import { useLayoutEffect, useRef, useSyncExternalStore, type ReactNode } from "react";
 import type { ComponentItem } from "@/lib/components-data";
 import { PixelWave } from "@/registry/pixel-wave/pixel-wave";
 import type { DemoProps } from "./demos/demos";
@@ -15,6 +15,13 @@ const Demo = dynamic(() => import("./demos/demos").then((m) => m.Demo), {
 
 // fetch the demos' chunk once the page is idle, so the first previews to scroll in find it already there (no loader flash)
 if (typeof window !== "undefined") (window.requestIdleCallback ?? ((f: () => void) => setTimeout(f, 1500)))(() => void import("./demos/demos"));
+
+const subscribePhone = (cb: () => void) => {
+  const q = matchMedia("(max-width: 639px)");
+  q.addEventListener("change", cb);
+  return () => q.removeEventListener("change", cb);
+};
+const usePhone = () => useSyncExternalStore(subscribePhone, () => matchMedia("(max-width: 639px)").matches, () => false);
 
 /** Draws children at their natural size and scales them to fit whatever box they sit in. `fill`: scale by width only and stretch the height to the box. */
 function Fit({ nat, max = 1, min = 0, pad = 24, fill = false, cover = false, children }: { nat: [number, number]; max?: number; min?: number; pad?: number; fill?: boolean; cover?: boolean; children: ReactNode }) {
@@ -60,12 +67,14 @@ function Fit({ nat, max = 1, min = 0, pad = 24, fill = false, cover = false, chi
  * `live={false}` (a card far from the viewport) draws only the clip poster, or nothing over the card's own background: no demo is mounted, so nothing loops or holds a WebGL context off screen.
  */
 export function Preview({ item, inert = true, max = 1, min, pad, cover, live = true, playing, speed = 1, opts = {} }: { item: ComponentItem; inert?: boolean; max?: number; min?: number; pad?: number; cover?: boolean; live?: boolean } & Partial<DemoProps>) {
+  const phone = usePhone();
   // eslint-disable-next-line @next/next/no-img-element -- a static poster the card box already sizes
   if (!live) return item.clip ? <img src={`/previews/${item.slug}.jpg`} alt="" loading="lazy" decoding="async" className="absolute inset-0 size-full object-cover" /> : null;
+  const compact = phone && !inert && !!item.natPhone; // the dialog on a phone: a demo with its own phone layout (`natPhone`) draws that one, as the site it came from does
   return (
-    <Fit nat={item.nat} max={max} min={min} pad={pad} fill={item.fill} cover={cover}>
+    <Fit nat={compact ? item.natPhone! : item.nat} max={max} min={min} pad={pad} fill={item.fill} cover={cover}>
       <div inert={inert} aria-hidden={inert || undefined} className="grid size-full place-items-center">
-        <Demo slug={item.slug} playing={playing} speed={speed} opts={inert ? { ...opts, card: true } : opts} />
+        <Demo slug={item.slug} playing={playing} speed={speed} opts={inert ? { ...opts, card: true } : compact ? { ...opts, compact: true } : opts} />
       </div>
     </Fit>
   );
