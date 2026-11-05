@@ -109,14 +109,14 @@ export function SheetNotch({ name, shown, canCopy, copied, onCopy, shared, onSha
             <div className="min-w-0 flex-1">
               <h2 className="truncate text-sm leading-tight font-medium tracking-tight">{name}</h2>
               {/* always there, so it is clear the notch has more views behind it */}
-              <span className="flex items-center gap-1 text-[11px] leading-tight text-white/50">
+              <span className="flex items-center gap-1 text-xs leading-tight text-white/50">
                 <CurrentIcon className="size-3 shrink-0" />
                 <span className="truncate">{currentLabel}</span>
                 <ChevronDown className={`size-3 shrink-0 transition-transform duration-200 ${open ? "rotate-180" : ""}`} />
               </span>
             </div>
             {canCopy && (
-              <button type="button" onClick={onCopy} data-cuelume-tap aria-label="Copy prompt" className="inline-flex h-9 shrink-0 items-center gap-2 rounded-full bg-white px-2.5 text-sm font-medium text-black transition-colors hover:bg-white/85 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-white sm:pr-3 sm:pl-3.5">
+              <button type="button" onClick={onCopy} data-cuelume-tap aria-label="Copy prompt" className="touch-hit relative inline-flex h-9 shrink-0 items-center gap-2 rounded-full bg-white px-2.5 text-sm font-medium text-black transition-colors hover:bg-white/85 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-white sm:pr-3 sm:pl-3.5">
                 {copied ? <Check className="size-4" /> : <ClipboardCopy className="size-4" />}
                 <span className="hidden sm:inline">{copied ? "Copied" : "Copy prompt"}</span>
               </button>
