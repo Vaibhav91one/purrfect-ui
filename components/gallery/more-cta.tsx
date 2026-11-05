@@ -9,7 +9,7 @@ import { SleepingCat } from "./sleeping-cat";
 export function MoreCta() {
   const wrap = useRef<HTMLDivElement>(null);
   return (
-    <div ref={wrap} className="relative z-10 -mt-24 flex flex-col items-center pb-6">
+    <div ref={wrap} className="relative z-10 -mt-10 flex flex-col sm:-mt-24 items-center pb-6">
       <SleepingCat variant={3} trigger={wrap} className="-mb-2 h-16 sm:h-20" />
       <Button href="/components" data-cuelume-navigate="" icon={<ArrowRight className="size-4" />} iconPosition="end">
         View more components
