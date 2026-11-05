@@ -13,6 +13,9 @@ const Demo = dynamic(() => import("./demos/demos").then((m) => m.Demo), {
   loading: () => <PixelWave size={6} gap={2} className="text-muted-foreground" aria-label="Loading the preview" />,
 });
 
+// fetch the demos' chunk once the page is idle, so the first previews to scroll in find it already there (no loader flash)
+if (typeof window !== "undefined") (window.requestIdleCallback ?? ((f: () => void) => setTimeout(f, 1500)))(() => void import("./demos/demos"));
+
 /** Draws children at their natural size and scales them to fit whatever box they sit in. `fill`: scale by width only and stretch the height to the box. */
 function Fit({ nat, max = 1, pad = 24, fill = false, cover = false, children }: { nat: [number, number]; max?: number; pad?: number; fill?: boolean; cover?: boolean; children: ReactNode }) {
   const box = useRef<HTMLDivElement>(null);
