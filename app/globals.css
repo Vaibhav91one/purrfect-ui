@@ -317,6 +317,17 @@ html {
   background: var(--background);
 }
 
+/* touch: no grey tap flash, no 300ms delay or double-tap zoom, no text-selection or callout on controls */
+:where(a, button, summary, [role="button"], label) {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+:where(button, [role="button"]) {
+  -webkit-touch-callout: none;
+  user-select: none;
+}
+
 body {
   background: var(--background);
   color: var(--foreground);

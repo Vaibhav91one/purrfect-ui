@@ -64,7 +64,7 @@ export function SheetNotch({ name, shown, canCopy, copied, onCopy, shared, onSha
   );
 
   return (
-    <div className="pointer-events-none absolute inset-x-0 top-4 z-10 flex justify-center px-4">
+    <div className="pointer-events-none absolute inset-x-0 top-[max(1rem,env(safe-area-inset-top))] z-10 flex justify-center px-4">
       <div className="pointer-events-auto relative">
       <div
         ref={root}
