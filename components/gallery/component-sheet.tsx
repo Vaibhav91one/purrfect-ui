@@ -13,6 +13,7 @@ import { CopyButton, useCopy } from "./copy-button";
 import { DocSections } from "./doc-sections";
 import { Segmented } from "./segmented";
 import { Preview } from "./preview";
+import { PixelWave } from "@/registry/pixel-wave/pixel-wave";
 import { SheetNotch } from "./sheet-notch";
 import { SiteClip } from "./site-clip";
 
@@ -54,9 +55,15 @@ function Source({ slug }: { slug: string }) {
   }, [slug]);
   return (
     <>
-      <pre className="absolute inset-0 overflow-y-auto overscroll-contain pl-6 pr-16 pt-20 pb-24 text-xs leading-relaxed">
-        {typeof code === "string" ? <Code code={code} /> : <span className="font-mono text-muted-foreground">{code === undefined ? "Loading…" : "The source isn't published yet."}</span>}
-      </pre>
+      {code === undefined ? (
+        <div className="absolute inset-0 grid place-items-center text-muted-foreground">
+          <PixelWave size={10} gap={3} aria-label="Loading the source" />
+        </div>
+      ) : (
+        <pre className="absolute inset-0 overflow-y-auto overscroll-contain pl-6 pr-16 pt-20 pb-24 text-xs leading-relaxed">
+          {typeof code === "string" ? <Code code={code} /> : <span className="font-mono text-muted-foreground">The source isn&apos;t published yet.</span>}
+        </pre>
+      )}
       {typeof code === "string" && <CopyButton text={code} label="Copy source" className="absolute top-20 right-6" />}
     </>
   );
@@ -181,7 +188,7 @@ export function ComponentSheet({ item, onClose }: { item: ComponentItem; onClose
           ) : tab === "wild" && item.clip ? (
             <div className="absolute inset-0">
               <SiteClip slug={item.slug} playing={playing} speed={1} className="absolute inset-x-6 inset-y-16 h-[calc(100%-8rem)] w-[calc(100%-3rem)] object-contain" />
-              <a href={item.clip.href} target="_blank" rel="noreferrer noopener" className="absolute bottom-6 left-6 rounded-sm text-xs text-muted-foreground hover:text-foreground">
+              <a href={item.clip.href} target="_blank" rel="noreferrer noopener" className="absolute inset-x-0 bottom-6 mx-auto w-fit rounded-sm text-xs text-muted-foreground hover:text-foreground">
                 From {item.clip.label} ↗
               </a>
             </div>
