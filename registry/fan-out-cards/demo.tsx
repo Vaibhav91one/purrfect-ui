@@ -26,13 +26,15 @@ const CARDS: FanOutCard[] = [
 
 const phone = (
   // the phone sits above the cards, so they slide out from behind it; its top fades out and its rounded bottom shows, like the original's
-  <div className="relative z-10 h-[449px] w-[290px] overflow-hidden rounded-[48px] border-[7px] border-neutral-900 bg-neutral-900 shadow-2xl ring-[3px] ring-neutral-300 [mask-image:linear-gradient(to_bottom,transparent,black_30%)]">
-    <img src="/demo/field.jpg" alt="" className="absolute inset-0 size-full rounded-[40px] object-cover" />
-    <div className="dark absolute inset-x-0 top-[75.5%] flex -translate-y-1/2 justify-center">
-      <div className="rounded-full bg-card px-5 py-2 shadow-lg">
-        <ShimmerText className="text-base">
-          <span className="font-semibold">Armour</span> is listening
-        </ShimmerText>
+  <div className="relative z-10 [mask-image:linear-gradient(to_bottom,transparent,black_30%)]">
+    <div className="h-[449px] w-[290px] overflow-hidden rounded-[48px] border-[7px] border-neutral-900 bg-neutral-900 shadow-2xl ring-[3px] ring-neutral-300">
+      <img src="/demo/field.jpg" alt="" className="absolute inset-0 size-full rounded-[40px] object-cover" />
+      <div className="dark absolute inset-x-0 top-[75.5%] flex -translate-y-1/2 justify-center">
+        <div className="rounded-full bg-card px-5 py-2 shadow-lg">
+          <ShimmerText className="text-base">
+            <span className="font-semibold">Armour</span> is listening
+          </ShimmerText>
+        </div>
       </div>
     </div>
   </div>
