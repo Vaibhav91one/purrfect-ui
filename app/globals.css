@@ -234,6 +234,12 @@ svg[data-play="fast"] {
 
 html[data-sheet] {
   overflow: hidden;
+  scrollbar-gutter: stable; /* the scrollbar's width stays, so the page (and the notch) does not shift when the dialog locks scrolling */
+}
+
+/* the dialog carries its own copy of the notch (SheetNotch), so the page's is tucked away while it is open */
+html[data-sheet] [data-notch] {
+  visibility: hidden;
 }
 
 dialog[data-sheet]::backdrop {

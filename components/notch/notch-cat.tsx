@@ -14,10 +14,10 @@ const HIDDEN_Y = 52; // px: a full row (48) plus a little, so the head is fully 
  * so often (never while it is purring), and each time it comes back it has a different gradient and eye. The clip-path cuts only the bottom edge, so the purr rings can spread sideways
  * and up (the notch itself clips them).
  */
-export function NotchCat() {
+export function NotchCat({ settled = false, variant: first = 0 }: { settled?: boolean; variant?: number } = {}) {
   const reduce = useReducedMotion();
-  const [hidden, setHidden] = useState(true);
-  const [variant, setVariant] = useState(0);
+  const [hidden, setHidden] = useState(!settled); // `settled`: a copy that stands in for the live notch is already up, in the same look
+  const [variant, setVariant] = useState(first);
 
   useEffect(() => {
     if (reduce) {

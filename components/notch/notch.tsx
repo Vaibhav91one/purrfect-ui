@@ -155,7 +155,7 @@ export function Notch() {
     // same page: SheetHost only hears openSheet, not a router push of ?c= (and ?cat= is already in the URL)
     const u = new URL(href, location.href);
     const slug = u.searchParams.get("c");
-    if (slug && u.pathname === pathname) openSheet(slug, null);
+    if (slug && u.pathname === pathname) openSheet(slug);
     else router.push(href);
   };
   // a category chip toggles that category; "All" clears them (pressed only on /components). On /components only the URL

@@ -211,10 +211,13 @@ function ScrollBox({ playing, speed, children, boxRef, className }: { playing?: 
     if (!playing || !box) return;
     let raf = 0;
     const t0 = performance.now();
-    const from = box.scrollTop;
+    // a cosine wave over the scroll range. It picks up at the box's current position, and never from a standstill (zero speed at
+    // the very top), so the motion is there from the first frame, on open and on resume alike
+    const range = box.scrollHeight - box.clientHeight;
+    const phase0 = Math.max(0.55, range > 0 ? Math.acos(1 - (2 * Math.min(box.scrollTop, range)) / range) : 0);
     const tick = (now: number) => {
       const max = box.scrollHeight - box.clientHeight;
-      box.scrollTop = from + (max * (1 - Math.cos(((now - t0) / 6000) * speed * Math.PI * 2))) / 2 - (max * (1 - Math.cos(0))) / 2;
+      box.scrollTop = (max * (1 - Math.cos(phase0 + ((now - t0) / 6000) * speed * Math.PI * 2))) / 2;
       raf = requestAnimationFrame(tick);
     };
     raf = requestAnimationFrame(tick);

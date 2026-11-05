@@ -18,7 +18,7 @@ export function CardLink({ item, className }: { item: ComponentItem; className: 
         onClick={(e) => {
           if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
           e.preventDefault();
-          openSheet(item.slug, e.currentTarget.parentElement!);
+          openSheet(item.slug);
         }}
       />
     </div>
