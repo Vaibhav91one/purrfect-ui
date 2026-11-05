@@ -85,9 +85,9 @@ export function ComponentShell({ item, list, children }: { item: ComponentItem; 
         <PanelLeft className="size-5" />
       </button>
       <p className="flex items-center gap-2 text-lg whitespace-nowrap">
-        <Link href="/" className="text-muted-foreground transition-colors hover:text-foreground">purrfect ui</Link>
+        <Link href="/" className="touch-hit relative text-muted-foreground transition-colors hover:text-foreground">purrfect ui</Link>
         <span aria-hidden className="text-muted-foreground">/</span>
-        <Link href="/components" className="transition-colors hover:text-muted-foreground">Components</Link>
+        <Link href="/components" className="touch-hit relative transition-colors hover:text-muted-foreground">Components</Link>
       </p>
     </div>
   );

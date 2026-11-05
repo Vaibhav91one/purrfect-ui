@@ -184,8 +184,8 @@ export function ComponentSheet({ item, onClose }: { item: ComponentItem; onClose
         {(tab === "code" || tab === "usage") && <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 z-[5] h-16 bg-linear-to-b from-card via-card/80 to-transparent" />}
         <div className="relative min-h-0 flex-1">
           {tab === "preview" ? (
-            <div ref={stage} data-hover-sound="off" className="absolute inset-x-6 inset-y-16" onPointerEnter={engage} onPointerLeave={release} onFocus={engage} onBlur={release}>
-              <Preview item={item} inert={false} max={1.4} playing={running} opts={opts} />
+            <div ref={stage} data-hover-sound="off" className="absolute inset-x-2 inset-y-16 sm:inset-x-6" onPointerEnter={engage} onPointerLeave={release} onFocus={engage} onBlur={release}>
+              <Preview item={item} inert={false} max={1.4} min={0.5} playing={running} opts={opts} />
             </div>
           ) : tab === "wild" && item.clip ? (
             <div className="absolute inset-0">
