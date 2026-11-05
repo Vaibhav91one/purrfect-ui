@@ -60,7 +60,7 @@ function Source({ slug }: { slug: string }) {
           <PixelWave size={10} gap={3} aria-label="Loading the source" />
         </div>
       ) : (
-        <pre className="absolute inset-0 overflow-y-auto overscroll-contain pl-6 pr-16 pt-20 pb-24 text-xs leading-relaxed">
+        <pre className="absolute inset-0 overflow-y-auto overscroll-contain pl-6 pr-16 pt-20 pb-24 text-xs [@media(max-height:500px)]:pt-16 [@media(max-height:500px)]:pb-6 leading-relaxed">
           {typeof code === "string" ? <Code code={code} /> : <span className="font-mono text-muted-foreground">The source isn&apos;t published yet.</span>}
         </pre>
       )}
@@ -72,7 +72,7 @@ function Source({ slug }: { slug: string }) {
 /** The dialog's Usage tab. */
 function Usage({ slug, install, published }: { slug: string; install: string; published: boolean }) {
   return (
-    <div className="absolute inset-0 overflow-auto overscroll-contain px-6 pt-20 pb-24">
+    <div className="absolute inset-0 overflow-auto overscroll-contain px-6 pt-20 pb-24 [@media(max-height:500px)]:pt-16 [@media(max-height:500px)]:pb-6">
       <div className="mx-auto max-w-2xl">
         <DocSections slug={slug} install={install} published={published} />
       </div>
@@ -174,9 +174,9 @@ export function ComponentSheet({ item, onClose }: { item: ComponentItem; onClose
       }}
       onClose={onClose}
       onClick={(e) => e.target === dialog.current && close()}
-      className="fixed inset-0 m-0 grid size-full max-h-none max-w-none place-items-center overflow-hidden bg-transparent p-4 pt-[max(5rem,calc(env(safe-area-inset-top)+4.5rem))] pb-[max(1rem,env(safe-area-inset-bottom))] text-foreground outline-none"
+      className="fixed inset-0 m-0 grid size-full max-h-none max-w-none place-items-center overflow-hidden bg-transparent p-4 pt-[max(5rem,calc(env(safe-area-inset-top)+4.5rem))] pb-[max(1rem,env(safe-area-inset-bottom))] text-foreground outline-none [@media(max-height:500px)]:pt-[calc(env(safe-area-inset-top)+4.5rem)] [@media(max-height:500px)]:pb-[max(0.75rem,env(safe-area-inset-bottom))] [@media(max-height:500px)]:pl-[max(1rem,env(safe-area-inset-left))] [@media(max-height:500px)]:pr-[max(1rem,env(safe-area-inset-right))]"
     >
-      <section data-sheet-preview className="relative flex h-[min(620px,calc(100svh-6rem))] w-[min(880px,calc(100vw-2rem))] flex-col overflow-hidden rounded-3xl bg-card">
+      <section data-sheet-preview className="relative flex h-[min(620px,calc(100svh-6rem))] w-[min(880px,calc(100vw-2rem))] flex-col [@media(max-height:500px)]:h-[calc(100svh-4.5rem-max(0.75rem,env(safe-area-inset-bottom)))] [@media(max-height:500px)]:w-[min(880px,calc(100vw-2rem-env(safe-area-inset-left)-env(safe-area-inset-right)))] overflow-hidden rounded-3xl bg-card">
         <button type="button" onClick={close} aria-label="Close" className="absolute top-4 right-4 z-10 grid size-11 place-items-center rounded-full text-muted-foreground transition-colors hover:text-foreground active:text-foreground active:bg-foreground/10 focus-visible:outline-2 focus-visible:outline-accent">
           <X className="size-5" />
         </button>
@@ -184,7 +184,7 @@ export function ComponentSheet({ item, onClose }: { item: ComponentItem; onClose
         {(tab === "code" || tab === "usage") && <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 z-[5] h-16 bg-linear-to-b from-card via-card/80 to-transparent" />}
         <div className="relative min-h-0 flex-1">
           {tab === "preview" ? (
-            <div ref={stage} data-hover-sound="off" className="absolute inset-x-2 inset-y-16 sm:inset-x-6" onPointerEnter={engage} onPointerLeave={release} onFocus={engage} onBlur={release}>
+            <div ref={stage} data-hover-sound="off" className="absolute inset-x-2 inset-y-16 sm:inset-x-6 [@media(max-height:500px)]:inset-y-4" onPointerEnter={engage} onPointerLeave={release} onFocus={engage} onBlur={release}>
               <Preview item={item} inert={false} max={1.4} min={0.5} playing={running} opts={opts} />
             </div>
           ) : tab === "wild" && item.clip ? (
@@ -201,7 +201,7 @@ export function ComponentSheet({ item, onClose }: { item: ComponentItem; onClose
           )}
         </div>
         {/* floating over the content, so the component keeps the whole sheet */}
-        <div className="pointer-events-none absolute inset-x-6 bottom-[max(1.5rem,env(safe-area-inset-bottom))] flex items-end">
+        <div className="pointer-events-none absolute inset-x-6 bottom-[max(1.5rem,env(safe-area-inset-bottom))] flex items-end [@media(max-height:500px)]:bottom-3">
           {tab === "preview" && extras.length > 0 ? (
             <div className="pointer-events-auto max-w-[calc(100%-4rem)] rounded-2xl bg-card/80 p-2 backdrop-blur-md">
               <Controls extras={extras} opts={opts} setOpt={(k, v) => setOpts((o) => ({ ...o, [k]: v }))} />
