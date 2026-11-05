@@ -35,6 +35,13 @@ const subscribeResize = (cb: () => void) => {
 let keepSearching = false;
 const handOffSearch = () => (keepSearching = true);
 
+// the height that is really visible: on iOS the on-screen keyboard covers the page without resizing it, so the results list is sized to this
+const subscribeVisual = (cb: () => void) => {
+  visualViewport?.addEventListener("resize", cb);
+  return () => visualViewport?.removeEventListener("resize", cb);
+};
+const useVisibleHeight = () => useSyncExternalStore(subscribeVisual, () => Math.round(visualViewport?.height ?? innerHeight), () => 800);
+
 const useViewportWidth = () => useSyncExternalStore(subscribeResize, () => innerWidth, () => 1280);
 
 /**
@@ -45,6 +52,7 @@ const useViewportWidth = () => useSyncExternalStore(subscribeResize, () => inner
 export function Notch() {
   const reduce = useReducedMotion();
   const vw = useViewportWidth();
+  const vh = useVisibleHeight();
   const { play } = useSound();
   const router = useRouter();
   const pathname = usePathname();
@@ -246,7 +254,7 @@ export function Notch() {
                   }}
                   placeholder="Search…"
                   aria-label="Search"
-                  className="min-w-16 flex-1 bg-transparent text-sm text-white outline-none placeholder:text-white/40"
+                  className="min-w-16 flex-1 bg-transparent text-sm text-white outline-none placeholder:text-white/40 pointer-coarse:text-base" /* 16px on touch: iOS Safari zooms the page on focus below that */
                 />
                 <button
                   type="button"
@@ -280,7 +288,7 @@ export function Notch() {
                   </button>
                 ))}
               </div>
-              <ul className="max-h-[min(20rem,50svh)] overflow-y-auto overscroll-contain px-2 pb-2">
+              <ul style={{ maxHeight: Math.max(120, Math.min(320, vh * 0.5, vh - 156)) }} className="overflow-y-auto overscroll-contain px-2 pb-2">
                 {matches.length === 0 && <li className="px-3 py-3 text-sm text-white/50">Nothing found</li>}
                 {matches.map((l, i) => {
                   const Icon = l.Icon;

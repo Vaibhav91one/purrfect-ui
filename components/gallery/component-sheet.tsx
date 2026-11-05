@@ -174,10 +174,10 @@ export function ComponentSheet({ item, onClose }: { item: ComponentItem; onClose
       }}
       onClose={onClose}
       onClick={(e) => e.target === dialog.current && close()}
-      className="fixed inset-0 m-0 grid size-full max-h-none max-w-none place-items-center overflow-hidden bg-transparent p-4 pt-20 text-foreground outline-none"
+      className="fixed inset-0 m-0 grid size-full max-h-none max-w-none place-items-center overflow-hidden bg-transparent p-4 pt-[max(5rem,calc(env(safe-area-inset-top)+4.5rem))] pb-[max(1rem,env(safe-area-inset-bottom))] text-foreground outline-none"
     >
       <section data-sheet-preview className="relative flex h-[min(620px,calc(100svh-6rem))] w-[min(880px,calc(100vw-2rem))] flex-col overflow-hidden rounded-3xl bg-card">
-        <button type="button" onClick={close} aria-label="Close" className="absolute top-5 right-5 z-10 grid size-10 place-items-center rounded-full text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-2 focus-visible:outline-accent">
+        <button type="button" onClick={close} aria-label="Close" className="absolute top-4 right-4 z-10 grid size-11 place-items-center rounded-full text-muted-foreground transition-colors hover:text-foreground active:text-foreground active:bg-foreground/10 focus-visible:outline-2 focus-visible:outline-accent">
           <X className="size-5" />
         </button>
         <div className="relative min-h-0 flex-1">
@@ -199,7 +199,7 @@ export function ComponentSheet({ item, onClose }: { item: ComponentItem; onClose
           )}
         </div>
         {/* floating over the content, so the component keeps the whole sheet */}
-        <div className="pointer-events-none absolute inset-x-6 bottom-6 flex items-end">
+        <div className="pointer-events-none absolute inset-x-6 bottom-[max(1.5rem,env(safe-area-inset-bottom))] flex items-end">
           {tab === "preview" && extras.length > 0 ? (
             <div className="pointer-events-auto max-w-[calc(100%-4rem)] rounded-2xl bg-card/80 p-2 backdrop-blur-md">
               <Controls extras={extras} opts={opts} setOpt={(k, v) => setOpts((o) => ({ ...o, [k]: v }))} />

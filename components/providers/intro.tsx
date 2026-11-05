@@ -108,11 +108,12 @@ export function Intro() {
       <div ref={cat} style={{ transformOrigin: "0 0", height: CAT_H, width: (CAT_H * 240) / 250 }} className="relative">
         <GradientCat className="h-[220px]" outlineClass="" variant={variant} />
       </div>
+      {/* the prompt is static: an opacity animation on it made iOS Safari paint two stray arcs over the text */}
       <div ref={ui} className="absolute inset-x-0 top-[calc(50%+150px)] text-center text-foreground">
         {phase === "count" ? (
           <p role="status" className="text-5xl font-light tracking-tighter tabular-nums">{count}</p>
         ) : (
-          <p className="text-sm tracking-wide text-foreground" style={{ animation: "intro-pulse 1.6s ease-in-out infinite" }}>tap to enter</p>
+          <p className="text-sm tracking-wide text-foreground">tap to enter</p>
         )}
       </div>
     </div>

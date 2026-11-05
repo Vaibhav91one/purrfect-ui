@@ -4,7 +4,7 @@ import { Notch } from "@/components/notch/notch";
 // catches clicks; its width is capped like every section.
 export function Navbar() {
   return (
-    <header className="pointer-events-none fixed inset-x-0 top-4 z-50 px-4 md:px-8 lg:px-12">
+    <header className="pointer-events-none fixed inset-x-0 top-[max(1rem,env(safe-area-inset-top))] z-50 px-4 md:px-8 lg:px-12">
       <div className="mx-auto flex w-full max-w-[1800px] justify-center">
         <Notch />
       </div>
