@@ -10,11 +10,14 @@ import { Preview } from "./preview";
 import { SiteClip } from "./site-clip";
 import { openSheet } from "./use-sheet";
 
+// how far ahead of the viewport a card mounts its live demo (further off, only the poster is drawn and nothing runs)
+const NEAR = "1000px";
+
 /** What is inside a card: the live preview, its name on hover and the open arrow (hidden where the card is only a stop on a path). */
 export function CardFace({ item, hideLabel = false }: { item: ComponentItem; hideLabel?: boolean }) {
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { amount: 0.3 });
-  const near = useInView(ref, { margin: "200px" }); // the demo is mounted only near the viewport
+  const near = useInView(ref, { margin: NEAR }); // the demo is mounted a screen or so ahead of the viewport, so it is already running when scrolled to
   const reduce = useReducedMotion();
   const staged = !!item.clip || item.nat[0] >= 1000; // a clip, or a demo drawn at a full page's size, sits in the padded stage
   // cards loop while on screen, so you can see what each one does without opening it
@@ -51,7 +54,7 @@ function CardMeta({ name, arrow, label }: { name: string; arrow?: string; label?
 export function LiveCard({ item }: { item: ComponentItem }) {
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { amount: 0.3 });
-  const near = useInView(ref, { margin: "200px" }); // the demo is mounted only near the viewport
+  const near = useInView(ref, { margin: NEAR }); // the demo is mounted a screen or so ahead of the viewport, so it is already running when scrolled to
   const reduce = useReducedMotion();
   return (
     <div
