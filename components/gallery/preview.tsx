@@ -84,7 +84,9 @@ function Fit({ nat, max = 1, min = 0, pad = 24, fill = false, cover = false, slo
             }
           : undefined
       }
-      className="absolute inset-0 overflow-hidden overscroll-contain [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+      // overscroll-contain only in the dialog (slop): on a grid card the box is overflow-hidden with a demo bigger than it, which counts as
+      // a scroll container, and "contain" there made the page's wheel scroll stop dead whenever the pointer was over a card
+      className={`absolute inset-0 overflow-hidden [scrollbar-width:none] [&::-webkit-scrollbar]:hidden${slop ? " overscroll-contain" : ""}`}
     >
       <div ref={inner} style={{ width: nat[0], height: nat[1] }} className="absolute top-1/2 left-1/2 grid -translate-x-1/2 -translate-y-1/2 place-items-center">
         {children}
