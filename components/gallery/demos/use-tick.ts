@@ -7,8 +7,17 @@ export function useTick(playing: boolean | undefined, speed: number, ms: number)
   const [n, setN] = useState(0);
   useEffect(() => {
     if (!playing) return;
-    const id = setInterval(() => setN((v) => v + 1), ms / speed);
-    return () => clearInterval(id);
+    // the first step comes soon (not after a whole interval), so the loop starts moving as the dialog opens or resumes
+    const step = ms / speed;
+    let id: ReturnType<typeof setInterval> | undefined;
+    const first = setTimeout(() => {
+      setN((v) => v + 1);
+      id = setInterval(() => setN((v) => v + 1), step);
+    }, Math.min(step, 500));
+    return () => {
+      clearTimeout(first);
+      clearInterval(id);
+    };
   }, [playing, speed, ms]);
   return n;
 }

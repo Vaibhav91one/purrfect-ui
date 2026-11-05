@@ -61,9 +61,9 @@ export function LiveCard({ item }: { item: ComponentItem }) {
       tabIndex={0}
       aria-label={`Open ${item.name}`}
       data-cuelume-open
-      onClick={() => openSheet(item.slug, ref.current)}
+      onClick={() => openSheet(item.slug)}
       onKeyDown={(e) => {
-        if (e.target === e.currentTarget && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); openSheet(item.slug, ref.current); }
+        if (e.target === e.currentTarget && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); openSheet(item.slug); }
       }}
       className="group relative mb-3 w-full cursor-pointer break-inside-avoid overflow-hidden rounded-[28px] bg-card px-6 py-14 sm:px-10 sm:py-16 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
     >
