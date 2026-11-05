@@ -8,6 +8,7 @@ import { ThemeToggle } from "@/components/notch/theme-toggle";
 import type { ComponentItem } from "@/lib/components-data";
 import { Code } from "./code";
 import { CopyButton, useCopy } from "./copy-button";
+import { PixelWave } from "@/registry/pixel-wave/pixel-wave";
 import { Preview } from "./preview";
 import { SiteClip } from "./site-clip";
 
@@ -26,7 +27,13 @@ function Source({ slug }: { slug: string }) {
       .catch(() => live && setCode(null));
     return () => void (live = false);
   }, [slug]);
-  if (typeof code !== "string") return <p className="rounded-xl bg-muted px-4 py-3 text-sm text-muted-foreground">{code === undefined ? "Loading…" : "The source isn't published yet."}</p>;
+  if (code === undefined)
+    return (
+      <div className="grid place-items-center rounded-xl bg-muted py-10 text-muted-foreground">
+        <PixelWave size={8} gap={2} aria-label="Loading the source" />
+      </div>
+    );
+  if (typeof code !== "string") return <p className="rounded-xl bg-muted px-4 py-3 text-sm text-muted-foreground">The source isn&apos;t published yet.</p>;
   return (
     <div className="relative rounded-xl bg-muted">
       <pre className="max-h-[32rem] overflow-auto p-4 pr-12 text-xs leading-relaxed">

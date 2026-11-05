@@ -3,10 +3,15 @@
 import dynamic from "next/dynamic";
 import { useLayoutEffect, useRef, type ReactNode } from "react";
 import type { ComponentItem } from "@/lib/components-data";
+import { PixelWave } from "@/registry/pixel-wave/pixel-wave";
 import type { DemoProps } from "./demos/demos";
 
 // every demo (and the registry components they draw) is one chunk, fetched when the first preview mounts, not with the page
-const Demo = dynamic(() => import("./demos/demos").then((m) => m.Demo), { ssr: false });
+// until it arrives the box shows the site's loader, not a blank
+const Demo = dynamic(() => import("./demos/demos").then((m) => m.Demo), {
+  ssr: false,
+  loading: () => <PixelWave size={6} gap={2} className="text-muted-foreground" aria-label="Loading the preview" />,
+});
 
 /** Draws children at their natural size and scales them to fit whatever box they sit in. `fill`: scale by width only and stretch the height to the box. */
 function Fit({ nat, max = 1, pad = 24, fill = false, cover = false, children }: { nat: [number, number]; max?: number; pad?: number; fill?: boolean; cover?: boolean; children: ReactNode }) {
