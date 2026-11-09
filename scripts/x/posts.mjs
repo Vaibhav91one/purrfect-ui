@@ -1,41 +1,61 @@
 // One X post per component that has a site clip, in COMPONENTS order (lib/components-data.ts).
-// `pnpm x:today` posts the first one not yet in ~/.purrfectui-x.json.
-const post = (slug, line, tags) => ({ slug, text: `${line}\n\nhttps://purrfectui.com/components/${slug}\n\n${tags}` });
+// `pnpm x:today` posts the first one not yet in ~/.purrfectui-x.json (sticker-pop leads). LAUNCH only runs with --launch.
+// A post is its caption, a blank line, then the link (`text(post)`); the clip is attached under it.
+import { readFileSync } from "node:fs";
+import { homedir } from "node:os";
+import { join } from "node:path";
 
-export const POSTS = [
-  post("roll-button", "Roll button: a pill whose letters roll up from the middle when you hover, with a small lift and a quick press.", "#react #webdev"),
-  post("notch", "A tab that hangs from the top edge of the page with curved shoulders. It drops in once when it mounts.", "#react #ui"),
-  post("hero-reveal", "Hero reveal: the photo frame opens along the y-axis, the headline blurs up, then the button springs in.", "#react #webdev"),
-  post("layered-menu", "Tap the burger and four coloured panels drop in one after another to make a full-screen menu.", "#react #motion"),
-  post("scroll-reveal", "Text that fills in word by word as you scroll it into view. There's a letter-by-letter mode too.", "#react #webdev"),
-  post("hover-preview", "A list of links where hovering a row floats a little preview card that trails your pointer.", "#react #ui"),
-  post("scroll-marquee", "A marquee that moves with the page scroll and flips direction when you scroll back up.", "#react #webdev"),
-  post("roll-link", "Roll link: hover it and the label rolls over on a 3D axis, like a sign flipping to its other side.", "#react #css"),
-  post("parallax-photo", "A full-bleed photo the page scrolls over. The frame moves while the picture inside barely does.", "#react #webdev"),
-  post("curtain-reveal", "Curtain reveal: as you scroll, the page lifts away from a panel underneath, like a curtain going up.", "#react #motion"),
-  post("preloader", "A full-screen intro where a few words swap in turn, then the panel lifts off with a curved edge.", "#react #webdev"),
-  post("cursor-follower", "A dot that follows your mouse and inverts the colours of whatever is under it.", "#react #ui"),
-  post("star-rise", "A liquid-metal asterisk that rises into place, then turns as you scroll.", "#react #webgl"),
-  post("marquee-rows", "Big rows of text. Hover, focus or tap one and it swaps to a coloured band that scrolls sideways.", "#react #webdev"),
-  post("peek-card", "Peek card: on hover the image zooms and an info panel slides up. There's a wide row version as well.", "#react #ui"),
-  post("inertia-gallery", "An endless strip of frames you push with the wheel or a drag. It coasts, snaps where you meant it to, and morphs between a list and a slider.", "#react #webdev"),
-  post("fit-title", "One line of display type sized to fill its container exactly. It rises out of a mask the first time you see it.", "#react #typography"),
-  post("fan-out-cards", "A stack of cards that springs out sideways to its own tilted spots when you scroll it into view.", "#react #motion"),
-  post("shimmer-text", "Shimmer text: a band of light sweeps across a label, for when something is running.", "#react #ui"),
-  post("photo-wordmark", "A huge wordmark filled with a photo, cropped at the bottom, that rises out of the crop as it scrolls in.", "#react #webdev"),
-  post("quote-cycle", "Lines that pop up, hold for a beat, then shrink away as the next one drops in.", "#react #motion"),
-  post("column-hop", "A small board where a card hops between columns on a loop: its row collapses, the next one opens, and it rises in.", "#react #ui"),
-  post("line-rise", "Lines of text slide up one after another from behind a clipping edge when the block comes into view.", "#react #webdev"),
-  post("sticker-pop", "A sticker that pops in with a springy overshoot to its own tilt once the image loads, and shrinks and fades on the way out.", "#react #motion"),
-  post("swap-card", "A product card whose photo crossfades and zooms to a second shot on hover. The badge wobbles and turns.", "#react #ui"),
-  post("sticky-crossfade", "A sticky picture next to a column of text. Each block that passes the middle of the screen crossfades it to the next picture.", "#react #webdev"),
-  post("spring-chips", "Pill labels with icon tiles that spring in around a centrepiece, one at a time, when you scroll to them.", "#react #motion"),
-  post("voice-bars", "Thin bars jumping between heights on a staggered loop. Put it next to a mic that's listening.", "#react #ui"),
-  post("announce-strip", "A thin announcement strip whose text loops without a visible seam. It slides away when you scroll down or close it.", "#react #webdev"),
-  post("grid-disclosure", "An accordion that opens one panel at a time to its own height using grid rows, so nothing gets measured in JS.", "#react #css"),
-  post("flip-text", "Flip text: letters flip over on the X axis as your pointer passes over them.", "#react #webdev"),
-  post("spin-mark", "A mark that pops in with a spring, then either spins forever or turns as you scroll.", "#react #motion"),
-  post("asterisk-rows", "Rows of big asterisks that pop in, drift both ways with the scroll and turn as you go.", "#react #webdev"),
-  post("arrow-link", "A big arrow link that rises out of a mask on first view. Hover or focus it and the arrow slides while the label rolls over.", "#react #ui"),
-  post("fill-button", "An outlined pill whose fill sweeps in from the left on hover and out to the right when you leave.", "#react #css"),
+// COMPONENTS.length, counted from the source so it stays right as components are added.
+const count = readFileSync(new URL("../../lib/components-data.ts", import.meta.url), "utf8").match(/^ {2}item\(/gm).length;
+
+export const LAUNCH = {
+  slug: "launch",
+  caption: `purrfect ui is out. ${count} animated react components, all free.\ncopy one file or add it with one shadcn command: https://purrfectui.com`,
+  clip: join(homedir(), "Movies/purrfectui-launch.mp4"),
+};
+
+export const text = (post) => `${post.caption}\n\ncheck it out at purrfectui.com`;
+
+const ALL = [
+  { slug: "load-preloader", caption: "a big 0 to 100 count that follows the real loading, then the cover fades away" },
+  { slug: "sticker-pop", caption: "made stickers that pop in with a little overshoot and land tilted" },
+  { slug: "roll-button", caption: "letters roll up from the middle when you hover this pill" },
+  { slug: "notch", caption: "a tab hanging off the top edge, curved shoulders and all" },
+  { slug: "hero-reveal", caption: "hero intro. the photo opens up, then the headline blurs in" },
+  { slug: "layered-menu", caption: "made a burger menu that drops in as four coloured panels" },
+  { slug: "scroll-reveal", caption: "scroll and the text fills in word by word" },
+  { slug: "hover-preview", caption: "hover a row and a little preview tags along with your cursor" },
+  { slug: "scroll-marquee", caption: "a marquee hooked to your scroll. go back up and it flips" },
+  { slug: "roll-link", caption: "links that roll over like a little sign flipping" },
+  { slug: "parallax-photo", caption: "the page scrolls over this photo while the picture barely moves" },
+  { slug: "curtain-reveal", caption: "you scroll and the page lifts away like a curtain going up" },
+  { slug: "preloader", caption: "intro screen: a few words swap in, then it lifts off on a curve" },
+  { slug: "cursor-follower", caption: "cursor dot that inverts whatever it passes over" },
+  { slug: "star-rise", caption: "rising liquid asterisk" },
+  { slug: "marquee-rows", caption: "big type rows. hover one and it turns into a moving colour band" },
+  { slug: "peek-card", caption: "been making peek cards, the image zooms and the details slide up" },
+  { slug: "inertia-gallery", caption: "push it with the wheel and it coasts, then snaps where you meant" },
+  { slug: "fit-title", caption: "one line of type sized to fill the box exactly" },
+  { slug: "fan-out-cards", caption: "stacked cards fanning out as they scroll into view" },
+  { slug: "shimmer-text", caption: "shimmer label for when something's still running" },
+  { slug: "photo-wordmark", caption: "giant wordmark with a photo inside, rising out of its crop" },
+  { slug: "quote-cycle", caption: "quotes popping up one at a time, each shrinking away for the next" },
+  { slug: "column-hop", caption: "tiny board where a card keeps hopping between columns" },
+  { slug: "line-rise", caption: "lines slide up from behind an edge, one after another" },
+  { slug: "swap-card", caption: "product card that swaps to a second shot on hover, and the badge wobbles" },
+  { slug: "sticky-crossfade", caption: "sticky image beside the text, crossfading as you read down" },
+  { slug: "spring-chips", caption: "pill chips springing in around the centre one by one" },
+  { slug: "voice-bars", caption: "listening bars for a mic 🎙️" },
+  { slug: "announce-strip", caption: "announcement bar, loops with no seam and slides off when you scroll" },
+  { slug: "grid-disclosure", caption: "accordion where every panel opens to exactly its own height" },
+  { slug: "flip-text", caption: "run your pointer across and the letters flip over" },
+  { slug: "spin-mark", caption: "a mark that springs in and then just keeps spinning" },
+  { slug: "asterisk-rows", caption: "rows of asterisks drifting both ways while you scroll ✳️" },
+  { slug: "arrow-link", caption: "big arrow link. on hover the arrow slides and the label rolls over" },
+  { slug: "fill-button", caption: "outline pill that fills in from the left and drains out the right" },
+  { slug: "mithai-box", caption: "a little late for diwali, but the mithai box is here\n\nuntie the ribbon, lift the lid, tap a sweet to see its name. seven boxes to pick from" },
 ];
+
+// Mapinly first, top of its page to the bottom (intro, hero, sections, footer, then the event page); the rest keep COMPONENTS order.
+const MAPINLY = ["star-rise", "load-preloader", "line-rise", "marquee-rows", "peek-card", "asterisk-rows", "spin-mark", "parallax-photo"];
+export const POSTS = [...MAPINLY.map((slug) => ALL.find((p) => p.slug === slug)), ...ALL.filter((p) => !MAPINLY.includes(p.slug))];

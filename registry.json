@@ -1041,6 +1041,32 @@
         "tailwindcss": ">=4",
         "tokens": "shadcn (background, foreground, muted, border, ...): run shadcn init first"
       }
+    },
+    {
+      "name": "mithai-box",
+      "type": "registry:ui",
+      "title": "Mithai box",
+      "description": "A 3D Diwali sweet box in three.js: the lid swings open on a spring, a warm light comes up and the sweets hop in their cups.",
+      "dependencies": [
+        "three@^0.187.0"
+      ],
+      "devDependencies": [
+        "@types/three@^0.187.0"
+      ],
+      "registryDependencies": [
+        "utils"
+      ],
+      "files": [
+        {
+          "path": "registry/mithai-box/mithai-box.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "meta": {
+        "react": ">=19",
+        "tailwindcss": ">=4",
+        "tokens": "shadcn (background, foreground, muted, border, ...): run shadcn init first"
+      }
     }
   ]
 }

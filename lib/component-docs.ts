@@ -941,6 +941,43 @@ const box = useRef<HTMLDivElement>(null);
       "Reduced motion: a 0.2s fade at the final tilt and size, no scale or swing.",
     ],
   },
+  "mithai-box": {
+    usage: `import { MithaiBox } from "@/components/ui/mithai-box";
+
+<MithaiBox className="h-96 w-[32rem]" />
+
+// a shop format: the dabba with its flower lid (reduced motion: it still opens, with no bounce, float or hop)
+<MithaiBox format="dabba" />
+
+// controlled, kraft, your own sweets and note
+<MithaiBox open={open} onOpenChange={setOpen} variant="kraft" sweets={["laddoo", "laddoo", "katli"]} message="Happy Diwali" />`,
+    props: [
+      { name: "open", type: "boolean", description: "Controlled open state. Leave it out and the box toggles itself on click." },
+      { name: "defaultOpen", type: "boolean", default: "false", description: "Starts open (uncontrolled)." },
+      { name: "onOpenChange", type: "(open: boolean) => void", description: "Called on every click, Enter or Space with the state it asks for." },
+      { name: "variant", type: '"royal" | "peacock" | "kraft" | "velvet"', default: '"royal"', description: "Maroon with a foil mandala, peacock blue with foil feathers, embossed kraft with twine, or velvet with zari and a ribbon." },
+      { name: "format", type: '"classic" | "tray" | "diamond" | "rajwadi" | "arch" | "dabba" | "rigid"', default: '"classic"', description: "The box. classic is the hinged box (finish and shape apply to it); the rest copy real Diwali boxes and their prints: a net-covered tray, a diamond box, a Rajwadi carry box, an arch-window hamper, a filigree dabba, a rigid box with a ribbon." },
+      { name: "shape", type: '"square" | "long" | "hexagon" | "octagon" | "round"', default: '"square"', description: "The plan: square (9 cups), long (8), or hexagon, octagon and round (7, round a centre cup). The art wraps every shape." },
+      { name: "sweets", type: '("laddoo" | "katli" | "jalebi" | "barfi" | "gulabjamun" | "milkcake" | "sandesh")[]', default: "a fresh random mix of all seven", description: "The nine paper cups, row by row from the back; leave it out for a shuffled mix on every mount: beaded motichoor laddoo with almond slivers, kaju katli diamonds under torn silver vark, a sugar-crusted jalebi coil, glossy gulab jamun in a pool of syrup, Alwar milk cake with its caramel heart, grainy rolled sandesh with pistachio and saffron, khoa barfi with pistachio crumbs. Extras are dropped; fewer leave empty cups." },
+      { name: "message", type: "string", default: '"Shubh Deepavali"', description: "Written inside the lid, one word per line. Also the fallback text without WebGL." },
+      { name: "paused", type: "boolean", default: "false", description: "Stops the idle float, so nothing redraws until the box is touched." },
+      { name: "hint", type: "string | false", default: '"Open the box"', description: "A hand-written note with a scribbled arrow that keeps redrawing itself; it fades when the box opens and writes itself in again whenever it is shut. Its font is var(--mithai-hint-font), falling back to the system cursive." },
+      { name: "sound", type: "boolean", default: "true", description: "Its own Web Audio sounds: a click, the hinge creaking with its speed, a knock on the open stop, a thud shutting and a chime with reverb. They start on the first click." },
+    ],
+    behaviors: [
+      "Reduced motion: the lid glides open and shut on a stiff spring, with no bounce, jolt, float, tilt, hop or dust; the hint shows already drawn.",
+      "Every shape is built in code with three.js: no model files to host. three loads only when the box mounts.",
+      "The lid is a hinge with weight: a click lifts it past upright and it falls onto its stop with a small bounce; closing lowers it and it drops shut with a thud that jolts the box. Hover lifts it a touch.",
+      "As it opens a warm light comes up, a chime rings, the sweets hop in turn and gold dust bursts out.",
+      "Open, a sweet under the pointer springs up out of its cup. Click or tap one to pick it: it rises higher, grows and turns slowly while its name is written in at the top left, like the hint. Click it again, click elsewhere or press Esc to put it back (the box stays open).",
+      "The shop formats open their own way on a springy hinge: the tray's net lifts and fades, the diamond's four flaps unfold like petals, the Rajwadi's top panels swing out, the hamper's two top flaps fold up into its handle, the dabba's lid lifts off and stands behind the tin, the rigid box's lid lifts off and rests behind.",
+      "A ribbon comes undone before its lid moves: the bow's loops pull into the knot and lift away, the bands loosen and fade. Shutting, the lid lands first and the ribbon ties itself again.",
+      "Changing the format, finish, shape or sweets builds the new box shut, so it can be opened again.",
+      "Dressed like a sweet shop's box: gold edging, a toran on the lid's rim, jharokha arches on the walls, a gold tray with a place for each sweet; a greeting plate (royal), a tassel (velvet) or a twine tag (kraft).",
+      "It draws only while something moves and while on screen, and frees every geometry, material and texture on unmount.",
+      "A button with aria-expanded. Without WebGL the message shows as text.",
+    ],
+  },
   "spring-chips": {
     usage: `import { SpringChips } from "@/components/ui/spring-chips";
 import { Mic, Banknote } from "lucide-react";

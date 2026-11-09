@@ -11,6 +11,7 @@ import { buildPrompt } from "@/lib/component-prompt";
 import { Code } from "./code";
 import { CopyButton, useCopy } from "./copy-button";
 import { DocSections } from "./doc-sections";
+import { NotchSelect } from "./notch-select";
 import { Segmented } from "./segmented";
 import { Preview } from "./preview";
 import { PixelWave } from "@/registry/pixel-wave/pixel-wave";
@@ -33,9 +34,10 @@ function Controls({ extras, opts, setOpt }: { extras: Extra[]; opts: Record<stri
   return (
     <div className="flex flex-wrap items-center gap-x-5 gap-y-3">
       {extras.map((x) => (
-        <div key={x.key} className="flex items-center gap-3">
+        // min-w-0 + its own scroll: a long segmented (seven options) scrolls in its row on a phone instead of widening the sheet
+        <div key={x.key} className="flex min-w-0 max-w-full items-center gap-3">
           <span className={rowLabel}>{x.label}</span>
-          {x.kind === "switch" ? <Switch on={!!opts[x.key]} onChange={(v) => setOpt(x.key, v)} label={x.label} /> : <Segmented options={x.options} value={String(opts[x.key])} onChange={(v) => setOpt(x.key, v)} />}
+          {x.kind === "switch" ? <Switch on={!!opts[x.key]} onChange={(v) => setOpt(x.key, v)} label={x.label} /> : <div className="min-w-0 overflow-x-auto [scrollbar-width:none]"><Segmented options={x.options} value={String(opts[x.key])} onChange={(v) => setOpt(x.key, v)} /></div>}
         </div>
       ))}
     </div>
@@ -118,6 +120,10 @@ export function ComponentSheet({ item, onClose }: { item: ComponentItem; onClose
   const running = playing && (tab !== "preview" || item.ambient || !engaged);
   const extras = item.extras ?? [];
   const [opts, setOpts] = useState<Record<string, string | boolean>>(() => Object.fromEntries(extras.map((x) => [x.key, x.default])));
+  const setOpt = (k: string, v: string | boolean) => setOpts((o) => ({ ...o, [k]: v }));
+  // `when`: a control shows only while the other options match it (Finish and Shape belong to the classic box alone)
+  const live = extras.filter((x) => !x.when || Object.entries(x.when).every(([k, v]) => opts[k] === v));
+  const selects = live.filter((x) => x.kind === "select"), rest = live.filter((x) => x.kind !== "select");
   const share = useCopy(`${SITE_URL}/components/${item.slug}`);
   const prompt = useCopy(buildPrompt(item), `Setup prompt for ${item.name}`);
 
@@ -186,7 +192,13 @@ export function ComponentSheet({ item, onClose }: { item: ComponentItem; onClose
       onClick={(e) => e.target === dialog.current && close()}
       className="fixed inset-0 m-0 grid size-full max-h-none max-w-none place-items-center overflow-hidden bg-transparent p-4 pt-[max(5rem,calc(env(safe-area-inset-top)+4.5rem))] pb-[max(1rem,env(safe-area-inset-bottom))] text-foreground outline-none [@media(max-height:500px)]:pt-[calc(env(safe-area-inset-top)+4.5rem)] [@media(max-height:500px)]:pb-[max(0.75rem,env(safe-area-inset-bottom))] [@media(max-height:500px)]:pl-[max(1rem,env(safe-area-inset-left))] [@media(max-height:500px)]:pr-[max(1rem,env(safe-area-inset-right))]"
     >
-      <section data-sheet-preview className="relative flex h-[min(620px,calc(100svh-6rem))] w-[min(880px,calc(100vw-2rem))] flex-col [@media(max-height:500px)]:h-[calc(100svh-4.5rem-max(0.75rem,env(safe-area-inset-bottom)))] [@media(max-height:500px)]:w-[min(880px,calc(100vw-2rem-env(safe-area-inset-left)-env(safe-area-inset-right)))] overflow-hidden rounded-3xl bg-card">
+      <section data-sheet-preview className="relative isolate flex h-[min(620px,calc(100svh-6rem))] w-[min(880px,calc(100vw-2rem))] flex-col [@media(max-height:500px)]:h-[calc(100svh-4.5rem-max(0.75rem,env(safe-area-inset-bottom)))] [@media(max-height:500px)]:w-[min(880px,calc(100vw-2rem-env(safe-area-inset-left)-env(safe-area-inset-right)))] overflow-hidden rounded-3xl bg-card">
+        {/* the component's choices, top left, dressed like the extras below: they drop over the stage, not under it */}
+        {tab === "preview" && selects.length > 0 && (
+          <div className="absolute top-4 left-4 z-20 flex max-w-[calc(100%-5rem)] flex-wrap gap-1.5 sm:gap-2">
+            {selects.map((x) => x.kind === "select" && <NotchSelect key={x.key} label={x.label} options={x.options} value={String(opts[x.key])} onChange={(v) => setOpt(x.key, v)} />)}
+          </div>
+        )}
         <button type="button" onClick={close} aria-label="Close" className="absolute top-4 right-4 z-10 grid size-11 place-items-center rounded-full text-muted-foreground transition-colors hover:text-foreground active:text-foreground active:bg-foreground/10 focus-visible:outline-2 focus-visible:outline-accent">
           <X className="size-5" />
         </button>
@@ -212,9 +224,9 @@ export function ComponentSheet({ item, onClose }: { item: ComponentItem; onClose
         </div>
         {/* floating over the content, so the component keeps the whole sheet */}
         <div className="pointer-events-none absolute inset-x-6 bottom-[max(1.5rem,env(safe-area-inset-bottom))] flex items-end [@media(max-height:500px)]:bottom-3">
-          {tab === "preview" && extras.length > 0 ? (
+          {tab === "preview" && rest.length > 0 ? (
             <div className="pointer-events-auto max-w-[calc(100%-4rem)] rounded-2xl bg-card/80 p-2 backdrop-blur-md">
-              <Controls extras={extras} opts={opts} setOpt={(k, v) => setOpts((o) => ({ ...o, [k]: v }))} />
+              <Controls extras={rest} opts={opts} setOpt={setOpt} />
             </div>
           ) : null}
         </div>

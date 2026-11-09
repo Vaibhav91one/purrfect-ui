@@ -10,7 +10,8 @@ export type Clip = { label: string; href: string; w: number; h: number };
 const CLIPS: Record<string, Clip> = clips;
 
 /** An extra control in the dialog, on top of the Loop switch and Speed slider every component gets. */
-export type Extra = { key: string; label: string } & ({ kind: "segmented"; options: string[]; default: string } | { kind: "switch"; default: boolean });
+/** `when` shows the control only while the other options match it. */
+export type Extra = { key: string; label: string; when?: Record<string, string> } & ({ kind: "segmented" | "select"; options: string[]; default: string } | { kind: "switch"; default: boolean });
 
 export type ComponentItem = {
   slug: string;
@@ -59,6 +60,7 @@ const PAUSABLE = new Set([
   "drawer-menu",
   "line-rise",
   "sticker-pop",
+  "mithai-box",
   "swap-card",
   "voice-bars",
   "word-stream",
@@ -73,7 +75,7 @@ const PAUSABLE = new Set([
   "announce-strip",
 ]);
 const AMBIENT = new Set(["pixel-wave", "shimmer-text", "spin-mark", "voice-bars"]);
-const NAT_PHONE: Record<string, [number, number]> = { "fan-out-cards": [390, 520] };
+const NAT_PHONE: Record<string, [number, number]> = { "fan-out-cards": [390, 520], "mithai-box": [360, 520] };
 const FILL = new Set(["scroll-marquee", "asterisk-rows", "photo-wordmark", "line-rise", "sticky-crossfade", "parallax-photo"]);
 
 const item = (slug: string, name: string, category: string, description: string, nat: [number, number] = [420, 300], extras?: Extra[]): ComponentItem => ({
@@ -137,6 +139,7 @@ export const COMPONENTS: ComponentItem[] = [
   item("step-ring", "Step ring", "Display", "A numbered step badge: a quarter-arc spins for the current step, a tick for done, a dash for skipped.", [800, 560]),
   item("pixel-wave", "Pixel wave", "Text", "A 3x3 pixel loader whose cells fade on staggered delays, so a wavefront sweeps across the grid.", [240, 240]),
   item("word-stream", "Word stream", "Text", "A chat reply that types in word by word behind a caret, then tells you when it is done.", [800, 560]),
+  item("mithai-box", "Mithai box", "Display", "A 3D Diwali sweet box in three.js: the lid swings open on a spring, a warm light comes up and the sweets hop in their cups.", [720, 540], [{ key: "format", label: "Format", kind: "select", options: ["Classic", "Tray", "Diamond", "Rajwadi", "Arch", "Dabba", "Rigid"], default: "Classic" }, { key: "variant", label: "Finish", kind: "select", options: ["Royal", "Peacock", "Kraft", "Velvet"], default: "Royal", when: { format: "Classic" } }, { key: "shape", label: "Shape", kind: "select", options: ["Square", "Long", "Hexagon", "Octagon", "Round"], default: "Square", when: { format: "Classic" } }]),
   item("flip-text", "Flip text", "Text", "Text whose letters flip over on the X axis under the pointer.", [560, 300]),
   item("fade-lines", "Fade lines", "Text", "Text whose lines rise and fade in one after another as it scrolls into view.", [560, 300]),
   item("spin-mark", "Spin mark", "Display", "A mark that pops in with a spring, then spins forever or turns as you scroll.", [448, 320]),
