@@ -1,12 +1,12 @@
-// Prepares today's X post: opens the compose intent with the text filled in and reveals the clip in Finder.
+// Prepares today's X post: opens the compose intent with the caption and link, and reveals the clip in Finder.
 // You attach the mp4 and press Post. Nothing here talks to X. State: ~/.purrfectui-x.json.
-//   node scripts/x/today.mjs [--dry] [--slug <slug>] [--list]
+//   node scripts/x/today.mjs [--dry] [--slug <slug>] [--launch] [--list]
 import { execFileSync } from "node:child_process";
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { POSTS } from "./posts.mjs";
+import { LAUNCH, POSTS, text } from "./posts.mjs";
 
 const ROOT = fileURLToPath(new URL("../..", import.meta.url));
 const STATE = join(homedir(), ".purrfectui-x.json");
@@ -24,7 +24,10 @@ if (args.includes("--list")) {
   process.exit(0);
 }
 
-const post = forced ? POSTS.find((p) => p.slug === forced) : POSTS.find((p) => !done.has(p.slug));
+const post =
+  args.includes("--launch") ? LAUNCH
+  : forced ? POSTS.find((p) => p.slug === forced)
+  : POSTS.find((p) => !done.has(p.slug));
 if (forced && !post) {
   console.error(`no post for "${forced}"`);
   process.exit(1);
@@ -35,14 +38,16 @@ if (!post) {
   process.exit(0);
 }
 
-const url = `https://x.com/intent/post?text=${encodeURIComponent(post.text)}`;
-const clip = join(ROOT, "public/previews", `${post.slug}.mp4`);
-console.log(`${post.slug}\n\n${post.text}\n\n${url}\n${clip}`);
+const launch = post === LAUNCH;
+const body = launch ? post.caption : text(post);
+const url = `https://x.com/intent/post?text=${encodeURIComponent(body)}`;
+const clip = post.clip ?? join(ROOT, "public/previews", `${post.slug}.mp4`);
+console.log(`${post.slug}\n\n${body}\n\n${url}\n${clip}`);
 if (dry) process.exit(0);
 
 execFileSync("open", [url]);
 if (existsSync(clip)) execFileSync("open", ["-R", clip]);
-else console.warn(`missing clip: ${clip}`);
+else console.warn(`missing clip: ${clip}${launch ? " (run pnpm x:montage)" : ""}`);
 const date = new Date().toLocaleDateString("en-CA"); // local YYYY-MM-DD
 state.posted.push({ slug: post.slug, date });
 writeFileSync(STATE, JSON.stringify(state, null, 2) + "\n");

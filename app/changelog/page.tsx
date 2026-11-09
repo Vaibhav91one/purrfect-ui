@@ -14,6 +14,7 @@ export const metadata = {
 
 // newest first; add an entry when a component ships
 const ENTRIES = [
+  { date: "2026-11-09", title: "Mithai box", items: ["New: Mithai box. A 3D gift box of Indian sweets: untie the ribbon, lift the lid, tap a sweet to see its name. Seven boxes to pick from."] },
   { date: "2026-10-29", title: "Docs, changelog and categories", items: ["Install docs, this changelog and an about page.", "A page per category: Input, Navigation, Layout, Display, Text."] },
   {
     date: "2026-10-28",

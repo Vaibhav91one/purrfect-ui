@@ -38,6 +38,7 @@
     "check:behaviour": "node scripts/check/behaviour.mjs",
     "check:budget": "node scripts/check/budget.mjs",
     "x:today": "node scripts/x/today.mjs",
+    "x:montage": "node scripts/x/montage.mjs",
     "x:install": "cp scripts/x/com.purrfectui.x-today.plist ~/Library/LaunchAgents/ && launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.purrfectui.x-today.plist",
     "x:uninstall": "launchctl bootout gui/$(id -u)/com.purrfectui.x-today; rm -f ~/Library/LaunchAgents/com.purrfectui.x-today.plist"
   },
@@ -53,13 +54,15 @@
     "react-dom": "19.3.0",
     "sonner": "^2.0.8",
     "sugar-high": "^2.6.4",
-    "tailwind-merge": "^3.7.0"
+    "tailwind-merge": "^3.7.0",
+    "three": "^0.187.0"
   },
   "devDependencies": {
     "@tailwindcss/turbopack": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@types/three": "^0.187.0",
     "eslint": "^9",
     "eslint-config-next": "16.4.3",
     "playwright-core": "^1.64.1",

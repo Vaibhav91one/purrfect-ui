@@ -43,6 +43,7 @@ import { AsteriskRowsScene } from "@/registry/asterisk-rows/demo";
 import ArrowLinkDemo from "@/registry/arrow-link/demo";
 import RollLinkDemo from "@/registry/roll-link/demo";
 import StickerPopDemo from "@/registry/sticker-pop/demo";
+import MithaiBoxDemo from "@/registry/mithai-box/demo";
 import SwapCardDemo from "@/registry/swap-card/demo";
 import SpringChipsDemo from "@/registry/spring-chips/demo";
 import VoiceBarsDemo from "@/registry/voice-bars/demo";
@@ -95,7 +96,7 @@ function ButtonLoop({ playing, speed, opts }: DemoProps) {
   const n = useTick(playing, speed, 1500) % 2;
   return (
     <div className="relative grid h-[300px] w-[420px] place-items-center overflow-hidden rounded-2xl">
-      <Button variant={opts.variant === "Ghost" ? "ghost" : "solid"} size={opts.size === "Large" ? "lg" : "md"} data-hover={n === 1 ? "true" : undefined} data-cuelume-tap="" icon={<Rocket className="size-4" />}>
+      <Button variant={opts.variant === "Ghost" ? "ghost" : "solid"} size={opts.size === "Large" ? "lg" : "md"} data-hover={playing && n === 1 ? "true" : undefined} data-cuelume-tap="" icon={<Rocket className="size-4" />}>
         Ship it
       </Button>
     </div>
@@ -417,7 +418,8 @@ function LoadPreloaderLoop({ playing, speed }: DemoProps) {
 
 // the card swaps to its second photo and back every 1.6s, the way a pointer passing over it would
 function SwapCardLoop({ playing, speed }: DemoProps) {
-  return <SwapCardDemo hover={useTick(playing, speed, 1600) % 2 === 1} />;
+  const n = useTick(playing, speed, 1600);
+  return <SwapCardDemo hover={!!playing && n % 2 === 1} />; // paused (or hovered) it lets go, so a real pointer drives it
 }
 
 // the box scrolls the about page, so the sticky picture crossfades as each block passes its middle
@@ -477,6 +479,7 @@ export const DEMOS: Record<string, (p: DemoProps) => ReactNode> = {
   "column-hop": ColumnHopDemo,
   "line-rise": LineRiseLoop,
   "sticker-pop": ({ playing, speed }: DemoProps) => <StickerPopDemo playing={playing} speed={speed} />,
+  "mithai-box": ({ playing, opts }: DemoProps) => <MithaiBoxDemo playing={playing} variant={String(opts.variant ?? "Royal").toLowerCase() as "royal"} shape={String(opts.shape ?? "Square").toLowerCase() as "square"} format={String(opts.format ?? "Classic").toLowerCase() as "classic"} compact={!!opts.compact} />,
   "swap-card": SwapCardLoop,
   "sticky-crossfade": StickyCrossfadeLoop,
   "parallax-photo": ParallaxPhotoLoop,

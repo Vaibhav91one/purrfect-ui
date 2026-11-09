@@ -21,7 +21,7 @@
 
 <br />
 
-purrfect ui is a shadcn registry built with Next.js, Tailwind CSS and TypeScript. Every component is animated (Motion, or GSAP for Magnetic, or plain CSS and rAF), honors `prefers-reduced-motion` and installs straight into your codebase. You own the code, so there is no package to depend on and you can restyle anything. The site itself plays synthesized sound cues; the installed components stay silent. The components are extracted from my own projects (Poinu, Mapinly, Bountydesk, portfolio).
+purrfect ui is a shadcn registry built with Next.js, Tailwind CSS and TypeScript. Every component is animated (Motion, or GSAP for Magnetic, or plain CSS and rAF), honors `prefers-reduced-motion` and installs straight into your codebase. You own the code, so there is no package to depend on and you can restyle anything. The site itself plays synthesized sound cues; the installed components stay silent, except Mithai box, which synthesizes its own with Web Audio (`sound={false}` turns them off). The components are extracted from my own projects (Poinu, Mapinly, Bountydesk, portfolio).
 
 ### Requirements
 
@@ -112,6 +112,7 @@ Where sound is wired today:
 | Notch theme and sound toggles | `toggle`, `tap` |
 | Hero "Browse components" link | `navigate` (`data-cuelume-navigate`) |
 | Copy buttons (the whole hero install pill, path view, component sheet) | `success`, subtle, only after the copy worked |
+| Mithai box demo (not Cuelume: its own Web Audio click, hinge creak, knocks, thud and reverb chime; follows the Sound switch, hover cue off) | `sound={enabled}` |
 
 Pick the cue that matches the action (copy = `success` subtle, route change = `navigate`, switch = `toggle`). Cat sounds (purr, meow, steps) are parked in `lib/cat-sounds.ts`, not wired in.
 
@@ -125,7 +126,9 @@ A component that came from a real site can show a short clip of it running there
 
 ### Daily X post
 
-`pnpm x:today` prepares one post a day, one component each, for every component with a clip (texts in `scripts/x/posts.mjs`). It opens X's compose page with the text and link filled in and shows the component's mp4 in Finder; you attach the mp4 and press Post. It never posts by itself. `--dry` prints the next post without opening or recording it, `--slug <slug>` picks one, `--list` shows what has been posted.
+`pnpm x:today` gets one X post ready a day, one component at a time for every component with a clip, starting with sticker-pop (captions in `scripts/x/posts.mjs`). Each post is the caption, a blank line, then "check it out at purrfectui.com". It opens X's compose page with that text filled in and shows the component's mp4 in Finder; attach the mp4 and press Post. It never posts by itself. `--dry` prints the next post without opening or recording anything, `--slug <slug>` picks a component, `--launch` opens the launch post with the reel below, and `--list` shows what has been posted.
+
+`pnpm x:montage` rebuilds the launch reel at `~/Movies/purrfectui-launch.mp4`, a 20s reel of fast cuts from the site clips, word cards and the cat. It is a HyperFrames project in `scripts/x/launch-reel/`: `index.html` holds the cuts (`data-media-start` picks each clip's moment) and one `<audio>` per sound, and `compositions/` holds the word cards and end card. The build copies the clips it uses into `assets/clips`, renders the sound effects with `render-cues.mjs` (cuelume's own recipes, rendered offline in headless Chrome to WAV), then renders the video. To change a cut, edit `index.html` or open the project with `npx hyperframes preview`. Sounds: cuelume (MIT).
 
 `pnpm x:install` adds a LaunchAgent that runs it at 10:00 every day (or on wake if the Mac was asleep); `pnpm x:uninstall` removes it. What has been posted is kept in `~/.purrfectui-x.json`, and the log is `~/Library/Logs/purrfectui-x.log`. The paths in `scripts/x/run.sh` and the plist are this machine's; edit them if node or the repo moves.
 
