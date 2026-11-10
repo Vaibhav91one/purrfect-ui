@@ -45,7 +45,7 @@ export const CLIPS = {
   // framed on its sticker pile: the stickers pop in one by one while the counter runs, then leave in reverse;
   // it ends before the loader wipes up, and its still is the full pile (poster: seconds into the clip)
   "sticker-pop": { site: `${POINU}/about`, interact: "load", fresh: true, realtime: true, start: "!!document.querySelector('.ui-ld')", focus: ".ui-ld > div.absolute", zoom: 1.8, seconds: 1.4, poster: 1.2, label: "poinu.vercel.app" },
-  "inertia-gallery": { site: POINU, target: '[role=group][aria-label="Work view"] button:last-child', interact: "click", realtime: true, stay: 2.4, zoom: 1, session: PS, label: "poinu.vercel.app" },
+  "inertia-gallery": { site: POINU, target: '[role=group][aria-label="Work view"] button:last-child', interact: "click", realtime: true, dpr: 1, clickAt: 4.6, wheels: [[1.4, 1.4, 0, 2400], [5.8, 1.4, 0, 2600]], stay: 3.6, zoom: 1, session: PS, label: "poinu.vercel.app" },
   "fit-title": { site: `${POINU}/shop`, interact: "load", realtime: true, start: "!!document.querySelector('h1.ui-mk')", seconds: 2.5, session: PS, label: "poinu.vercel.app" },
   // Armour, batch 3
   // recorded centred on the phone (load with a target) so the cards fan out in place, the camera pushing in as they land
