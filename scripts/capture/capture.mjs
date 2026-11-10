@@ -114,7 +114,8 @@ function planFor(clip, m) {
   const tBack = tPull + T.pull;
   const end = tBack + T.back + T.rest;
   const Z = clip.zoom ?? m.Z;
-  const presses = mode === "click" ? [[tPush + T.push + 0.2, tPush + T.push + 0.4], ...(clip.toggle ? [[tPush + T.push + 0.2 + clip.toggle, tPush + T.push + 0.4 + clip.toggle]] : [])] : [];
+  const c0 = clip.clickAt ?? tPush + T.push + 0.2; // clickAt: seconds into the clip, for a click that comes after a wheel gesture
+  const presses = mode === "click" ? [[c0, c0 + 0.2], ...(clip.toggle ? [[c0 + clip.toggle, c0 + 0.2 + clip.toggle]] : [])] : [];
   return {
     end,
     y: (t) => lerp(0, m.dest, seg(t, T.hold, T.scroll)) - lerp(0, m.dest, seg(t, tBack, T.back)),
@@ -133,7 +134,7 @@ function planFor(clip, m) {
 async function render(slug, clip, base, browser) {
   const mode = clip.interact ?? "hover";
   const dir = mkdtempSync(path.join(tmpdir(), `clip-${slug}-`));
-  const ctx = await browser.newContext({ viewport: { width: W, height: H }, deviceScaleFactor: DPR });
+  const ctx = await browser.newContext({ viewport: { width: W, height: H }, deviceScaleFactor: clip.dpr ?? DPR });
   // a site's intro is skipped on a repeat visit in the same tab: preset its sessionStorage flags (clip.session, the portfolio's
   // by default), or none with fresh: true when the clip is of that intro
   // clip.local: localStorage flags for the same reason (a site's one-time dialog, Mapinly's language picker)
@@ -259,7 +260,7 @@ async function render(slug, clip, base, browser) {
       cdp.send("Page.screencastFrameAck", { sessionId: f.sessionId }).catch(() => {});
     });
     t0 = Date.now();
-    await cdp.send("Page.startScreencast", { format: "jpeg", quality: 90, maxWidth: W * DPR, maxHeight: H * DPR, everyNthFrame: 1 });
+    await cdp.send("Page.startScreencast", { format: "jpeg", quality: 90, maxWidth: W * (clip.dpr ?? DPR), maxHeight: H * (clip.dpr ?? DPR), everyNthFrame: 1 });
     let at = null;
     let held = false;
     let sy = 0;
@@ -269,6 +270,18 @@ async function render(slug, clip, base, browser) {
       if (Math.abs(y - sy) > 0.5) {
         sy = y;
         await evalIn(`scrollTo({ top: ${y}, behavior: "instant" })`);
+      }
+      // clip.wheels: [start s, length s, deltaX, deltaY] gestures, sent at the page centre as eased wheel ticks (realtime clips only)
+      for (const w of clip.wheels ?? []) {
+        const p = Math.min(1, Math.max(0, (t - w[0]) / w[1]));
+        const e = p * p * (3 - 2 * p);
+        const sent = (w.sent ??= [0, 0]);
+        const dx = Math.round(w[2] * e - sent[0]), dy = Math.round(w[3] * e - sent[1]);
+        if (dx || dy) {
+          sent[0] += dx;
+          sent[1] += dy;
+          await cdp.send("Input.dispatchMouseEvent", { type: "mouseWheel", x: W / 2, y: H / 2, deltaX: dx, deltaY: dy });
+        }
       }
       const cur = rt.cur(t);
       if (!at || Math.abs(cur[0] - at[0]) + Math.abs(cur[1] - at[1]) > 0.01) await cdp.send("Input.dispatchMouseEvent", { type: "mouseMoved", x: cur[0], y: cur[1] });
