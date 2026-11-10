@@ -28,13 +28,19 @@ const LAYOUTS = {
 } as const;
 
 const place = (L: (typeof LAYOUTS)[keyof typeof LAYOUTS]): FanOutCard[] => {
-  const at = (px: number, cy: number) => [(px / L.w) * 100, ((L.top + cy - L.h / 2) / L.h) * 100] as const;
+  // Armour tilts with CSS rotate and moves with transform, so its offsets run inside the tilted frame: rotate them to get where the card's centre lands
+  const at = (px: number, cy: number, deg: number) => {
+    const r = (deg * Math.PI) / 180;
+    const x = px * Math.cos(r) - cy * Math.sin(r);
+    const y = px * Math.sin(r) + cy * Math.cos(r);
+    return [(x / L.w) * 100, ((L.top + y - L.h / 2) / L.h) * 100] as const;
+  };
   const [a, b] = L.cx;
   return [
-    { ...pos(at(-a, 100)), rotate: 6, content: insight("Your AAPL position is up 12%", "Live market", "#22c55e, #10b981, #14b8a6, #4ade80") },
-    { ...pos(at(a, 100)), rotate: -6, content: insight("You're on track to save $400 this month", "2 min ago", "#6366f1, #8b5cf6, #a78bfa, #818cf8") },
-    { ...pos(at(-b, 205)), rotate: -6, content: insight("Rebalancing opportunity detected", "1 hour ago", "#f97316, #fb923c, #fbbf24, #f59e0b") },
-    { ...pos(at(b, 205)), rotate: 6, content: insight("Portfolio hit a new all-time high", "3 hours ago", "#0ea5e9, #38bdf8, #6366f1, #818cf8") },
+    { ...pos(at(-a, 100, 6)), rotate: 6, content: insight("Your AAPL position is up 12%", "Live market", "#22c55e, #10b981, #14b8a6, #4ade80") },
+    { ...pos(at(a, 100, -6)), rotate: -6, content: insight("You're on track to save $400 this month", "2 min ago", "#6366f1, #8b5cf6, #a78bfa, #818cf8") },
+    { ...pos(at(-b, 205, -6)), rotate: -6, content: insight("Rebalancing opportunity detected", "1 hour ago", "#f97316, #fb923c, #fbbf24, #f59e0b") },
+    { ...pos(at(b, 205, 6)), rotate: 6, content: insight("Portfolio hit a new all-time high", "3 hours ago", "#0ea5e9, #38bdf8, #6366f1, #818cf8") },
   ];
 };
 const pos = ([x, y]: readonly [number, number]) => ({ x, y });
@@ -84,7 +90,7 @@ export default function FanOutCardsDemo({ compact = false }: { compact?: boolean
       {/* the phone's soft shadow, a halo under it (a drop-shadow would be cut square by the box that crops the phone's top) */}
       <div className="pointer-events-none absolute bottom-0 left-1/2 h-[75%] w-[80%] -translate-x-1/2 translate-y-1/4 bg-[radial-gradient(closest-side,rgb(9_20_50/0.09),transparent)]" />
       {/* pointer-events-none lets clicks around the cards reach the replay button */}
-      <FanOutCards key={`${run}-${compact}`} cards={place(L)} stagger={0.1} cardClassName="w-80 max-w-none rounded-lg border-0 bg-white p-4 text-left text-zinc-800 shadow-[0_16px_36px_rgba(15,23,42,0.12)]" className="pointer-events-none size-full" />
+      <FanOutCards key={`${run}-${compact}`} cards={place(L)} stagger={0.13} cardClassName="w-80 max-w-none rounded-lg border-0 bg-white p-4 text-left text-zinc-800 shadow-[0_16px_36px_rgba(15,23,42,0.12)]" className="pointer-events-none size-full" />
       {/* the phone sits above the cards, so they slide out from behind it; a white wash fades its top away */}
       <div className="pointer-events-none absolute bottom-0 left-1/2 z-10 -translate-x-1/2">
         <div className="relative overflow-hidden" style={{ width: L.wrap[0], height: L.wrap[1] }}>

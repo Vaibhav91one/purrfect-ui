@@ -1,7 +1,7 @@
 "use client"; // check-ignore: use-client-unneeded the variants are functions (custom), which cannot cross from a server component
 
 import { MotionConfig, motion, type Variants } from "motion/react";
-import type { CSSProperties, ComponentProps, ReactNode } from "react";
+import type { ComponentProps, ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
 export type FanOutCard = {
@@ -28,7 +28,7 @@ const EASE = [0.22, 1, 0.36, 1] as const;
 const SPRING = { type: "spring", stiffness: 210, damping: 20, mass: 0.75 } as const;
 
 /**
- * Cards that start stacked behind the centre, each already at its own height and tilt, and spring sideways out to their
+ * Cards that start stacked behind the centre, each already at its own height and tilt, and slide out along their tilt to their
  * spots when the group scrolls into view, one after another. Offsets are percentages of the container (each card rides a zero-size point in the centre that moves
  * in container units, so no empty layer box ever widens the page), which means the fan scales with whatever box it is in:
  * no pixel offsets, no media queries.
@@ -37,18 +37,15 @@ const SPRING = { type: "spring", stiffness: 210, damping: 20, mass: 0.75 } as co
  * It plays once. Reduced motion: the cards are already in place and only fade in.
  */
 export function FanOutCards({ cards, center, stagger = 0.08, cardClassName, className, ...rest }: FanOutCardsProps) {
-  const layer: Variants = {
-    hidden: (c: { y: number }) => ({ x: "0cqw", y: `${c.y}cqh` }),
-    shown: (c: { x: number; y: number; delay: number }) => ({ x: `${c.x}cqw`, y: `${c.y}cqh`, transition: { ...SPRING, delay: c.delay } }),
-  };
+  // The card's own x runs inside its tilted frame, so it slides out along the tilt, not flat sideways
   const card: Variants = {
-    hidden: (c: { rotate: number }) => ({ opacity: 0, scale: 0.88, rotate: c.rotate }),
-    shown: (c: { rotate: number; delay: number }) => ({
+    hidden: (c: { x: number }) => ({ opacity: 0, scale: 0.88, x: `${-c.x}cqw` }),
+    shown: (c: { delay: number }) => ({
       opacity: 1,
       scale: 1,
-      rotate: c.rotate,
+      x: "0cqw",
       // check-ignore: duration a one-off entrance that plays once on scroll, not a response to input
-      transition: { opacity: { duration: 0.4, ease: EASE, delay: c.delay }, scale: { duration: 0.55, ease: EASE, delay: c.delay } },
+      transition: { x: { ...SPRING, delay: c.delay }, opacity: { duration: 0.4, ease: EASE, delay: c.delay }, scale: { duration: 0.55, ease: EASE, delay: c.delay } },
     }),
   };
 
@@ -66,24 +63,22 @@ export function FanOutCards({ cards, center, stagger = 0.08, cardClassName, clas
       {cards.map((c, i) => {
         const custom = { x: c.x, y: c.y, rotate: c.rotate ?? 0, delay: i * stagger };
         return (
-          <motion.div
+          <div
             key={i}
-            custom={custom}
-            variants={layer}
-            style={{ "--x": `${c.x}cqw`, "--y": `${c.y}cqh`, "--r": `${custom.rotate}deg` } as CSSProperties}
-            className="pointer-events-none absolute top-1/2 left-1/2 flex size-0 items-center justify-center motion-reduce:![transform:translate(var(--x),var(--y))]"
+            style={{ translate: `${c.x}cqw ${c.y}cqh`, rotate: `${custom.rotate}deg` }}
+            className="pointer-events-none absolute top-1/2 left-1/2 flex size-0 items-center justify-center"
           >
             <motion.div
               custom={custom}
               variants={card}
               className={cn(
-                "pointer-events-auto w-64 max-w-[40cqw] shrink-0 rounded-lg [overflow-wrap:anywhere] border border-border bg-card p-3 text-card-foreground shadow-lg motion-reduce:![transform:rotate(var(--r))]",
+                "pointer-events-auto w-64 max-w-[40cqw] shrink-0 rounded-lg [overflow-wrap:anywhere] border border-border bg-card p-3 text-card-foreground shadow-lg motion-reduce:![transform:none]",
                 cardClassName,
               )}
             >
               {c.content}
             </motion.div>
-          </motion.div>
+          </div>
         );
       })}
     </motion.div>
