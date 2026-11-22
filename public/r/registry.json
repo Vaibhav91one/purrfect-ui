@@ -1041,6 +1041,89 @@
         "tailwindcss": ">=4",
         "tokens": "shadcn (background, foreground, muted, border, ...): run shadcn init first"
       }
+    },
+    {
+      "name": "mithai-box",
+      "type": "registry:ui",
+      "title": "Mithai box",
+      "description": "A 3D Diwali sweet box in three.js: the lid swings open on a spring, a warm light comes up and the sweets hop in their cups.",
+      "dependencies": [
+        "three@^0.187.0"
+      ],
+      "devDependencies": [
+        "@types/three@^0.187.0"
+      ],
+      "registryDependencies": [
+        "utils"
+      ],
+      "files": [
+        {
+          "path": "registry/mithai-box/mithai-box.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "meta": {
+        "react": ">=19",
+        "tailwindcss": ">=4",
+        "tokens": "shadcn (background, foreground, muted, border, ...): run shadcn init first"
+      }
+    },
+    {
+      "name": "lanyard-badge",
+      "type": "registry:ui",
+      "title": "Lanyard badge",
+      "description": "The DevFest Bengaluru 2026 attendee badge on its lanyard in three.js: grab it, pull it, flip it, and it swings back on real strap physics.",
+      "dependencies": [
+        "three@^0.187.0"
+      ],
+      "devDependencies": [
+        "@types/three@^0.187.0"
+      ],
+      "registryDependencies": [
+        "utils"
+      ],
+      "files": [
+        {
+          "path": "registry/lanyard-badge/lanyard-badge.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "public/models/lanyard-badge.gltf",
+          "type": "registry:file",
+          "target": "public/models/lanyard-badge.gltf"
+        }
+      ],
+      "meta": {
+        "react": ">=19",
+        "tailwindcss": ">=4",
+        "tokens": "shadcn (background, foreground, muted, border, ...): run shadcn init first"
+      }
+    },
+    {
+      "name": "sticker-sheet",
+      "type": "registry:ui",
+      "title": "Sticker sheet",
+      "description": "The DevFest 2026 sticker sheet in three.js: peel a sticker off its liner from any corner, carry it, and stick it down anywhere.",
+      "dependencies": [
+        "three@^0.187.0"
+      ],
+      "devDependencies": [
+        "@types/three@^0.187.0"
+      ],
+      "registryDependencies": [
+        "utils"
+      ],
+      "files": [
+        {
+          "path": "registry/sticker-sheet/sticker-sheet.tsx",
+          "type": "registry:ui"
+        }
+      ],
+      "meta": {
+        "react": ">=19",
+        "tailwindcss": ">=4",
+        "tokens": "shadcn (background, foreground, muted, border, ...): run shadcn init first"
+      }
     }
   ]
 }

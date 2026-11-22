@@ -73,9 +73,11 @@ const PAUSABLE = new Set([
   "sticky-crossfade",
   "step-ring",
   "announce-strip",
+  "lanyard-badge",
+  "sticker-sheet",
 ]);
 const AMBIENT = new Set(["pixel-wave", "shimmer-text", "spin-mark", "voice-bars"]);
-const NAT_PHONE: Record<string, [number, number]> = { "fan-out-cards": [390, 520], "mithai-box": [360, 520] };
+const NAT_PHONE: Record<string, [number, number]> = { "fan-out-cards": [390, 520], "mithai-box": [360, 520], "lanyard-badge": [360, 520], "sticker-sheet": [360, 520] };
 const FILL = new Set(["scroll-marquee", "asterisk-rows", "photo-wordmark", "line-rise", "sticky-crossfade", "parallax-photo"]);
 
 const item = (slug: string, name: string, category: string, description: string, nat: [number, number] = [420, 300], extras?: Extra[]): ComponentItem => ({
@@ -140,6 +142,8 @@ export const COMPONENTS: ComponentItem[] = [
   item("pixel-wave", "Pixel wave", "Text", "A 3x3 pixel loader whose cells fade on staggered delays, so a wavefront sweeps across the grid.", [240, 240]),
   item("word-stream", "Word stream", "Text", "A chat reply that types in word by word behind a caret, then tells you when it is done.", [800, 560]),
   item("mithai-box", "Mithai box", "Display", "A 3D Diwali sweet box in three.js: the lid swings open on a spring, a warm light comes up and the sweets hop in their cups.", [720, 540], [{ key: "format", label: "Format", kind: "select", options: ["Classic", "Tray", "Diamond", "Rajwadi", "Arch", "Dabba", "Rigid"], default: "Classic" }, { key: "variant", label: "Finish", kind: "select", options: ["Royal", "Peacock", "Kraft", "Velvet"], default: "Royal", when: { format: "Classic" } }, { key: "shape", label: "Shape", kind: "select", options: ["Square", "Long", "Hexagon", "Octagon", "Round"], default: "Square", when: { format: "Classic" } }]),
+  item("lanyard-badge", "Lanyard badge", "Display", "The DevFest Bengaluru 2026 attendee badge on its lanyard in three.js: grab it, pull it, flip it, and it swings back on real strap physics.", [480, 600], [{ key: "finish", label: "Finish", kind: "select", options: ["Print", "Foil"], default: "Print" }]),
+  item("sticker-sheet", "Sticker sheet", "Display", "The DevFest 2026 sticker sheet in three.js: peel a sticker off its liner from any corner, carry it, and stick it down anywhere.", [480, 600], [{ key: "finish", label: "Finish", kind: "select", options: ["Gloss", "Holo"], default: "Gloss" }]),
   item("flip-text", "Flip text", "Text", "Text whose letters flip over on the X axis under the pointer.", [560, 300]),
   item("fade-lines", "Fade lines", "Text", "Text whose lines rise and fade in one after another as it scrolls into view.", [560, 300]),
   item("spin-mark", "Spin mark", "Display", "A mark that pops in with a spring, then spins forever or turns as you scroll.", [448, 320]),
