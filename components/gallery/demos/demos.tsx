@@ -44,6 +44,8 @@ import ArrowLinkDemo from "@/registry/arrow-link/demo";
 import RollLinkDemo from "@/registry/roll-link/demo";
 import StickerPopDemo from "@/registry/sticker-pop/demo";
 import MithaiBoxDemo from "@/registry/mithai-box/demo";
+import LanyardBadgeDemo from "@/registry/lanyard-badge/demo";
+import StickerSheetDemo from "@/registry/sticker-sheet/demo";
 import SwapCardDemo from "@/registry/swap-card/demo";
 import SpringChipsDemo from "@/registry/spring-chips/demo";
 import VoiceBarsDemo from "@/registry/voice-bars/demo";
@@ -480,6 +482,8 @@ export const DEMOS: Record<string, (p: DemoProps) => ReactNode> = {
   "line-rise": LineRiseLoop,
   "sticker-pop": ({ playing, speed }: DemoProps) => <StickerPopDemo playing={playing} speed={speed} />,
   "mithai-box": ({ playing, opts }: DemoProps) => <MithaiBoxDemo playing={playing} variant={String(opts.variant ?? "Royal").toLowerCase() as "royal"} shape={String(opts.shape ?? "Square").toLowerCase() as "square"} format={String(opts.format ?? "Classic").toLowerCase() as "classic"} compact={!!opts.compact} />,
+  "lanyard-badge": ({ playing, opts }: DemoProps) => <LanyardBadgeDemo playing={playing} finish={String(opts.finish ?? "Print").toLowerCase() as "print"} compact={!!opts.compact} />,
+  "sticker-sheet": ({ playing, opts }: DemoProps) => <StickerSheetDemo playing={playing} finish={String(opts.finish ?? "Gloss").toLowerCase() as "gloss"} compact={!!opts.compact} />,
   "swap-card": SwapCardLoop,
   "sticky-crossfade": StickyCrossfadeLoop,
   "parallax-photo": ParallaxPhotoLoop,

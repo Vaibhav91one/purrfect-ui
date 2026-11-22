@@ -1163,4 +1163,54 @@ const [open, setOpen] = useState(true);
       "Reduced motion: the whole text shows at once in one 200ms fade with no caret (CSS, so server HTML is unchanged) and onDone fires on mount.",
     ],
   },
+  "lanyard-badge": {
+    usage: `import { LanyardBadge } from "@/components/ui/lanyard-badge";
+
+// the model installs to public/models/lanyard-badge.gltf; give the card its typeface with --lanyard-badge-font
+<LanyardBadge name="Ada Lovelace" className="h-[600px] w-[480px]" />
+
+// a speaker badge with the wordmark in holographic foil
+<LanyardBadge name="Grace Hopper" role="Speaker" finish="foil" />`,
+    props: [
+      { name: "name", type: "string", default: '"Vaibhav Tomar"', description: "Printed in the name box; a long name shrinks to fit." },
+      { name: "role", type: "string", default: '"Attendee"', description: "The tab over the name box." },
+      { name: "city", type: "string", default: '"Bengaluru"', description: "In the pill under the wordmark and in the footer." },
+      { name: "year", type: "string", default: '"2026"', description: "In the pill at the end of the arrow." },
+      { name: "finish", type: '"print" | "foil"', default: '"print"', description: "print is the card as it came, ink on glossy white stock; foil stamps the DevFest wordmark in holographic foil: metal and thin film masked to the letters, with a diffraction rainbow whose bands slide through the colours as the card turns." },
+      { name: "model", type: "string", default: '"/models/lanyard-badge.gltf"', description: "URL of the Blender model: card with its punched holes, swivel snap hooks, D-rings and crimp caps." },
+      { name: "paused", type: "boolean", default: "false", description: "Stops the loop as soon as the badge settles, so nothing redraws until it is grabbed." },
+      { name: "sound", type: "boolean", default: "true", description: "Its own Web Audio sounds: a tick when you grab it, a brass clink when the hardware is jerked." },
+    ],
+    behaviors: [
+      "Reduced motion: it does not swing in, and swings die within a second.",
+      "Real sizes and real gravity: the card is 94 x 138 mm on 20 mm straps, so it swings with the period of a badge round your neck (about 1.2 s) and settles in a few seconds.",
+      "Each strap is a Verlet rope; the card is a rigid body (a tetrahedron of particles) hung from the two clasp holes, so pulling a corner tips and twists it, and a hard fling flips it over to its plain back.",
+      "Grab the card anywhere, or a strap, and drag: the point under the pointer follows it in a plane facing the camera; let go and it keeps its speed.",
+      "The straps are ribbons swept through the rope that twist from facing you at the top to the card's facing at the clasp; the print repeats every 300 mm from the crimp cap up.",
+      "The hardware is a Blender model (scripts/blender/lanyard-badge.py); the print is drawn on a canvas from the props, so it stays sharp and changes without a new model.",
+      "The loop runs only on screen and while something moves; three loads only when the badge mounts. No WebGL or no model: the name and role show as text.",
+    ],
+  },
+  "sticker-sheet": {
+    usage: `import { StickerSheet } from "@/components/ui/sticker-sheet";
+
+// the DevFest 2026 sheet; give the art its typeface with --sticker-sheet-font
+<StickerSheet className="h-[600px] w-[480px]" />
+
+// your own stickers (PNG with transparency is die-cut round its shape), one in holo film
+<StickerSheet stickers={[{ src: "/logo.png", x: 74, y: 60, width: 50, finish: "holo" }, { id: "android", x: 74, y: 140, width: 45 }]} />`,
+    props: [
+      { name: "stickers", type: "StickerSpec[]", default: "the DevFest 2026 sheet", description: "Each sticker: a built-in id (android, devfest, vibe-coder, attended, gemma, gemini, gdg, google-cloud, firebase) or your own src, its centre (x, y) in millimetres on the A5 sheet and its width in mm, and finish: gloss vinyl or holo film. An image that fails to load is left out." },
+      { name: "paused", type: "boolean", default: "false", description: "Stops the loop once nothing moves, so nothing redraws until a sticker is touched." },
+      { name: "sound", type: "boolean", default: "true", description: "Its own Web Audio sounds: the vinyl crackling off its liner, brighter the faster you pull, and a soft pat as it lands." },
+    ],
+    behaviors: [
+      "Reduced motion: the springs are stiffer, so a sticker lies back down or settles under the finger without overshoot; peeling and carrying work the same.",
+      "Grab a sticker and pull: it peels from the corner nearest your finger, the vinyl rolling round a tight curl and lying back over itself white side up, casting a shadow on the sheet. Pulling outward lifts nothing.",
+      "Let go before about 60% and it springs flat again. Past that it comes away: it hangs under the pointer, tilting and sagging as you carry it, then drops and sticks where you let go, on top of anything it lands over, ready to be peeled again. Double-click puts every sticker back.",
+      "Holo finish: while a sticker lies flat, HoloSpot's spectral foil (fetched from jsDelivr only for a sheet with holo stickers) shows wherever the ink isn't and shifts as the sheet leans toward the pointer; while it bends, three's iridescent film takes over. If HoloSpot can't load, the film stays.",
+      "The liner keeps a faint kiss-cut outline where each sticker was. Every shape has a white die-cut border made from its own outline, so your own PNGs get one too.",
+      "The art is drawn on canvases at print resolution (14 px/mm) from the photographed sheet; three loads only when the sheet mounts, and the loop runs only while something moves.",
+    ],
+  },
 };
